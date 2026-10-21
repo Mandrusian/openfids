@@ -184,6 +184,17 @@ details.mt{margin:12px 0}details.mt summary{cursor:pointer;padding:9px 0;color:v
 .cp input[type=color]{width:36px;height:30px;padding:0;border:1px solid var(--line);border-radius:7px;background:none;cursor:pointer;flex:none}
 .cprow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}.cprow small{display:block;color:var(--mute);font-size:12px}
 .cprow input[type=color]{width:48px;height:34px}
+
+/* ---- v6: no direction patterns, glass status bubble ---- */
+tr.ra td:first-child::before,tr.rd td:first-child::before,td:first-child::before{content:none;display:none}
+.sb{text-align:right;width:1%;padding-right:18px}
+.gb{position:relative;display:inline-block;overflow:hidden;padding:5px 15px;border-radius:999px;font:600 14px var(--body);white-space:nowrap;color:var(--c);
+ background:color-mix(in srgb,var(--c) 15%,rgba(255,255,255,.06));border:1px solid color-mix(in srgb,var(--c) 38%,rgba(255,255,255,.28));
+ backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -8px 12px rgba(255,255,255,.04),0 4px 16px color-mix(in srgb,var(--c) 24%,transparent)}
+.gb::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.3),transparent 55%)}
+.gb.late{--c:var(--warn)}.gb.ok{--c:var(--ok)}
+.gb.flip{animation:flap .55s ease-in-out}
 </style>
 </head>
 <body>
@@ -228,7 +239,7 @@ details.mt{margin:12px 0}details.mt summary{cursor:pointer;padding:9px 0;color:v
       <button class="btn" id="fxClear">Clear all filters</button>
     </div></div>
     <div class="wrap"><table>
-      <thead><tr><th></th><th>Flight and status</th><th>Route</th><th>Scheduled</th><th>Aircraft</th><th>Registration</th><th>Gate</th></tr></thead>
+      <thead><tr><th></th><th>Flight and status</th><th>Route</th><th>Scheduled</th><th>Aircraft</th><th>Registration</th><th>Gate</th><th></th></tr></thead>
       <tbody id="rows"></tbody>
     </table></div>
   </section>
@@ -266,7 +277,7 @@ details.mt{margin:12px 0}details.mt summary{cursor:pointer;padding:9px 0;color:v
       <details class="mt"><summary>Customise every colour</summary><div id="cGrid"></div></details>
       <button class="btn" id="cReset">Reset colours</button>
       <div class="sw"><div>Liquid glass<small>Frosted, see-through surfaces with a glow that follows your cursor</small></div><input type="checkbox" id="sGlass"></div>
-      <div class="sw"><div>Colour-code arrivals and departures<small>The dotted and striped patterns always show</small></div><input type="checkbox" id="sColor"></div>
+      <div class="sw"><div>Colour-code arrivals and departures<small>Arrow labels always show</small></div><input type="checkbox" id="sColor"></div>
       <div class="sw"><div>Striped rows<small>Easier to follow across the board</small></div><input type="checkbox" id="sZebra"></div>
       <h4>Text size</h4><select class="in" id="sSize"><option value="s">Small</option><option value="m">Normal</option><option value="l">Large</option></select>
     </div>
@@ -376,9 +387,9 @@ function statusInfo(f) {
   const diff = f.estimated && !isNaN(s) && !isNaN(e) ? Math.round((e - s) / 60000) : 0;
   const dur = (m) => m < 60 ? `${m} min` : `${Math.floor(m / 60)} h` + (m % 60 ? ` ${m % 60} min` : '');
   if (lo.includes('cancel')) return { t: 'Cancelled', c: 'bad' };
-  if (diff >= 5) return { t: `Delayed by ${dur(diff)}`, c: 'late' };
-  if (lo.includes('delay')) return { t: raw, c: 'late' };
-  if (diff <= -5) return { t: `Early by ${dur(-diff)}`, c: 'ok' };
+  if (diff >= 5) return { t: `Delayed by ${dur(diff)}`, c: 'late', b: 1 };
+  if (lo.includes('delay')) return { t: raw, c: 'late', b: 1 };
+  if (diff <= -5) return { t: `Early by ${dur(-diff)}`, c: 'ok', b: 1 };
   if (!raw) return { t: 'Scheduled', c: '' };
   return { t: /on time/.test(lo) ? 'On time' : raw, c: /on time|board|land|arriv|depart|gate/.test(lo) ? 'ok' : '' };
 }
@@ -389,11 +400,12 @@ function rowParts(f) {
   const cls = `${arr ? 'ra' : 'rd'} ${mil(f) ? 'hot' : rare(f) ? 'rare' : ''}`.trim();
   const html = `<td><button class="star${on ? ' on' : ''}" data-star="${esc(code(f))}" title="${on ? 'Unfollow' : 'Follow'} ${esc(code(f))}">★</button></td>
     <td><span class="code tip" data-t="${esc(a.name)}" data-d="${esc(a.desc)}" data-c="${esc(f.airline)}">${esc(code(f))}</span>${mil(f) ? '<span class="tag hot">Military</span>' : rare(f) ? '<span class="tag rare">Rare</span>' : ''}${f.custom ? '<span class="tag">yours</span>' : ''}
-      <div class="ds"><span class="dir ${arr ? 'a' : 'd'}">${arr ? '▼ Arriving' : '▲ Departing'}</span><span class="st ${st.c}${changed.has(k) && S.motion ? ' flip' : ''}">${esc(st.t)}</span></div></td>
+      <div class="ds"><span class="dir ${arr ? 'a' : 'd'}">${arr ? '▼ Arriving' : '▲ Departing'}</span>${st.b ? '' : `<span class="st ${st.c}${changed.has(k) && S.motion ? ' flip' : ''}">${esc(st.t)}</span>`}</div></td>
     <td><b>${esc(f.portName)}</b><div class="mut">${esc(f.portIATA)} · ${esc(f.terminal || '')}</div></td>
     <td><span class="time">${esc(hm(f.scheduled))}</span> <span class="mut">${esc(day(f.scheduled))}</span>${f.estimated ? `<div class="mut">Est ${esc(hm(f.estimated))}</div>` : ''}</td>
     <td><span class="tip" data-t="${esc(p.name)}" data-d="${esc(p.desc)}" data-c="${esc(f.acType)}">${esc(f.acType || '')}</span></td>
-    <td>${esc(f.acRego || '')}</td><td>${esc(f.gate || '')}</td>`;
+    <td>${esc(f.acRego || '')}</td><td>${esc(f.gate || '')}</td>
+    <td class="sb">${st.b ? `<span class="gb ${st.c}${changed.has(k) && S.motion ? ' flip' : ''}">${esc(st.t)}</span>` : ''}</td>`;
   return { k, cls, html };
 }
 /* Silent refresh: rows are matched by key, so only changed rows update and single rows fade in or out. */
@@ -402,7 +414,7 @@ function render() {
   if (swap) { tb.textContent = ''; tb.classList.remove('swap'); void tb.offsetWidth; tb.classList.add('swap'); }
   if (!list.length) {
     const msg = view === 'watch' ? 'No starred flights on the board. Click ★ next to a flight to follow it.' : (!feed.ok && !flights.length ? 'No live data right now. Open the feed status in the menu, or add your own movements.' : 'No flights match.');
-    tb.innerHTML = `<tr class="emp"><td colspan="7" class="empty">${esc(msg)}</td></tr>`; return;
+    tb.innerHTML = `<tr class="emp"><td colspan="8" class="empty">${esc(msg)}</td></tr>`; return;
   }
   const emp = tb.querySelector('.emp'); if (emp) emp.remove();
   const rows = new Map([...tb.children].filter((r) => r.dataset.k).map((r) => [r.dataset.k, r]));
