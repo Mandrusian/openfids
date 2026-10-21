@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cairns Airport FIDS</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+            --bg-primary: #060911;
+            --bg-secondary: #0d121f;
+            --bg-card: #141c2e;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(56, 189, 248, 0.4);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #0284c7;
+            --accent-glow: rgba(2, 132, 199, 0.22);
+            --accent-hover: #0369a1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius: 10px;
+            --shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+            --fx-transition: none;
+            --row-padding: 14px 18px;
+        }
+
+body.fx-enabled {
+            --fx-transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+body.mode-compact {
+            --row-padding: 6px 12px;
+        }
+
+body.theme-amoled {
+            --bg-primary: #000000;
+            --bg-secondary: #08080a;
+            --bg-card: #101014;
+            --border-color: rgba(255, 255, 255, 0.12);
+            --border-hover: #38bdf8;
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+            --accent: #0284c7;
+            --accent-glow: rgba(56, 189, 248, 0.3);
+            --accent-hover: #0369a1;
+        }
+
+body.theme-cyberpunk {
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0c;
+            --bg-card: #121216;
+            --border-color: rgba(245, 158, 11, 0.25);
+            --border-hover: #f59e0b;
+            --text-main: #fffbeb;
+            --text-muted: #a1a1aa;
+            --accent: #f59e0b;
+            --accent-glow: rgba(245, 158, 11, 0.3);
+            --accent-hover: #d97706;
+        }
+
+body.theme-oceanic {
+            --bg-primary: #030a16;
+            --bg-secondary: #08162b;
+            --bg-card: #0f2342;
+            --border-color: rgba(56, 189, 248, 0.15);
+            --border-hover: #38bdf8;
+            --text-main: #f0f9ff;
+            --text-muted: #7dd3fc;
+            --accent: #0284c7;
+            --accent-glow: rgba(56, 189, 248, 0.3);
+            --accent-hover: #0369a1;
+        }
+
+body.theme-nordic {
+            --bg-primary: #111318;
+            --bg-secondary: #1a1d24;
+            --bg-card: #222630;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --border-hover: #94a3b8;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #64748b;
+            --accent-glow: rgba(100, 116, 139, 0.25);
+            --accent-hover: #475569;
+        }
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+body { background-color: var(--bg-primary); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
+
+.form-group { margin-bottom: 18px; }
+
+.form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.field, select.field, textarea.field {
+            width: 100%; background: var(--bg-primary); border: 1px solid var(--border-color);
+            padding: 12px 16px; border-radius: 6px; color: var(--text-main); font-size: 13px; transition: var(--fx-transition);
+        }
+
+.field:focus, select.field:focus, textarea.field:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+.btn-primary {
+            width: 100%; background: var(--accent); color: white; border: none;
+            padding: 12px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; margin-top: 10px; transition: var(--fx-transition);
+        }
+
+.btn-primary:hover { background: var(--accent-hover); }
+
+.modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 7, 12, 0.85); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center; z-index: 10000;
+            opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+
+.modal-overlay.active { opacity: 1; visibility: visible; }
+
+.modal-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: var(--radius); width: 90%; max-width: 850px; padding: 28px;
+            box-shadow: var(--shadow); max-height: 90vh; overflow-y: auto;
+        }
+
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 14px; }
+
+.modal-header h3 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+
+.close-modal { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-muted); width: 30px; height: 30px; border-radius: 6px; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--fx-transition); }
+
+.close-modal:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
+
+.btn-sm {
+            padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700;
+            border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-main); cursor: pointer; transition: var(--fx-transition);
+        }
+
+.btn-sm:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
+
+.btn-danger { color: var(--danger); border-color: rgba(239,68,68,0.3); }
+
+.btn-danger:hover { background: rgba(239,68,68,0.15); }
+
+header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 32px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color);
+            position: sticky; top: 0; z-index: 2000; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+.brand { display: flex; align-items: center; gap: 12px; }
+
+.logo-icon { width: 38px; height: 38px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 16px var(--accent-glow); }
+
+.brand-text h1 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+
+.brand-text p { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+
+.header-actions { display: flex; align-items: center; gap: 10px; }
+
+.hud-badge {
+            background: var(--bg-primary); border: 1px solid var(--border-color);
+            padding: 6px 12px; border-radius: 6px; display: flex; flex-direction: column; align-items: flex-end;
+            cursor: pointer; transition: var(--fx-transition);
+        }
+
+.hud-badge:hover { border-color: var(--accent); }
+
+.hud-badge .label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+
+.hud-badge .value { font-size: 13px; font-weight: 800; color: var(--text-main); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+
+.icon-btn {
+            background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-main);
+            width: 38px; height: 38px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--fx-transition);
+            font-size: 16px; position: relative;
+        }
+
+.icon-btn:hover { border-color: var(--accent); background: var(--accent-glow); }
+
+.container { max-width: 1440px; margin: 28px auto; padding: 0 32px; }
+
+.controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 14px; flex-wrap: wrap; }
+
+.search-box { position: relative; flex: 1; min-width: 280px; }
+
+.search-box input {
+            width: 100%; background: var(--bg-secondary); border: 1px solid var(--border-color);
+            padding: 10px 14px 10px 38px; border-radius: 6px; color: var(--text-main); font-size: 13px; transition: var(--fx-transition);
+        }
+
+.search-box input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+.search-box svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 14px; height: 14px; }
+
+.actions-group { display: flex; gap: 8px; align-items: center; }
+
+.filter-tabs { display: flex; gap: 2px; background: var(--bg-secondary); padding: 3px; border-radius: 6px; border: 1px solid var(--border-color); }
+
+.tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 12px; font-size: 11px; font-weight: 700; border-radius: 4px; cursor: pointer; transition: var(--fx-transition); }
+
+.tab-btn.active, .tab-btn:hover { background: var(--accent); color: white; }
+
+.action-btn {
+            background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-main);
+            padding: 8px 14px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: var(--fx-transition);
+        }
+
+.action-btn:hover { border-color: var(--accent); background: var(--accent-glow); }
+
+.table-wrapper { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+
+table { width: 100%; border-collapse: collapse; text-align: left; }
+
+th { background: rgba(0,0,0,0.3); padding: 14px 18px; font-size: 10px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-color); letter-spacing: 0.5px; }
+
+td { padding: var(--row-padding); border-bottom: 1px solid var(--border-color); font-size: 12px; }
+
+tbody tr { transition: var(--fx-transition); }
+
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+tbody tr.rare-military-row { background: rgba(239, 68, 68, 0.08) !important; border-left: 3px solid var(--danger); }
+
+#global-tooltip {
+            position: fixed; background: var(--bg-card); border: 1px solid var(--border-color);
+            padding: 12px 16px; border-radius: 8px; width: 280px; box-shadow: var(--shadow);
+            opacity: 0; visibility: hidden; transition: opacity 0.15s ease; z-index: 99999; pointer-events: none;
+        }
+
+#global-tooltip.visible { opacity: 1; visibility: visible; }
+
+#global-tooltip h4 { font-size: 12px; font-weight: 800; margin-bottom: 4px; }
+
+#global-tooltip p { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+
+.tooltip-trigger { cursor: help; border-bottom: 1px dashed var(--text-muted); }
+
+.flight-code { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent); }
+
+.rego-code { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--success); background: rgba(16,185,129,0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(16,185,129,0.2); }
+
+.time-box { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+.date-sub { font-size: 10px; color: var(--text-muted); display: block; margin-top: 2px; }
+
+.time-est { color: var(--warning); font-size: 10px; display: block; margin-top: 2px; }
+
+.status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
+
+.status-on-time { background: rgba(16, 185, 129, 0.12); color: var(--success); border: 1px solid rgba(16,185,129,0.25); }
+
+.status-delayed { background: rgba(245, 158, 11, 0.12); color: var(--warning); border: 1px solid rgba(245,158,11,0.25); }
+
+.status-neutral { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border: 1px solid var(--border-color); }
+
+.switch { position: relative; display: inline-block; width: 38px; height: 20px; }
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-primary); border: 1px solid var(--border-color); transition: .2s; border-radius: 20px; }
+
+.slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: var(--text-muted); transition: .2s; border-radius: 50%; }
+
+input:checked + .slider { background-color: var(--accent); }
+
+input:checked + .slider:before { transform: translateX(18px); background-color: #fff; }
+
+.state-container { text-align: center; padding: 60px 20px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border-color); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px auto; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- additions for the local build ---- */
+.feed-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--warning); margin-right: 6px; }
+.feed-dot.live { background: var(--success); box-shadow: 0 0 8px var(--success); }
+.feed-dot.down { background: var(--danger); }
+#feedBanner { display: none; background: rgba(245, 158, 11, 0.12); border-bottom: 1px solid rgba(245, 158, 11, 0.35); color: var(--warning); font-size: 12px; padding: 10px 32px; line-height: 1.5; }
+#feedBanner.show { display: block; }
+.form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; }
+.form-grid.three { grid-template-columns: repeat(3, 1fr); }
+.field { padding: 9px 10px; }
+.setting-row { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.setting-row strong { font-size: 12px; font-weight: 700; display: block; }
+.setting-row span.hint { font-size: 10px; color: var(--text-muted); }
+.custom-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; margin-top: 8px; font-size: 12px; background: var(--bg-primary); }
+.custom-item code { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+.section-label { font-size: 12px; font-weight: 800; margin: 18px 0 12px; color: var(--accent); text-transform: uppercase; }
+#stoppedOverlay { display: none; position: fixed; inset: 0; background: var(--bg-primary); z-index: 100000; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); font-size: 14px; }
+#stoppedOverlay.show { display: flex; }
+.tag-custom { font-size: 9px; font-weight: 800; letter-spacing: .5px; color: var(--warning); border: 1px solid rgba(245,158,11,.4); border-radius: 3px; padding: 1px 4px; margin-left: 6px; }
+@media (max-width: 760px) { .form-grid, .form-grid.three { grid-template-columns: 1fr 1fr; } .container { padding: 0 14px; } header { flex-wrap: wrap; gap: 10px; } }
+</style>
+</head>
+<body class="fx-enabled">
+
+<div id="stoppedOverlay"><div><h2 style="color: var(--text-main); margin-bottom: 8px;">FreeFIDS has stopped</h2>You can close this tab. Open the FreeFIDS shortcut to start it again.</div></div>
+
+<div id="global-tooltip">
+    <h4 id="tooltip-title"></h4>
+    <p id="tooltip-desc"></p>
+    <div id="tooltip-code" style="margin-top: 4px; font-size: 10px; color: var(--accent); font-family: 'JetBrains Mono', monospace;"></div>
+</div>
+
+<!-- Custom flights -->
+<div class="modal-overlay" id="customModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Add a Movement ➕</h3>
+            <button class="close-modal" data-close="customModal">✕</button>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Movements you add here are stored only on this computer and appear at the top of the board.</p>
+        <div class="form-grid">
+            <input class="field" id="cfAirline" placeholder="Airline (e.g. VIP)">
+            <input class="field" id="cfNumber" placeholder="Flight #">
+            <input class="field" id="cfAcType" placeholder="ICAO type (e.g. GLF6)">
+            <input class="field" id="cfRego" placeholder="Rego (e.g. N1VIP)">
+        </div>
+        <div class="form-grid">
+            <input class="field" id="cfPort" placeholder="Port name (e.g. Sydney)">
+            <input class="field" id="cfIata" placeholder="IATA (e.g. SYD)">
+            <select class="field" id="cfVector"><option value="A">Arrival</option><option value="D">Departure</option></select>
+            <input class="field" id="cfWhen" type="datetime-local">
+        </div>
+        <div class="form-grid three">
+            <input class="field" id="cfTerminal" placeholder="Terminal (T1)">
+            <input class="field" id="cfGate" placeholder="Gate / Bay">
+            <input class="field" id="cfStatus" placeholder="Status (e.g. Landed)">
+        </div>
+        <button class="btn-primary" id="cfAddBtn">Add to board</button>
+        <div class="section-label">Your added movements</div>
+        <div id="customList"></div>
+    </div>
+</div>
+
+<!-- Settings -->
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal-card" style="max-width: 440px;">
+        <div class="modal-header">
+            <h3>Interface Preferences ⚙️</h3>
+            <button class="close-modal" data-close="settingsModal">✕</button>
+        </div>
+        <div class="form-group">
+            <label>Theme Preset</label>
+            <div id="themeButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;">
+                <button class="tab-btn" data-theme="default">Midnight</button>
+                <button class="tab-btn" data-theme="amoled">AMOLED Black</button>
+                <button class="tab-btn" data-theme="cyberpunk">Cyberpunk</button>
+                <button class="tab-btn" data-theme="oceanic">Oceanic</button>
+                <button class="tab-btn" data-theme="nordic">Nordic</button>
+            </div>
+        </div>
+        <div class="setting-row">
+            <div><strong>Compact FIDS Mode</strong><span class="hint">Dense rows to see more flights.</span></div>
+            <label class="switch"><input type="checkbox" id="compactToggle"><span class="slider"></span></label>
+        </div>
+        <div class="setting-row">
+            <div><strong>Full High-FX Motion</strong><span class="hint">Smooth transitions and animations.</span></div>
+            <label class="switch"><input type="checkbox" id="fxToggle"><span class="slider"></span></label>
+        </div>
+        <div class="setting-row">
+            <div><strong>Audio Status Alert Chimes</strong><span class="hint">Play a chime when a flight's status changes.</span></div>
+            <label class="switch"><input type="checkbox" id="audioToggle"><span class="slider"></span></label>
+        </div>
+        <div class="form-group" style="margin-top: 16px;">
+            <label>Refresh Frequency</label>
+            <select id="pollSelect" class="field">
+                <option value="5000">Fast (5 seconds)</option>
+                <option value="15000">Balanced (15 seconds)</option>
+                <option value="30000">Standard (30 seconds)</option>
+                <option value="60000">Relaxed (60 seconds)</option>
+            </select>
+        </div>
+        <p id="dataDirNote" style="font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; word-break: break-all;"></p>
+    </div>
+</div>
+
+<header>
+    <div class="brand">
+        <div class="logo-icon">✈️</div>
+        <div class="brand-text">
+            <h1>Cairns Airport FIDS</h1>
+            <p>LIVE TELEMETRY · RUNNING LOCALLY</p>
+        </div>
+    </div>
+    <div class="header-actions">
+        <div class="hud-badge" id="feedBadge" title="State of the connection to the airport's flight data">
+            <span class="label">Feed</span>
+            <span class="value"><span class="feed-dot" id="feedDot"></span><span id="feedLabel">...</span></span>
+        </div>
+        <div class="hud-badge">
+            <span class="label">Movements</span>
+            <span class="value" id="total-count">0</span>
+        </div>
+        <button class="icon-btn" id="addBtn" title="Add a movement">➕</button>
+        <button class="icon-btn" id="settingsBtn" title="Settings">⚙️</button>
+        <button class="icon-btn" id="quitBtn" title="Stop FreeFIDS">⏻</button>
+    </div>
+</header>
+<div id="feedBanner"></div>
+
+<div class="container">
+    <div class="controls-bar">
+        <div class="search-box">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input type="text" id="searchInput" placeholder="Search flight, airline, destination, registration..." autocomplete="off">
+        </div>
+        <div class="actions-group">
+            <div class="filter-tabs" id="filterTabs">
+                <button class="tab-btn active" data-filter="all">All</button>
+                <button class="tab-btn" data-filter="A">Arrivals</button>
+                <button class="tab-btn" data-filter="D">Departures</button>
+                <button class="tab-btn" data-filter="military" style="color: var(--danger);">Military</button>
+                <button class="tab-btn" data-filter="rare" style="color: var(--warning);">Rare</button>
+            </div>
+            <button class="action-btn" id="csvBtn">Export CSV</button>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Flight</th><th>Type</th><th>Route</th><th>Terminal</th><th>Scheduled</th>
+                    <th>Aircraft</th><th>Registration</th><th>Gate</th><th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="flightTableBody">
+                <tr><td colspan="9"><div class="state-container"><div class="spinner"></div>Connecting to Cairns Airport data stream...</div></td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+(() => {
+    const $ = (id) => document.getElementById(id);
+    const KEY = 'freefids.settings';
+    const defaults = { theme: 'default', compact: false, fx: true, audio: false, poll: 30000 };
+    let settings = { ...defaults };
+    let allFlights = [], aircraftDb = {}, airlineDb = {}, feed = { ok: false };
+    let currentFilter = 'all', pollTimer = null, audioCtx = null;
+    const lastStatus = new Map();
+    let firstLoad = true;
+
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const api = async (url, opts) => { const r = await fetch(url, opts); if (!r.ok) throw new Error(r.status); return r.json(); };
+    const post = (url, body) => api(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+    /* ---------- settings ---------- */
+    function loadSettings() { try { Object.assign(settings, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {} }
+    function saveSettings() { try { localStorage.setItem(KEY, JSON.stringify(settings)); } catch (e) {} }
+    function applySettings() {
+        document.body.className = document.body.className.replace(/theme-\S+/g, '').trim();
+        if (settings.theme !== 'default') document.body.classList.add('theme-' + settings.theme);
+        document.body.classList.toggle('mode-compact', settings.compact);
+        document.body.classList.toggle('fx-enabled', settings.fx);
+        document.querySelectorAll('#themeButtons .tab-btn').forEach((b) => b.classList.toggle('active', b.dataset.theme === settings.theme));
+        $('compactToggle').checked = settings.compact;
+        $('fxToggle').checked = settings.fx;
+        $('audioToggle').checked = settings.audio;
+        $('pollSelect').value = String(settings.poll);
+    }
+    function startPolling() { clearInterval(pollTimer); pollTimer = setInterval(fetchFlights, settings.poll); }
+
+    /* ---------- chime ---------- */
+    function chime() {
+        if (!settings.audio) return;
+        try {
+            audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+            const t = audioCtx.currentTime;
+            [880, 1175].forEach((freq, i) => {
+                const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                o.type = 'sine'; o.frequency.value = freq;
+                g.gain.setValueAtTime(0.0001, t + i * 0.18);
+                g.gain.exponentialRampToValueAtTime(0.15, t + i * 0.18 + 0.02);
+                g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.18 + 0.4);
+                o.connect(g); g.connect(audioCtx.destination);
+                o.start(t + i * 0.18); o.stop(t + i * 0.18 + 0.45);
+            });
+        } catch (e) {}
+    }
+
+    /* ---------- tooltips (event delegation) ---------- */
+    const tip = $('global-tooltip');
+    document.addEventListener('mousemove', (e) => {
+        const t = e.target.closest && e.target.closest('[data-tip-title]');
+        if (!t) { tip.classList.remove('visible'); return; }
+        $('tooltip-title').textContent = t.dataset.tipTitle;
+        $('tooltip-desc').textContent = t.dataset.tipDesc;
+        $('tooltip-code').textContent = t.dataset.tipCode;
+        let left = e.clientX + 15;
+        if (left + 280 > window.innerWidth) left = e.clientX - 290;
+        tip.style.left = left + 'px';
+        tip.style.top = (e.clientY - 60) + 'px';
+        tip.classList.add('visible');
+    });
+    document.addEventListener('mouseleave', () => tip.classList.remove('visible'));
+
+    /* ---------- flights ---------- */
+    function fmtDate(iso) {
+        const d = iso ? new Date(iso) : null;
+        if (!d || isNaN(d)) return { time: '', dateStr: '' };
+        return { time: (String(iso).split('T')[1] || '').substring(0, 5), dateStr: d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }) };
+    }
+    const planeOf = (f) => aircraftDb[f.acType || '738'] || null;
+    const airlineOf = (f) => airlineDb[f.airline || ''] || null;
+    const isMilitary = (f) => Boolean((planeOf(f) || {}).military || (airlineOf(f) || {}).military);
+    const isRare = (f) => Boolean((planeOf(f) || {}).rare);
+
+    function renderFeed() {
+        const dot = $('feedDot'), banner = $('feedBanner');
+        dot.className = 'feed-dot ' + (feed.ok ? 'live' : 'down');
+        $('feedLabel').textContent = feed.ok ? 'LIVE' : 'OFFLINE';
+        banner.textContent = feed.ok ? '' : (feed.message || 'Live feed unavailable.');
+        banner.classList.toggle('show', !feed.ok);
+    }
+
+    function renderFlights(flights) {
+        const tbody = $('flightTableBody');
+        if (!flights.length) {
+            const msg = (!feed.ok && !allFlights.length) ? 'No live data right now. See the notice above, or add your own movements with ➕.' : 'No flight records found.';
+            tbody.innerHTML = `<tr><td colspan="9"><div class="state-container">${esc(msg)}</div></td></tr>`;
+            return;
+        }
+        tbody.innerHTML = flights.map((f) => {
+            const acKey = f.acType || '738';
+            const plane = planeOf(f) || { name: `Aircraft [${acKey}]`, desc: 'Standard commercial aircraft.' };
+            const code = f.airline || '';
+            const al = airlineOf(f) || { name: `Operator [${code}]`, desc: 'Active carrier code.' };
+            const highlight = (isMilitary(f) || isRare(f)) ? 'rare-military-row' : '';
+            const arr = f.vector === 'A';
+            const raw = (f.statusMsgPublic || '').trim();
+            const low = raw.toLowerCase();
+            const statusClass = low.includes('delay') ? 'status-delayed' : (low.includes('on time') || low.includes('boarding')) ? 'status-on-time' : 'status-neutral';
+            const sched = fmtDate(f.scheduled), est = fmtDate(f.estimated);
+            return `<tr class="${highlight}">
+                <td><span class="tooltip-trigger flight-code" data-tip-title="${esc(al.name)}" data-tip-desc="${esc(al.desc)}" data-tip-code="Code: ${esc(code)}">${esc(code)}${esc(f.flightNumber)}</span>${f.custom ? '<span class="tag-custom">LOCAL</span>' : ''}</td>
+                <td>${arr ? '<span style="color: var(--success); font-weight:800;">ARR</span>' : '<span style="color: var(--accent); font-weight:800;">DEP</span>'}</td>
+                <td><strong>${esc(f.portName)}</strong><br><span style="font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">${esc(f.portIATA)}</span></td>
+                <td><span style="font-family: 'JetBrains Mono', monospace; background: rgba(255,255,255,0.04); padding: 2px 6px; border-radius: 4px;">${esc(f.terminal || 'T2')}</span></td>
+                <td><span class="time-box">${esc(sched.time)}<span class="date-sub">${esc(sched.dateStr)}</span>${f.estimated ? `<span class="time-est">Est: ${esc(est.time)}</span>` : ''}</span></td>
+                <td><span class="tooltip-trigger" style="font-family: 'JetBrains Mono', monospace; color: var(--accent);" data-tip-title="${esc(plane.name)}" data-tip-desc="${esc(plane.desc)}" data-tip-code="ICAO: ${esc(acKey)}">${esc(acKey)}</span></td>
+                <td><span class="rego-code">${esc(f.acRego || 'N/A')}</span></td>
+                <td><span style="font-family: 'JetBrains Mono', monospace;">Gate ${esc(f.gate || 'TBD')}</span></td>
+                <td><span class="status-pill ${statusClass}">${esc(raw || (arr ? 'Arriving' : 'Departing'))}</span></td>
+            </tr>`;
+        }).join('');
+    }
+
+    function filterFlights() {
+        const q = $('searchInput').value.toLowerCase();
+        renderFlights(allFlights.filter((f) => {
+            let ok = true;
+            if (currentFilter === 'A' || currentFilter === 'D') ok = f.vector === currentFilter;
+            else if (currentFilter === 'military') ok = isMilitary(f);
+            else if (currentFilter === 'rare') ok = isRare(f);
+            const hay = `${f.airline}${f.flightNumber} ${f.portName} ${f.portIATA} ${f.acType} ${f.acRego}`.toLowerCase();
+            return ok && hay.includes(q);
+        }));
+    }
+
+    function detectChanges(flights) {
+        let changed = false;
+        flights.forEach((f) => {
+            const key = f.id || `${f.airline}${f.flightNumber}|${f.vector}|${f.scheduled}`;
+            const status = (f.statusMsgPublic || '').trim();
+            if (!firstLoad && lastStatus.has(key) && lastStatus.get(key) !== status) changed = true;
+            lastStatus.set(key, status);
+        });
+        firstLoad = false;
+        if (changed) chime();
+    }
+
+    async function fetchFlights() {
+        try {
+            const data = await api('/api/flights');
+            allFlights = data.flights || [];
+            feed = data.feed || { ok: false };
+            $('total-count').textContent = allFlights.length;
+            detectChanges(allFlights);
+        } catch (e) {
+            feed = { ok: false, message: 'FreeFIDS is not responding. Is it still running?' };
+        }
+        renderFeed();
+        filterFlights();
+    }
+
+    /* ---------- custom flights ---------- */
+    async function loadCustomList() {
+        try {
+            const data = await api('/api/custom-flights');
+            const list = data.flights || [];
+            $('customList').innerHTML = list.length ? list.map((f) => `
+                <div class="custom-item">
+                    <span><code>${esc(f.airline)}${esc(f.flightNumber)}</code> · ${f.vector === 'A' ? 'ARR' : 'DEP'} · ${esc(f.portName)} · ${esc(f.acType)} ${esc(f.acRego)}</span>
+                    <button class="btn-sm btn-danger" data-del="${esc(f.id)}">Remove</button>
+                </div>`).join('') : '<div style="font-size: 12px; color: var(--text-muted);">Nothing added yet.</div>';
+        } catch (e) {}
+    }
+    function defaultWhen() {
+        const d = new Date(Date.now() - new Date().getTimezoneOffset() * 60000);
+        return d.toISOString().slice(0, 16);
+    }
+    async function addCustom() {
+        const v = (id) => $(id).value.trim();
+        const when = v('cfWhen') || defaultWhen();
+        try {
+            await post('/api/custom-flights', {
+                airline: v('cfAirline'), flightNumber: v('cfNumber'), acType: v('cfAcType'), acRego: v('cfRego'),
+                portName: v('cfPort'), portIATA: v('cfIata'), vector: v('cfVector'), scheduled: when + ':00',
+                terminal: v('cfTerminal'), gate: v('cfGate'), status: v('cfStatus'),
+            });
+            ['cfAirline', 'cfNumber', 'cfAcType', 'cfRego', 'cfPort', 'cfIata', 'cfTerminal', 'cfGate', 'cfStatus'].forEach((id) => $(id).value = '');
+            await loadCustomList();
+            await fetchFlights();
+        } catch (e) { alert('Could not save that movement.'); }
+    }
+
+    /* ---------- csv ---------- */
+    function downloadCSV() {
+        if (!allFlights.length) return alert('No flight data to export.');
+        const headers = ['id', 'vector', 'airline', 'flightNumber', 'portIATA', 'portName', 'terminal', 'scheduled', 'estimated', 'statusMsgPublic', 'gate', 'stand', 'acType', 'acRego'];
+        const rows = [headers.join(',')].concat(allFlights.map((f) => headers.map((h) => `"${String(f[h] ?? '').replace(/"/g, '""')}"`).join(',')));
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(new Blob([rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' }));
+        link.download = `cairns_airport_fids_${new Date().toISOString().slice(0, 10)}.csv`;
+        link.click();
+    }
+
+    /* ---------- wiring ---------- */
+    const modal = (id, show) => $(id).classList.toggle('active', show);
+    document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => modal(b.dataset.close, false)));
+    document.querySelectorAll('.modal-overlay').forEach((m) => m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('active'); }));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.active').forEach((m) => m.classList.remove('active')); });
+
+    $('addBtn').onclick = () => { if (!$('cfWhen').value) $('cfWhen').value = defaultWhen(); loadCustomList(); modal('customModal', true); };
+    $('cfAddBtn').onclick = addCustom;
+    $('customList').addEventListener('click', async (e) => {
+        const id = e.target.dataset && e.target.dataset.del;
+        if (!id) return;
+        try { await api('/api/custom-flights/' + encodeURIComponent(id), { method: 'DELETE' }); await loadCustomList(); await fetchFlights(); } catch (err) {}
+    });
+    $('settingsBtn').onclick = () => modal('settingsModal', true);
+    $('themeButtons').addEventListener('click', (e) => { if (e.target.dataset.theme) { settings.theme = e.target.dataset.theme; saveSettings(); applySettings(); } });
+    $('compactToggle').onchange = (e) => { settings.compact = e.target.checked; saveSettings(); applySettings(); };
+    $('fxToggle').onchange = (e) => { settings.fx = e.target.checked; saveSettings(); applySettings(); };
+    $('audioToggle').onchange = (e) => { settings.audio = e.target.checked; saveSettings(); if (settings.audio) chime(); };
+    $('pollSelect').onchange = (e) => { settings.poll = parseInt(e.target.value, 10); saveSettings(); startPolling(); };
+    $('filterTabs').addEventListener('click', (e) => {
+        if (!e.target.dataset.filter) return;
+        currentFilter = e.target.dataset.filter;
+        document.querySelectorAll('#filterTabs .tab-btn').forEach((b) => b.classList.toggle('active', b === e.target));
+        filterFlights();
+    });
+    $('searchInput').addEventListener('input', filterFlights);
+    $('csvBtn').onclick = downloadCSV;
+    $('quitBtn').onclick = async () => {
+        if (!confirm('Stop FreeFIDS? You can start it again from your shortcut.')) return;
+        try { await fetch('/api/quit', { method: 'POST', headers: { 'X-FreeFIDS': '1' } }); } catch (e) {}
+        $('stoppedOverlay').classList.add('show');
+        clearInterval(pollTimer);
+    };
+
+    /* ---------- start ---------- */
+    (async function init() {
+        loadSettings(); applySettings();
+        try {
+            const db = await api('/api/database');
+            aircraftDb = db.aircraft || {}; airlineDb = db.airlines || {};
+            const st = await api('/api/status');
+            $('dataDirNote').textContent = 'Your data folder: ' + st.data_dir;
+        } catch (e) {}
+        await fetchFlights();
+        startPolling();
+    })();
+})();
+</script>
+</body>
+</html>
