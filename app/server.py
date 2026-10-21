@@ -1,4 +1,4 @@
-"""FreeFIDS local server.
+"""OpenFIDS local server.
 
 Runs entirely on the user's own computer, bound to 127.0.0.1. There are no
 accounts or logins: whoever is sitting at the machine is the user.
@@ -23,15 +23,15 @@ APP_DIR = Path(__file__).resolve().parent
 
 def get_data_dir() -> Path:
     """Per-user folder for settings and custom flights (survives updates)."""
-    override = os.environ.get("FREEFIDS_DATA")
+    override = os.environ.get("OPENFIDS_DATA")
     if override:
         path = Path(override).expanduser()
     elif sys.platform.startswith("win"):
-        path = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming")) / "FreeFIDS"
+        path = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming")) / "OpenFIDS"
     elif sys.platform == "darwin":
-        path = Path.home() / "Library" / "Application Support" / "FreeFIDS"
+        path = Path.home() / "Library" / "Application Support" / "OpenFIDS"
     else:
-        path = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "freefids"
+        path = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "openfids"
     path.mkdir(parents=True, exist_ok=True)
     return path
 
@@ -41,7 +41,7 @@ CUSTOM_FLIGHTS_FILE = DATA_DIR / "custom_flights.json"
 CONFIG_FILE = DATA_DIR / "config.json"
 _file_lock = threading.Lock()
 
-app = FastAPI(title="FreeFIDS", docs_url=None, redoc_url=None, openapi_url=None)
+app = FastAPI(title="OpenFIDS", docs_url=None, redoc_url=None, openapi_url=None)
 
 ALLOWED_HOSTS = {"127.0.0.1", "localhost", "[::1]"}
 
@@ -85,7 +85,7 @@ FEED_URL = BASE_URL + "/flights/data"
 LOGIN_URL = BASE_URL + "/login"
 
 session = requests.Session()
-session.headers.update({"User-Agent": "Mozilla/5.0 (FreeFIDS local app)"})
+session.headers.update({"User-Agent": "Mozilla/5.0 (OpenFIDS local app)"})
 
 feed = {"ok": False, "message": "Connecting to Cairns Airport...", "updated": None}
 _feed_lock = threading.Lock()
@@ -96,12 +96,12 @@ _login_retry_after = 0.0
 def upstream_credentials():
     """Optional login for the airport site, supplied by the user themselves.
 
-    Nothing is bundled with the app. Set FREEFIDS_UPSTREAM_EMAIL and
-    FREEFIDS_UPSTREAM_PASSWORD, or put {"upstream_email": "...",
+    Nothing is bundled with the app. Set OPENFIDS_UPSTREAM_EMAIL and
+    OPENFIDS_UPSTREAM_PASSWORD, or put {"upstream_email": "...",
     "upstream_password": "..."} in config.json inside the data folder.
     """
-    email = os.environ.get("FREEFIDS_UPSTREAM_EMAIL", "")
-    password = os.environ.get("FREEFIDS_UPSTREAM_PASSWORD", "")
+    email = os.environ.get("OPENFIDS_UPSTREAM_EMAIL", "")
+    password = os.environ.get("OPENFIDS_UPSTREAM_PASSWORD", "")
     if not (email and password):
         try:
             cfg = json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
@@ -136,17 +136,102 @@ def _set_feed(ok: bool, message: str):
         feed["updated"] = datetime.now().strftime("%H:%M:%S")
 
 
+# ---- pluggable feeds (see README: "Using a different flight board") ----
+ADAPTER_FILE = DATA_DIR / "adapter.py"
+
+
+def load_config() -> dict:
+    try:
+        cfg = json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
+        return cfg if isinstance(cfg, dict) else {}
+    except Exception:
+        return {}
+
+
+def load_adapter():
+    # Optional adapter.py in the data folder must define fetch(session) -> list of flight dicts.
+    if not ADAPTER_FILE.exists():
+        return None
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("openfids_adapter", ADAPTER_FILE)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    fn = getattr(module, "fetch", None)
+    if not callable(fn):
+        raise RuntimeError("adapter.py must define fetch(session)")
+    return fn
+
+
+def dig(data, path):
+    for part in str(path).split("."):
+        if not part:
+            continue
+        if isinstance(data, dict):
+            data = data.get(part)
+        elif isinstance(data, list) and part.isdigit() and int(part) < len(data):
+            data = data[int(part)]
+        else:
+            return None
+    return data
+
+
+def normalise(raw, mapping):
+    if not isinstance(raw, dict):
+        return None
+    out = dict(raw)
+    for ours, theirs in (mapping or {}).items():
+        if isinstance(theirs, str) and theirs.startswith("="):
+            out[ours] = theirs[1:]          # "=D" means the constant "D"
+            continue
+        value = dig(raw, theirs)
+        if value is not None:
+            out[ours] = value
+    vector = str(out.get("vector", "")).strip().upper()
+    if vector:
+        out["vector"] = "A" if vector.startswith("A") else "D"
+    return out
+
+
+def extra_db(name: str) -> dict:
+    try:
+        data = json.loads((DATA_DIR / name).read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
 def _try_fetch():
-    resp = session.get(FEED_URL, timeout=8)
-    if "login" in resp.url or resp.status_code in (401, 403, 419):
+    try:
+        adapter = load_adapter()
+    except Exception as exc:
+        return None, f"adapter failed to load: {exc}"
+    if adapter:
+        try:
+            flights = adapter(session)
+        except requests.RequestException:
+            raise
+        except Exception as exc:
+            return None, f"adapter error: {exc}"
+        return [f for f in (flights or []) if isinstance(f, dict)], None
+
+    cfg = load_config().get("feed") or {}
+    custom = bool(cfg.get("url"))
+    resp = session.get(cfg.get("url") or FEED_URL, timeout=8, headers=cfg.get("headers") or None)
+    if not custom and ("login" in resp.url or resp.status_code in (401, 403, 419)):
         return None, "login"
     if resp.status_code != 200:
         return None, f"http {resp.status_code}"
     try:
         data = resp.json()
     except ValueError:
-        return None, "login"
-    flights = data.get("flights", []) if isinstance(data, dict) else []
+        return None, ("response was not JSON" if custom else "login")
+    if custom:
+        items = dig(data, cfg["flights_path"]) if cfg.get("flights_path") else data
+        if not isinstance(items, list):
+            return None, "flights_path did not point at a list"
+        flights = [f for f in (normalise(i, cfg.get("fields")) for i in items) if f]
+    else:
+        flights = data.get("flights", []) if isinstance(data, dict) else []
     return flights, None
 
 
@@ -195,12 +280,14 @@ def index():
 
 @app.get("/api/status")
 def status():
-    return {"app": "freefids", "data_dir": str(DATA_DIR), "feed": feed}
+    return {"app": "openfids", "data_dir": str(DATA_DIR),
+            "title": load_config().get("title", "Cairns Airport FIDS"), "feed": feed}
 
 
 @app.get("/api/database")
 def database():
-    return {"aircraft": AIRCRAFT_DB, "airlines": AIRLINE_DB}
+    return {"aircraft": {**AIRCRAFT_DB, **extra_db("aircraft.json")},
+            "airlines": {**AIRLINE_DB, **extra_db("airlines.json")}}
 
 
 @app.get("/api/flights")
@@ -255,7 +342,7 @@ def delete_custom_flight(flight_id: str):
 @app.post("/api/quit")
 def quit_app(request: Request):
     # Custom header forces a CORS preflight, so other websites can't trigger this.
-    if request.headers.get("x-freefids") != "1":
+    if request.headers.get("x-openfids") != "1":
         raise HTTPException(status_code=403, detail="forbidden")
     threading.Timer(0.4, lambda: os._exit(0)).start()
     return {"status": "stopping"}

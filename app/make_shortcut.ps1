@@ -8,7 +8,7 @@ $shell  = New-Object -ComObject WScript.Shell
 $targets = @([Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Programs'))
 foreach ($dir in $targets) {
     if (-not $dir -or -not (Test-Path $dir)) { continue }
-    $lnk = $shell.CreateShortcut((Join-Path $dir 'FreeFIDS.lnk'))
+    $lnk = $shell.CreateShortcut((Join-Path $dir 'OpenFIDS.lnk'))
     $lnk.TargetPath       = $python
     $lnk.Arguments        = '"' + $script + '"'
     $lnk.WorkingDirectory = $root

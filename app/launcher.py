@@ -1,4 +1,4 @@
-"""Starts FreeFIDS locally and opens it in your browser.
+"""Starts OpenFIDS locally and opens it in your browser.
 
 Usage:  python launcher.py            open in the default browser (default)
         python launcher.py --window   open in a native window (needs: pip install pywebview)
@@ -20,7 +20,7 @@ sys.path.insert(0, str(HERE))
 # pythonw (Windows, no console) has no stdout/stderr; send them to a log file.
 if sys.stdout is None or sys.stderr is None:
     from server import DATA_DIR
-    log = open(DATA_DIR / "freefids.log", "a", buffering=1, encoding="utf-8")
+    log = open(DATA_DIR / "openfids.log", "a", buffering=1, encoding="utf-8")
     sys.stdout = sys.stderr = log
 
 import uvicorn  # noqa: E402
@@ -29,10 +29,10 @@ HOST = "127.0.0.1"
 FIRST_PORT = 8000
 
 
-def is_freefids(port: int) -> bool:
+def is_openfids(port: int) -> bool:
     try:
         with urllib.request.urlopen(f"http://{HOST}:{port}/api/status", timeout=1.5) as r:
-            return json.load(r).get("app") == "freefids"
+            return json.load(r).get("app") == "openfids"
     except Exception:
         return False
 
@@ -45,7 +45,7 @@ def port_free(port: int) -> bool:
 def wait_until_up(port: int, timeout: float = 20) -> bool:
     end = time.time() + timeout
     while time.time() < end:
-        if is_freefids(port):
+        if is_openfids(port):
             return True
         time.sleep(0.2)
     return False
@@ -59,7 +59,7 @@ def main():
 
     # Already running (e.g. shortcut clicked twice)? Just open it again.
     for port in range(FIRST_PORT, FIRST_PORT + 20):
-        if is_freefids(port):
+        if is_openfids(port):
             if not args.no_open:
                 webbrowser.open(f"http://{HOST}:{port}")
             return
@@ -71,7 +71,7 @@ def main():
     url = f"http://{HOST}:{port}"
     from server import app
 
-    print(f"FreeFIDS is running at {url}")
+    print(f"OpenFIDS is running at {url}")
     print("Close this window (or press Ctrl+C) to stop it.")
 
     if args.window:

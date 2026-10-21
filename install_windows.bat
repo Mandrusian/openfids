@@ -1,9 +1,9 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title FreeFIDS installer
+title OpenFIDS installer
 echo.
-echo  FreeFIDS - installer for Windows
+echo  OpenFIDS - installer for Windows
 echo  ================================
 echo.
 
@@ -48,10 +48,10 @@ echo [3/3] Creating shortcuts ...
 call shortcut_windows.bat nopause
 
 echo.
-echo  All done! Use the "FreeFIDS" shortcut on your Desktop or Start menu.
+echo  All done! Use the "OpenFIDS" shortcut on your Desktop or Start menu.
 echo  (Or double-click start_windows.bat.)
 echo.
-set /p LAUNCH="Start FreeFIDS now? [Y/n] "
+set /p LAUNCH="Start OpenFIDS now? [Y/n] "
 if /i "%LAUNCH%"=="n" goto end
 start "" ".venv\Scripts\pythonw.exe" "app\launcher.py"
 :end

@@ -295,7 +295,7 @@ input:checked + .slider:before { transform: translateX(18px); background-color: 
 </head>
 <body class="fx-enabled">
 
-<div id="stoppedOverlay"><div><h2 style="color: var(--text-main); margin-bottom: 8px;">FreeFIDS has stopped</h2>You can close this tab. Open the FreeFIDS shortcut to start it again.</div></div>
+<div id="stoppedOverlay"><div><h2 style="color: var(--text-main); margin-bottom: 8px;">OpenFIDS has stopped</h2>You can close this tab. Open the OpenFIDS shortcut to start it again.</div></div>
 
 <div id="global-tooltip">
     <h4 id="tooltip-title"></h4>
@@ -395,7 +395,7 @@ input:checked + .slider:before { transform: translateX(18px); background-color: 
         </div>
         <button class="icon-btn" id="addBtn" title="Add a movement">➕</button>
         <button class="icon-btn" id="settingsBtn" title="Settings">⚙️</button>
-        <button class="icon-btn" id="quitBtn" title="Stop FreeFIDS">⏻</button>
+        <button class="icon-btn" id="quitBtn" title="Stop OpenFIDS">⏻</button>
     </div>
 </header>
 <div id="feedBanner"></div>
@@ -436,7 +436,7 @@ input:checked + .slider:before { transform: translateX(18px); background-color: 
 <script>
 (() => {
     const $ = (id) => document.getElementById(id);
-    const KEY = 'freefids.settings';
+    const KEY = 'openfids.settings';
     const defaults = { theme: 'default', compact: false, fx: true, audio: false, poll: 30000 };
     let settings = { ...defaults };
     let allFlights = [], aircraftDb = {}, airlineDb = {}, feed = { ok: false };
@@ -581,7 +581,7 @@ input:checked + .slider:before { transform: translateX(18px); background-color: 
             $('total-count').textContent = allFlights.length;
             detectChanges(allFlights);
         } catch (e) {
-            feed = { ok: false, message: 'FreeFIDS is not responding. Is it still running?' };
+            feed = { ok: false, message: 'OpenFIDS is not responding. Is it still running?' };
         }
         renderFeed();
         filterFlights();
@@ -657,8 +657,8 @@ input:checked + .slider:before { transform: translateX(18px); background-color: 
     $('searchInput').addEventListener('input', filterFlights);
     $('csvBtn').onclick = downloadCSV;
     $('quitBtn').onclick = async () => {
-        if (!confirm('Stop FreeFIDS? You can start it again from your shortcut.')) return;
-        try { await fetch('/api/quit', { method: 'POST', headers: { 'X-FreeFIDS': '1' } }); } catch (e) {}
+        if (!confirm('Stop OpenFIDS? You can start it again from your shortcut.')) return;
+        try { await fetch('/api/quit', { method: 'POST', headers: { 'X-OpenFIDS': '1' } }); } catch (e) {}
         $('stoppedOverlay').classList.add('show');
         clearInterval(pollTimer);
     };
@@ -671,6 +671,7 @@ input:checked + .slider:before { transform: translateX(18px); background-color: 
             aircraftDb = db.aircraft || {}; airlineDb = db.airlines || {};
             const st = await api('/api/status');
             $('dataDirNote').textContent = 'Your data folder: ' + st.data_dir;
+            if (st.title) { document.title = st.title; document.querySelector('.brand-text h1').textContent = st.title; }
         } catch (e) {}
         await fetchFlights();
         startPolling();

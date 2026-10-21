@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# Adds FreeFIDS to your applications menu and (if you have one) your Desktop.
-# Re-run this if you ever move the FreeFIDS folder.
+# Adds OpenFIDS to your applications menu and (if you have one) your Desktop.
+# Re-run this if you ever move the OpenFIDS folder.
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 if [ ! -x "$ROOT/.venv/bin/python" ]; then
-  echo "FreeFIDS is not installed yet. Run ./install_linux.sh first."
+  echo "OpenFIDS is not installed yet. Run ./install_linux.sh first."
   exit 1
 fi
 
 APPS="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
 mkdir -p "$APPS"
-ENTRY="$APPS/freefids.desktop"
+ENTRY="$APPS/openfids.desktop"
 cat > "$ENTRY" <<DESKTOP
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=FreeFIDS
+Name=OpenFIDS
 GenericName=Flight Information Display
 Comment=Cairns Airport FIDS (runs locally)
 Exec="$ROOT/.venv/bin/python" "$ROOT/app/launcher.py"
@@ -31,10 +31,10 @@ echo "Menu entry: $ENTRY"
 DESK="$(xdg-user-dir DESKTOP 2>/dev/null)"
 [ -z "$DESK" ] && DESK="$HOME/Desktop"
 if [ -d "$DESK" ]; then
-  cp "$ENTRY" "$DESK/FreeFIDS.desktop"
-  chmod +x "$DESK/FreeFIDS.desktop"
+  cp "$ENTRY" "$DESK/OpenFIDS.desktop"
+  chmod +x "$DESK/OpenFIDS.desktop"
   # GNOME needs the launcher marked as trusted; harmless elsewhere
-  command -v gio >/dev/null 2>&1 && gio set "$DESK/FreeFIDS.desktop" metadata::trusted true >/dev/null 2>&1
-  echo "Desktop shortcut: $DESK/FreeFIDS.desktop"
+  command -v gio >/dev/null 2>&1 && gio set "$DESK/OpenFIDS.desktop" metadata::trusted true >/dev/null 2>&1
+  echo "Desktop shortcut: $DESK/OpenFIDS.desktop"
   echo "(On GNOME/KDE you may need to right-click it once and choose 'Allow Launching'.)"
 fi

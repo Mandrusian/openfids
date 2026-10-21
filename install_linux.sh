@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# FreeFIDS installer for Linux
+# OpenFIDS installer for Linux
 set -u
 cd "$(dirname "$0")" || exit 1
 echo
-echo " FreeFIDS - installer for Linux"
+echo " OpenFIDS - installer for Linux"
 echo " =============================="
 echo
 
@@ -61,6 +61,6 @@ echo "[3/3] Creating menu entry and desktop shortcut ..."
 bash ./shortcut_linux.sh
 
 echo
-echo " All done! Find FreeFIDS in your applications menu, or run ./start_linux.sh"
-read -r -p "Start FreeFIDS now? [Y/n] " a
+echo " All done! Find OpenFIDS in your applications menu, or run ./start_linux.sh"
+read -r -p "Start OpenFIDS now? [Y/n] " a
 [[ "$a" =~ ^[Nn] ]] || { nohup .venv/bin/python app/launcher.py >/dev/null 2>&1 & disown; }

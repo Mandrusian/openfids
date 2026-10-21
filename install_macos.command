@@ -1,8 +1,8 @@
 #!/bin/bash
-# FreeFIDS installer for macOS (double-click to run)
+# OpenFIDS installer for macOS (double-click to run)
 cd "$(dirname "$0")" || exit 1
 echo
-echo " FreeFIDS - installer for macOS"
+echo " OpenFIDS - installer for macOS"
 echo " =============================="
 echo
 
@@ -40,11 +40,11 @@ echo "[2/3] Installing requirements ..."
 .venv/bin/python -m pip install --upgrade pip >/dev/null 2>&1
 .venv/bin/python -m pip install -r app/requirements.txt || { echo "Install failed. Check your internet connection."; read -r -p "Press Enter..." _; exit 1; }
 
-echo "[3/3] Creating the FreeFIDS app ..."
+echo "[3/3] Creating the OpenFIDS app ..."
 bash ./shortcut_macos.command nopause
 
 echo
-echo " All done! Open FreeFIDS from Launchpad / Applications or your Desktop."
-read -r -p "Start FreeFIDS now? [Y/n] " a
+echo " All done! Open OpenFIDS from Launchpad / Applications or your Desktop."
+read -r -p "Start OpenFIDS now? [Y/n] " a
 [[ "$a" =~ ^[Nn] ]] || nohup .venv/bin/python app/launcher.py >/dev/null 2>&1 &
 sleep 1
