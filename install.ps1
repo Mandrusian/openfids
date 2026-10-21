@@ -37,67 +37,41 @@ foreach ($Required in @('app\server.py','app\requirements.txt','app\launcher.py'
     }
 }
 
+function Test-PythonExecutable {
+    param([string]$Executable)
+
+    if ([string]::IsNullOrWhiteSpace($Executable) -or -not (Test-Path -LiteralPath $Executable -PathType Leaf)) {
+        return $false
+    }
+
+    $PreviousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        & $Executable -c 'import sys; sys.exit(0 if sys.version_info >= (3,9) else 1)' 2>&1 | Out-Null
+        return ($LASTEXITCODE -eq 0)
+    }
+    catch {
+        return $false
+    }
+    finally {
+        $ErrorActionPreference = $PreviousErrorActionPreference
+    }
+}
+
 function Find-Python {
-    foreach ($Name in @('python', 'py')) {
-        $Command = Get-Command $Name -ErrorAction SilentlyContinue
-        if (-not $Command) { continue }
-
-        $PreviousErrorActionPreference = $ErrorActionPreference
-        try {
-            $ErrorActionPreference = 'Continue'
-            if ($Name -eq 'py') {
-                $Output = & $Command.Source -3 -c 'import sys; print(sys.executable)' 2>&1
-            }
-            else {
-                $Output = & $Command.Source -c 'import sys; print(sys.executable)' 2>&1
-            }
-            $Code = $LASTEXITCODE
-        }
-        catch {
-            $Code = 1
-        }
-        finally {
-            $ErrorActionPreference = $PreviousErrorActionPreference
-        }
-
-        if ($Code -eq 0 -and $Output) {
-            $Candidate = [string]($Output | Select-Object -Last 1)
-            if (Test-Path $Candidate -PathType Leaf) {
-                $PreviousErrorActionPreference = $ErrorActionPreference
-                try {
-                    $ErrorActionPreference = 'Continue'
-                    & $Candidate -c 'import sys; sys.exit(0 if sys.version_info >= (3,9) else 1)' 2>&1 | Out-Null
-                    $Code = $LASTEXITCODE
-                }
-                catch {
-                    $Code = 1
-                }
-                finally {
-                    $ErrorActionPreference = $PreviousErrorActionPreference
-                }
-                if ($Code -eq 0) { return $Candidate }
-            }
+    foreach ($Name in @('python.exe', 'python')) {
+        $Command = Get-Command $Name -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($Command -and (Test-PythonExecutable $Command.Source)) {
+            return $Command.Source
         }
     }
 
-    foreach ($Version in @('313','312','311','310','39')) {
-        foreach ($Base in @("$env:LOCALAPPDATA\Programs\Python", $env:ProgramFiles)) {
+    foreach ($Version in @('314','313','312','311','310','39')) {
+        foreach ($Base in @("$env:LOCALAPPDATA\\Programs\\Python", $env:ProgramFiles)) {
             if (-not $Base) { continue }
-            $Candidate = Join-Path $Base "Python$Version\python.exe"
-            if (Test-Path $Candidate -PathType Leaf) {
-                $PreviousErrorActionPreference = $ErrorActionPreference
-                try {
-                    $ErrorActionPreference = 'Continue'
-                    & $Candidate -c 'import sys; sys.exit(0 if sys.version_info >= (3,9) else 1)' 2>&1 | Out-Null
-                    $Code = $LASTEXITCODE
-                }
-                catch {
-                    $Code = 1
-                }
-                finally {
-                    $ErrorActionPreference = $PreviousErrorActionPreference
-                }
-                if ($Code -eq 0) { return $Candidate }
+            $Candidate = Join-Path $Base "Python$Version\\python.exe"
+            if (Test-PythonExecutable $Candidate) {
+                return $Candidate
             }
         }
     }
