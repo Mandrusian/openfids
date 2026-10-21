@@ -43,9 +43,9 @@ function Find-Python {
         if (-not $Command) { continue }
 
         $Prefix = if ($Name -eq 'py') { @('-3') } else { @() }
-        & $Command.Source @Prefix -c 'import sys; sys.exit(0 if sys.version_info >= (3,9) else 1)' 2>$null
+        & $Command.Source @Prefix -c 'import sys; sys.exit(0 if sys.version_info >= (3,9) else 1)' *> $null
         if ($LASTEXITCODE -eq 0) {
-            $Exe = & $Command.Source @Prefix -c 'import sys; print(sys.executable)' 2>$null
+            $Exe = & $Command.Source @Prefix -c 'import sys; print(sys.executable)' *> $null
             if ($LASTEXITCODE -eq 0 -and $Exe) { return [string]$Exe[-1] }
         }
     }
@@ -54,7 +54,7 @@ function Find-Python {
         foreach ($Base in @("$env:LOCALAPPDATA\Programs\Python", $env:ProgramFiles)) {
             $Candidate = Join-Path $Base "Python$Version\python.exe"
             if (Test-Path $Candidate) {
-                & $Candidate -c 'import sys; sys.exit(0 if sys.version_info >= (3,9) else 1)' 2>$null
+                & $Candidate -c 'import sys; sys.exit(0 if sys.version_info >= (3,9) else 1)' *> $null
                 if ($LASTEXITCODE -eq 0) { return $Candidate }
             }
         }
