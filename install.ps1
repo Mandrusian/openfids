@@ -67,9 +67,9 @@ function Find-Python {
     }
 
     foreach ($Version in @('314','313','312','311','310','39')) {
-        foreach ($Base in @("$env:LOCALAPPDATA\\Programs\\Python", $env:ProgramFiles)) {
+        foreach ($Base in @("$env:LOCALAPPDATA\Programs\Python", $env:ProgramFiles)) {
             if (-not $Base) { continue }
-            $Candidate = Join-Path $Base "Python$Version\\python.exe"
+            $Candidate = Join-Path $Base "Python$Version\python.exe"
             if (Test-PythonExecutable $Candidate) {
                 return $Candidate
             }
