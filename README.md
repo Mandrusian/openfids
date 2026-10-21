@@ -102,6 +102,15 @@ Nothing is installed system-wide, so that's everything. (Python, if the installe
 | Windows SmartScreen warning | Choose **More info**, then **Run anyway**. |
 | Changed something and nothing happened | Reload the page with Ctrl+Shift+R (Cmd+Shift+R on macOS). |
 
+## A note on AI
+
+OpenFIDS was written with the help of an AI assistant (Claude, made by Anthropic), working from my instructions. This is a heads-up, and it doesn't change how you use the app.
+
+- **There's no AI inside OpenFIDS.** The app doesn't call any AI service and doesn't send your searches, watchlist or settings anywhere.
+- **What it does connect to:** the flight feed you've set up (Cairns Airport by default), Google Fonts for the typeface, and GitHub and PyPI when you install or update.
+- **AI-written code can have mistakes.** Some parts, including the installers and shortcut scripts, haven't been tested on every operating system. If something breaks, please open an issue and include what you saw.
+- **Read before you run.** As with any `curl | bash` command, you can read `install.sh` first. The link is in the Advanced section.
+
 ---
 
 # Advanced
