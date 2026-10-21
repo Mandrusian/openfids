@@ -1,45 +1,156 @@
-AIRCRAFT_DB = {
-    "737": {"name": "Boeing 737-800", "desc": "Standard narrow-body twinjet airliner.", "rare": False, "military": False},
-    "738": {"name": "Boeing 737-800", "desc": "Standard narrow-body twinjet airliner.", "rare": False, "military": False},
-    "320": {"name": "Airbus A320", "desc": "Popular short-to-medium-range passenger jet.", "rare": False, "military": False},
-    "32A": {"name": "Airbus A320 (Sharklets)", "desc": "A320 equipped with fuel-saving wingtip sharklets.", "rare": False, "military": False},
-    "32N": {"name": "Airbus A320neo", "desc": "New Engine Option variant featuring superior fuel efficiency.", "rare": False, "military": False},
-    "A20N": {"name": "Airbus A320neo", "desc": "New Engine Option variant featuring LEAP-1A or PW engines.", "rare": False, "military": False},
-    "321": {"name": "Airbus A321", "desc": "Stretched variant of the A320 family.", "rare": False, "military": False},
-    "32Q": {"name": "Airbus A321neo", "desc": "Long-range neo variant of the A321.", "rare": False, "military": False},
-    "A21N": {"name": "Airbus A321neo / XLR", "desc": "Extra-long range narrowbody airliner.", "rare": False, "military": False},
-    "788": {"name": "Boeing 787-8 Dreamliner", "desc": "Long-haul wide-body twin-engine jet.", "rare": False, "military": False},
-    "77W": {"name": "Boeing 777-300ER", "desc": "Large wide-body long-range twinjet.", "rare": False, "military": False},
-    "DH8D": {"name": "De Havilland Canada Dash 8-400", "desc": "High-speed regional turboprop aircraft.", "rare": False, "military": False},
-    "F100": {"name": "Fokker 100", "desc": "Medium-range regional jetliner.", "rare": True, "military": False},
-    "C17": {"name": "Boeing C-17 Globemaster III", "desc": "Military strategic transport aircraft.", "rare": False, "military": True},
-    "KC30": {"name": "Airbus A330 MRTT", "desc": "Multi-role military aerial refuelling and transport aircraft.", "rare": True, "military": True},
-    "P8": {"name": "Boeing P-8 Poseidon", "desc": "Military maritime patrol and reconnaissance aircraft.", "rare": True, "military": True},
-    
-    # --- PRIVATE JETS & VIPS ---
-    "GL7T": {"name": "Bombardier Global 7500", "desc": "Ultra-long-range large-cabin business jet.", "rare": True, "military": False},
-    "GL6T": {"name": "Bombardier Global 6500", "desc": "Long-range high-speed executive private jet.", "rare": True, "military": False},
-    "GLF6": {"name": "Gulfstream G650 / G650ER", "desc": "Flagship ultra-long-range luxury private business jet.", "rare": True, "military": False},
-    "GV": {"name": "Gulfstream V", "desc": "Long-range executive business jet.", "rare": True, "military": False},
-    "G280": {"name": "Gulfstream G280", "desc": "Super-midsize twin-engine corporate jet.", "rare": True, "military": False},
-    "C25B": {"name": "Cessna Citation CJ3+", "desc": "Popular light business jet.", "rare": True, "military": False},
-    "C680": {"name": "Cessna Citation Sovereign", "desc": "Midsize business jet with transcontinental range.", "rare": True, "military": False},
-    "E55P": {"name": "Embraer Phenom 300 / 300E", "desc": "Best-selling light business jet.", "rare": True, "military": False},
-    "CL30": {"name": "Bombardier Challenger 350", "desc": "Super-midsize business jet.", "rare": True, "military": False},
-    "FA7X": {"name": "Dassault Falcon 7X", "desc": "Trijet long-range luxury business jet.", "rare": True, "military": False},
-    "FA8X": {"name": "Dassault Falcon 8X", "desc": "Ultra-long-range trijet executive aircraft.", "rare": True, "military": False},
-    "F2TH": {"name": "Dassault Falcon 2000", "desc": "Twin-engine business jet.", "rare": True, "military": False},
-    "PC24": {"name": "Pilatus PC-24", "desc": "Innovative twin-turbofan superversatile private jet.", "rare": True, "military": False},
-    "H25B": {"name": "Hawker 800XP / 850XP", "desc": "Midsize corporate jet aircraft.", "rare": True, "military": False},
-    "LJ75": {"name": "Learjet 75", "desc": "Light business jet aircraft.", "rare": True, "military": False}
-}
+"""OpenFIDS lookup data. Keys are IATA and ICAO codes, matched case-insensitively.
+Add your own in aircraft.json / airlines.json in your data folder."""
+AIRCRAFT_DB, AIRLINE_DB = {}, {}
 
-AIRLINE_DB = {
-    "QFA": {"name": "Qantas", "desc": "Australia's flag carrier airline.", "military": False},
-    "VOZ": {"name": "Virgin Australia", "desc": "Major Australian domestic and international airline.", "military": False},
-    "JST": {"name": "Jetstar Airways", "desc": "Australian low-cost airline subsidiary of Qantas Group.", "military": False},
-    "AXC": {"name": "Alliance Airlines", "desc": "Australian contract and charter airline operator.", "military": False},
-    "HIE": {"name": "Hinterland Aviation", "desc": "Regional charter and regular public transport airline based in Cairns.", "military": False},
-    "RAAF": {"name": "Royal Australian Air Force", "desc": "Air warfare branch of the Australian Defence Force.", "military": True},
-    "USAF": {"name": "United States Air Force", "desc": "Air branch of the United States Armed Forces.", "military": True}
-}
+def _a(codes, name, desc, rare=False, military=False):
+    for c in codes.split():
+        AIRCRAFT_DB[c.upper()] = {"name": name, "desc": desc, "rare": rare, "military": military}
+
+def _l(codes, name, desc, military=False):
+    for c in codes.split():
+        AIRLINE_DB[c.upper()] = {"name": name, "desc": desc, "military": military}
+
+# --- Boeing narrow-bodies
+_a("737", "Boeing 737 (variant not given)", "Narrow-body twinjet; the best-selling airliner ever.")
+_a("73G B737", "Boeing 737-700", "Shorter 737 Next Generation.")
+_a("738 73H B738", "Boeing 737-800", "Workhorse of Australian domestic routes.")
+_a("739 73J B739", "Boeing 737-900 / 900ER", "Stretched 737 Next Generation.")
+_a("7M8 B38M", "Boeing 737 MAX 8", "Latest-generation 737 with LEAP-1B engines.")
+_a("7M9 B39M", "Boeing 737 MAX 9", "Stretched 737 MAX.")
+_a("732 B732 733 B733 734 B734 735 B735 736 B736", "Boeing 737 Classic / -600", "Older 737 variants, increasingly rare.", rare=True)
+_a("757 752 753 B752 B753", "Boeing 757", "Narrow-body with a wide-body's range.", rare=True)
+_a("717 B712", "Boeing 717-200", "Small twinjet, flown by QantasLink.", rare=True)
+_a("M80 M82 M83 M88 MD80", "McDonnell Douglas MD-80", "Rear-engined twinjet, now rare.", rare=True)
+# --- Airbus narrow-bodies
+_a("318 A318", "Airbus A318", "Smallest A320-family jet.", rare=True)
+_a("319 A319 31N A19N", "Airbus A319 / A319neo", "Shortened A320.")
+_a("320 32A A320", "Airbus A320", "Popular short-to-medium-range jet.")
+_a("32N A20N", "Airbus A320neo", "New-engine A320 with better fuel efficiency.")
+_a("321 32B A321", "Airbus A321", "Stretched A320.")
+_a("32Q A21N", "Airbus A321neo / XLR", "Long-range narrow-body.")
+# --- Wide-bodies
+_a("330 332 A332", "Airbus A330-200", "Twin-engine wide-body.")
+_a("333 A333", "Airbus A330-300", "Larger A330.")
+_a("338 A338 339 A339", "Airbus A330neo", "Re-engined A330.")
+_a("340 342 343 345 346 A342 A343 A345 A346", "Airbus A340", "Four-engine long-haul jet.", rare=True)
+_a("350 359 A359", "Airbus A350-900", "Modern carbon-fibre long-haul twin.")
+_a("351 A35K", "Airbus A350-1000", "Stretched A350.")
+_a("380 388 A388", "Airbus A380-800", "Double-deck superjumbo.", rare=True)
+_a("787 788 B788", "Boeing 787-8 Dreamliner", "Long-haul wide-body twin.")
+_a("789 B789", "Boeing 787-9 Dreamliner", "Stretched Dreamliner.")
+_a("78X B78X", "Boeing 787-10 Dreamliner", "Longest Dreamliner.")
+_a("777 772 77L B772 B77L", "Boeing 777-200 / 200LR", "Long-range twin.")
+_a("773 B773", "Boeing 777-300", "Stretched 777.")
+_a("77W B77W", "Boeing 777-300ER", "Large long-range twinjet.")
+_a("744 74H B744", "Boeing 747-400", "Four-engine jumbo.", rare=True)
+_a("748 B748", "Boeing 747-8", "Newest, longest 747.", rare=True)
+_a("767 762 763 764 B762 B763 B764", "Boeing 767", "Mid-size wide-body, common on freight.")
+_a("MD11 M11", "McDonnell Douglas MD-11", "Tri-jet freighter.", rare=True)
+# --- Regional and turboprop
+_a("AT4 AT5 AT7 ATR AT43 AT45 AT46 AT72 AT75 AT76", "ATR 42 / 72", "Twin-turboprop regional airliner.")
+_a("DH8A DH1 DH8B DH2 DH8C DH3 Q200 Q300", "De Havilland Dash 8 (-100/200/300)", "Regional turboprop.")
+_a("DH8D DH4 Q400", "De Havilland Dash 8-400", "High-speed regional turboprop.")
+_a("E170 E70 170", "Embraer 170", "Regional jet.")
+_a("E75S E75L E75 175", "Embraer 175", "Regional jet.")
+_a("E190 E90 190", "Embraer 190", "Regional jet, used by Alliance and Airnorth.")
+_a("E195 E95 195", "Embraer 195", "Stretched E-Jet.")
+_a("E290 E295 290 295", "Embraer E190-E2 / E195-E2", "Second-generation E-Jet.")
+_a("E135 E145 ERJ ER3 ER4 E45X", "Embraer ERJ 135/145", "Small regional jet.", rare=True)
+_a("CRJ CRJ2 CRJ7 CRJ9 CRJX CR2 CR7 CR9", "Bombardier CRJ", "Regional jet family.")
+_a("SF34 SF3 S340", "Saab 340", "Twin-turboprop commuter.")
+_a("SB20 S20 SB2", "Saab 2000", "Fast turboprop.", rare=True)
+_a("F70", "Fokker 70", "Short-range regional jetliner.", rare=True)
+_a("F100 100", "Fokker 100", "Medium-range regional jetliner.", rare=True)
+_a("C208 208", "Cessna 208 Caravan", "Single-engine utility turboprop.")
+_a("B190 BEH", "Beechcraft 1900", "19-seat commuter turboprop.")
+_a("BE20 BE9L BE10 BE30 B350 B200", "Beechcraft King Air", "Twin-turboprop executive and air-ambulance aircraft.")
+_a("PC12", "Pilatus PC-12", "Single-engine turboprop, used by the Flying Doctor.")
+_a("SW4 SW3 SW2 SW1", "Fairchild Metroliner", "Cargo and commuter turboprop.")
+_a("J31 J32 J41", "BAe Jetstream", "Twin-turboprop commuter.", rare=True)
+_a("DHC6 DHT", "DHC-6 Twin Otter", "STOL utility turboprop.", rare=True)
+_a("N22 N24 GA8 BN2 BN2P", "Nomad / GA8 / Islander", "Light utility aircraft.", rare=True)
+_a("C172 C152 C182 C206 C210 C177 PA28 PA32 PA34 PA44 PA31 SR20 SR22 DA40 DA42 BE58 BE36 BE33 BE35", "General aviation light aircraft", "Piston single or twin.")
+_a("R22 R44 R66 EC35 EC45 EC30 EC20 AS50 AS55 AS65 AS32 B06 B407 B412 B429 A109 A139 S76 S92", "Helicopter", "Rotary-wing aircraft.", rare=True)
+# --- Business jets and VIP (original entries kept)
+_a("GL7T", "Bombardier Global 7500", "Ultra-long-range large-cabin business jet.", rare=True)
+_a("GL6T", "Bombardier Global 6500", "Long-range executive private jet.", rare=True)
+_a("GLEX GL5T", "Bombardier Global Express / 5000", "Long-range business jet.", rare=True)
+_a("GLF6", "Gulfstream G650 / G650ER", "Flagship ultra-long-range private jet.", rare=True)
+_a("GLF5 GLF4 GV GIV", "Gulfstream IV / V", "Long-range executive jet.", rare=True)
+_a("G280", "Gulfstream G280", "Super-midsize corporate jet.", rare=True)
+_a("C25A C25B C25C C510 C525 C550 C56X C680 C700 C750", "Cessna Citation", "Family of business jets.", rare=True)
+_a("E55P E50P E545 E550 E35L", "Embraer Phenom / Praetor / Legacy", "Light to midsize business jets.", rare=True)
+_a("CL30 CL35 CL60", "Bombardier Challenger", "Super-midsize business jet.", rare=True)
+_a("FA7X FA8X FA50 F900 F2TH", "Dassault Falcon", "Trijet and twinjet business jets.", rare=True)
+_a("PC24", "Pilatus PC-24", "Super versatile twin-turbofan.", rare=True)
+_a("H25B H25C", "Hawker 800 / 850 / 900", "Midsize corporate jet.", rare=True)
+_a("LJ35 LJ45 LJ60 LJ75", "Learjet", "Light business jet.", rare=True)
+# --- Military
+_a("C17", "Boeing C-17 Globemaster III", "Strategic military transport.", military=True)
+_a("C130 C30J", "Lockheed C-130 Hercules", "Tactical military transport.", rare=True, military=True)
+_a("C5 C5M", "Lockheed C-5 Galaxy", "Giant strategic airlifter.", rare=True, military=True)
+_a("KC30", "Airbus A330 MRTT", "Aerial refuelling and transport.", rare=True, military=True)
+_a("K35R KC10 K10 KC46", "Military tanker", "Aerial refuelling aircraft.", rare=True, military=True)
+_a("P8", "Boeing P-8 Poseidon", "Maritime patrol and reconnaissance.", rare=True, military=True)
+_a("AP3C P3 P3C", "Lockheed P-3 Orion", "Maritime patrol aircraft.", rare=True, military=True)
+_a("C27J", "Alenia C-27J Spartan", "Battlefield airlifter.", rare=True, military=True)
+_a("A400 C295 C160", "Military transport", "Tactical airlifter.", rare=True, military=True)
+_a("F35 F18 FA18 F18H F16 F22 F15", "Military fighter jet", "Combat aircraft.", rare=True, military=True)
+_a("PC21 PC9 T38", "Military trainer", "Pilot-training aircraft.", rare=True, military=True)
+_a("H60 H47 CH47 NH90 MRH90 TIGR", "Military helicopter", "Black Hawk, Chinook, MRH90 or Tiger.", rare=True, military=True)
+
+# --- Airlines (ICAO and IATA codes)
+_l("QFA QF", "Qantas", "Australia's flag carrier (QF is shared with QantasLink).")
+_l("QLK", "QantasLink", "Qantas regional brand.")
+_l("NWK", "Network Aviation", "Qantas Group fly-in fly-out operator.")
+_l("JST JQ", "Jetstar", "Qantas Group low-cost airline.")
+_l("VOZ VA", "Virgin Australia", "Major Australian airline.")
+_l("TGG TT", "Tigerair Australia", "Former Virgin Australia low-cost brand.")
+_l("RXA ZL", "Rex Regional Express", "Regional Australian airline.")
+_l("AXC QQ", "Alliance Airlines", "Australian charter and contract airline.")
+_l("ANO TL", "Airnorth", "Northern Australian regional airline.")
+_l("HIE", "Hinterland Aviation", "Cairns-based regional and charter operator.")
+_l("ANZ NZ", "Air New Zealand", "New Zealand's flag carrier.")
+_l("ANG PX", "Air Niugini", "Papua New Guinea's flag carrier.")
+_l("FJI FJ", "Fiji Airways", "Fiji's national airline.")
+_l("VAN NF", "Air Vanuatu", "Vanuatu's flag carrier.")
+_l("SOL IE", "Solomon Airlines", "Solomon Islands' flag carrier.")
+_l("SIA SQ", "Singapore Airlines", "Singapore's flag carrier.")
+_l("SCO TR", "Scoot", "Singapore Airlines low-cost arm.")
+_l("CPA CX", "Cathay Pacific", "Hong Kong's flag carrier.")
+_l("UAE EK", "Emirates", "Dubai-based long-haul airline.")
+_l("QTR QR", "Qatar Airways", "Qatar's flag carrier.")
+_l("ETD EY", "Etihad Airways", "Abu Dhabi's flag carrier.")
+_l("THA TG", "Thai Airways", "Thailand's flag carrier.")
+_l("MAS MH", "Malaysia Airlines", "Malaysia's flag carrier.")
+_l("AXM AK", "AirAsia", "Malaysian low-cost airline.")
+_l("GIA GA", "Garuda Indonesia", "Indonesia's flag carrier.")
+_l("PAL PR", "Philippine Airlines", "Philippines' flag carrier.")
+_l("VJC VJ", "VietJet Air", "Vietnamese low-cost airline.")
+_l("HVN VN", "Vietnam Airlines", "Vietnam's flag carrier.")
+_l("ANA NH", "All Nippon Airways", "Japanese airline.")
+_l("JAL JL", "Japan Airlines", "Japan's flag carrier.")
+_l("JJP GK", "Jetstar Japan", "Low-cost airline in Japan.")
+_l("KAL KE", "Korean Air", "South Korea's flag carrier.")
+_l("AAR OZ", "Asiana Airlines", "South Korean airline.")
+_l("CCA CA", "Air China", "China's flag carrier.")
+_l("CES MU", "China Eastern", "Chinese airline.")
+_l("CSN CZ", "China Southern", "Chinese airline.")
+_l("AIC AI", "Air India", "India's flag carrier.")
+_l("UAL UA", "United Airlines", "US airline.")
+_l("AAL AA", "American Airlines", "US airline.")
+_l("DAL DL", "Delta Air Lines", "US airline.")
+_l("ACA AC", "Air Canada", "Canada's flag carrier.")
+_l("BAW BA", "British Airways", "UK flag carrier.")
+_l("DLH LH", "Lufthansa", "German flag carrier.")
+_l("AFR AF", "Air France", "French flag carrier.")
+_l("KLM KL", "KLM", "Dutch flag carrier.")
+_l("FDX FX", "FedEx Express", "Cargo airline.")
+_l("UPS 5X", "UPS Airlines", "Cargo airline.")
+# Military / government callsign prefixes
+_l("RAAF ASY", "Royal Australian Air Force", "Air branch of the Australian Defence Force.", True)
+_l("ADF", "Australian Defence Force", "Flights operated for the ADF.", True)
+_l("USAF", "United States Air Force", "US air branch.", True)
+_l("RCH", "USAF Air Mobility Command", "Callsign 'Reach' for US military transport.", True)
+_l("CNV", "US Navy", "Callsign for US Navy flights.", True)
+_l("RRR", "Royal Air Force", "UK military air branch.", True)

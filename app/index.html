@@ -98,13 +98,58 @@ kbd{font:12px var(--body);border:1px solid var(--line);border-bottom-width:2px;b
 .nomo *,.nomo *::before{animation:none!important;transition:none!important}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:820px){.app,.app.min{grid-template-columns:64px 1fr}.lbl{display:none}main{padding:16px}.clock{text-align:left}.clock .big{justify-content:flex-start}}
+
+/* ---- v3: themes, direction colours, bubbles, motion ---- */
+:root{--arr:#34d399;--dep:#60a5fa}
+body.t-violet{--bg:#0e0a1a;--panel:#151025;--card:#1d1633;--accent:#a78bfa;--on-accent:#12082a}
+body.t-sunset{--bg:#140b0d;--panel:#1d1114;--card:#29181c;--line:rgba(255,200,180,.1);--accent:#ff7a59;--on-accent:#2a0d05}
+body.t-mint{--bg:#07120f;--panel:#0c1b17;--card:#12271f;--accent:#5eead4;--on-accent:#032b25}
+body.t-mono{--bg:#0a0a0a;--panel:#121212;--card:#1a1a1a;--accent:#e5e5e5;--on-accent:#111;--arr:#d4d4d4;--dep:#a3a3a3}
+body.t-contrast{--bg:#000;--panel:#000;--card:#111;--line:rgba(255,255,255,.4);--text:#fff;--mute:#d4d4d4;--accent:#ff0;--on-accent:#000}
+body.t-sky{--bg:#eaf2fb;--panel:#fff;--card:#f2f7fd;--line:rgba(0,30,80,.12);--text:#0f1b2d;--mute:#5a6b82;--accent:#0b6bcb;--on-accent:#fff;--ok:#15803d;--warn:#c2410c;--bad:#b91c1c;--arr:#15803d;--dep:#1d4ed8}
+body.t-day{--arr:#15803d;--dep:#1d4ed8}
+body.nocolor{--arr:var(--mute);--dep:var(--mute)}
+body{transition:background .4s,color .4s}
+body.zebra tbody tr:nth-child(even){background:color-mix(in srgb,var(--card) 55%,transparent)}
+body.sz-s{zoom:.92}body.sz-l{zoom:1.12}
+html.smooth,html.smooth *{scroll-behavior:smooth}
+.themes{grid-template-columns:repeat(3,1fr)}
+.themes button::before{content:'';display:block;height:6px;border-radius:3px;background:var(--sw,var(--accent));margin-bottom:6px}
+/* sliding bubbles */
+.chips,.nav{position:relative}.chip,.nav button{position:relative;z-index:1}
+.chip{background:transparent}.chip.on{background:transparent;border-color:transparent;color:var(--on-accent)}
+.bub,.nbub{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;transition:left .45s var(--ease),top .45s var(--ease),width .45s var(--ease),height .45s var(--ease)}
+.bub{z-index:0;border-radius:20px;background:var(--accent);box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 40%,transparent)}
+.nbub{z-index:0;border-radius:8px;background:var(--card);box-shadow:inset 3px 0 var(--accent)}
+.nav button.on{background:transparent;box-shadow:none;color:var(--text)}
+/* arrival = solid bar + down triangle, departure = striped bar + up triangle */
+td:first-child{position:relative}td:first-child::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px}
+tr.ra td:first-child::before{background:var(--arr)}
+tr.rd td:first-child::before{background:repeating-linear-gradient(45deg,var(--dep) 0 3px,transparent 3px 6px)}
+.dir{font-size:12px;font-weight:600}.dir.a{color:var(--arr)}.dir.d{color:var(--dep)}
+tr.hot td:first-child,tr.rare td:first-child{box-shadow:none}tr.hot{background:color-mix(in srgb,var(--bad) 7%,transparent)}
+.tag.hot{color:var(--bad)}.tag.rare{color:var(--accent)}
+/* switches */
+.sw input{appearance:none;-webkit-appearance:none;width:42px;height:24px;border-radius:12px;background:var(--card);border:1px solid var(--line);position:relative;cursor:pointer;flex:none;transition:background .25s,border-color .25s}
+.sw input::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--mute);transition:transform .3s var(--ease),background .25s}
+.sw input:checked{background:var(--accent);border-color:var(--accent)}.sw input:checked::after{transform:translateX(18px);background:var(--on-accent)}
+/* advanced filters */
+.adv{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s var(--ease),margin .4s var(--ease)}.adv.open{grid-template-rows:1fr;margin-bottom:14px}
+.advin{min-height:0;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;padding:2px}
+/* motion */
+.vin{animation:viewin .45s var(--ease)}@keyframes viewin{from{opacity:0;transform:translateY(10px)}}
+.swap tr{animation:rowin .4s var(--ease) both;animation-delay:calc(var(--i,0)*25ms)}@keyframes rowin{from{opacity:0;transform:translateX(-8px)}}
+.btn:active,.chip:active,.nav button:active,.foot button:active{transform:scale(.96)}
+.card{transition:transform .25s var(--ease),border-color .25s}.card:hover{transform:translateY(-3px);border-color:var(--accent)}
+#panel [data-p]:not([hidden])>*{animation:pin .45s var(--ease) both}@keyframes pin{from{opacity:0;transform:translateX(14px)}}
+#panel [data-p]>:nth-child(2){animation-delay:.04s!important}#panel [data-p]>:nth-child(3){animation-delay:.08s!important}#panel [data-p]>:nth-child(4){animation-delay:.12s!important}#panel [data-p]>:nth-child(5){animation-delay:.16s!important}#panel [data-p]>:nth-child(n+6){animation-delay:.2s!important}
 </style>
 </head>
 <body>
 <div class="app" id="app">
 <aside>
   <div class="brand"><span class="ic">✈</span><span class="lbl">Open<b>FIDS</b></span></div>
-  <nav class="nav" id="nav">
+  <nav class="nav" id="nav"><span class="nbub" id="nbub"></span>
     <button data-view="board" class="on"><span class="ic">▤</span><span class="lbl">Flight board</span></button>
     <button data-view="watch"><span class="ic">★</span><span class="lbl">Watchlist</span><span class="count lbl" id="wCount"></span></button>
     <button data-view="stats"><span class="ic">◔</span><span class="lbl">Statistics</span></button>
@@ -129,11 +174,18 @@ kbd{font:12px var(--body);border:1px solid var(--line);border-bottom-width:2px;b
   <section id="v-board">
     <div class="bar">
       <div class="search"><span>⌕</span><input id="q" placeholder="Search flight, airline, place or registration" autocomplete="off"><kbd>/</kbd></div>
-      <div class="chips" id="chips">
+      <div class="chips" id="chips"><span class="bub" id="bub"></span>
         <button class="chip on" data-f="all">All</button><button class="chip" data-f="A">Arrivals</button><button class="chip" data-f="D">Departures</button><button class="chip" data-f="military">Military</button><button class="chip" data-f="rare">Rare</button>
       </div>
-      <button class="btn" id="csv">Export CSV</button>
+      <button class="btn" id="mf">More filters <span class="count" id="mfN"></span></button><button class="btn" id="csv">Export CSV</button>
     </div>
+    <div class="adv" id="adv"><div class="advin">
+      <select class="in" id="fxAl"><option value="">Any airline</option></select>
+      <select class="in" id="fxAc"><option value="">Any aircraft</option></select>
+      <select class="in" id="fxSt"><option value="">Any status</option><option value="ontime">On time</option><option value="delayed">Delayed</option><option value="cancelled">Cancelled</option><option value="landed">Landed</option><option value="departed">Departed</option><option value="other">Other</option></select>
+      <select class="in" id="fxWin"><option value="">Any time</option><option value="120">Next 2 hours</option><option value="360">Next 6 hours</option><option value="today">Today only</option></select>
+      <button class="btn" id="fxClear">Clear all filters</button>
+    </div></div>
     <div class="wrap"><table>
       <thead><tr><th></th><th>Flight</th><th>Route</th><th>Scheduled</th><th>Aircraft</th><th>Registration</th><th>Gate</th><th>Status</th></tr></thead>
       <tbody id="rows"></tbody>
@@ -164,10 +216,16 @@ kbd{font:12px var(--body);border:1px solid var(--line);border-bottom-width:2px;b
   <div data-p="settings" hidden>
     <div class="ph"><h2>Settings</h2><button class="x" data-x>✕</button></div>
     <h4>Theme</h4>
-    <div class="themes" id="themes"><button data-t="default">Amber</button><button data-t="runway">Runway</button><button data-t="blue">Blue hour</button><button data-t="day">Daylight</button></div>
+    <div class="themes" id="themes"><button data-t="default" style="--sw:#ffb000">Amber</button><button data-t="runway" style="--sw:#5dff9a">Runway</button><button data-t="blue" style="--sw:#7cb4ff">Blue hour</button><button data-t="violet" style="--sw:#a78bfa">Violet</button><button data-t="sunset" style="--sw:#ff7a59">Sunset</button><button data-t="mint" style="--sw:#5eead4">Mint</button><button data-t="mono" style="--sw:#e5e5e5">Mono</button><button data-t="contrast" style="--sw:#ffff00">Contrast</button><button data-t="day" style="--sw:#b36b00">Daylight</button><button data-t="sky" style="--sw:#0b6bcb">Sky</button></div>
     <div class="sw"><div>Compact rows<small>Fit more flights on screen</small></div><input type="checkbox" id="sCompact"></div>
     <div class="sw"><div>Motion<small>Split-flap flips and slides</small></div><input type="checkbox" id="sMotion"></div>
     <div class="sw"><div>Chime on watchlist changes<small>Plays when a starred flight updates</small></div><input type="checkbox" id="sAudio"></div>
+    <div class="sw"><div>Smooth scrolling<small>Glide when changing views</small></div><input type="checkbox" id="sSmooth"></div>
+    <div class="sw"><div>Colour-code arrivals and departures<small>Symbols and stripes always show</small></div><input type="checkbox" id="sColor"></div>
+    <div class="sw"><div>24-hour time<small>Clock and board times</small></div><input type="checkbox" id="sH24"></div>
+    <div class="sw"><div>Striped rows<small>Easier to follow across the board</small></div><input type="checkbox" id="sZebra"></div>
+    <div class="sw"><div>Remember my filters<small>Restore them next time you open OpenFIDS</small></div><input type="checkbox" id="sRemember"></div>
+    <h4>Text size</h4><select class="in" id="sSize"><option value="s">Small</option><option value="m">Normal</option><option value="l">Large</option></select>
     <h4>Refresh every</h4>
     <select class="in" id="sPoll"><option value="5000">5 seconds</option><option value="15000">15 seconds</option><option value="30000">30 seconds</option><option value="60000">60 seconds</option></select>
     <h4>Airport feed login</h4>
@@ -195,7 +253,8 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const api = async (u, o) => { const r = await fetch(u, o); if (!r.ok) throw new Error(r.status); return r.json(); };
 const LS = 'openfids.v2';
-let S = { theme: 'default', compact: false, motion: true, audio: false, poll: 30000, min: false, watch: [] };
+let S = { theme: 'default', compact: false, motion: true, audio: false, poll: 30000, min: false, watch: [], smooth: true, dircolor: true, h24: true, zebra: false, remember: true, size: 'm', f: 'all', fx: {} };
+let fx = { al: '', ac: '', st: '', win: '' }, animNext = false;
 try { Object.assign(S, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (e) {}
 const save = () => { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} };
 let flights = [], ac = {}, al = {}, feed = { ok: false }, view = 'board', filter = 'all', timer, actx;
@@ -203,9 +262,9 @@ const last = new Map(), changed = new Set(); let first = true;
 
 const code = (f) => `${f.airline || ''}${f.flightNumber || ''}`;
 const key = (f) => f.id || `${code(f)}|${f.vector}|${f.scheduled}`;
-const plane = (f) => ac[f.acType || ''] || null, airline = (f) => al[f.airline || ''] || null;
+const plane = (f) => ac[String(f.acType || '').toUpperCase()] || null, airline = (f) => al[String(f.airline || '').toUpperCase()] || null;
 const mil = (f) => !!((plane(f) || {}).military || (airline(f) || {}).military), rare = (f) => !!(plane(f) || {}).rare;
-const hm = (iso) => (String(iso || '').split('T')[1] || '').slice(0, 5);
+const hm = (iso) => { const t = (String(iso || '').split('T')[1] || '').slice(0, 5); if (S.h24 || !t) return t; let [H, M] = t.split(':').map(Number); const ap = H >= 12 ? 'pm' : 'am'; H = H % 12 || 12; return H + ':' + String(M).padStart(2, '0') + ' ' + ap; };
 const day = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }); };
 
 /* split-flap text: only characters that changed flip */
@@ -217,10 +276,10 @@ function flap(el, text) {
 }
 
 function apply() {
-  document.body.className = (S.theme !== 'default' ? 't-' + S.theme : '') + (S.compact ? ' compact' : '') + (S.motion ? '' : ' nomo');
-  $('app').classList.toggle('min', S.min); $('colIc').textContent = S.min ? '»' : '«';
+  document.body.className = (S.theme !== 'default' ? 't-' + S.theme : '') + (S.compact ? ' compact' : '') + (S.motion ? '' : ' nomo') + (S.dircolor ? '' : ' nocolor') + (S.zebra ? ' zebra' : '') + (S.size !== 'm' ? ' sz-' + S.size : '');
+  document.documentElement.classList.toggle('smooth', S.smooth); $('app').classList.toggle('min', S.min); moveBubs(); $('colIc').textContent = S.min ? '»' : '«';
   document.querySelectorAll('#themes button').forEach((b) => b.classList.toggle('on', b.dataset.t === S.theme));
-  $('sCompact').checked = S.compact; $('sMotion').checked = S.motion; $('sAudio').checked = S.audio; $('sPoll').value = String(S.poll);
+  $('sCompact').checked = S.compact; $('sMotion').checked = S.motion; $('sAudio').checked = S.audio; $('sSmooth').checked = S.smooth; $('sColor').checked = S.dircolor; $('sH24').checked = S.h24; $('sZebra').checked = S.zebra; $('sRemember').checked = S.remember; $('sSize').value = S.size; $('sPoll').value = String(S.poll);
   document.documentElement.style.setProperty('--poll', S.poll + 'ms');
   $('wCount').textContent = S.watch.length || '';
 }
@@ -237,31 +296,40 @@ function toast(msg) {
 }
 
 /* ---------- board ---------- */
+function statusOf(f) {
+  const s = (f.statusMsgPublic || '').toLowerCase();
+  return s.includes('cancel') ? 'cancelled' : s.includes('delay') ? 'delayed' : /land|arriv/.test(s) ? 'landed' : s.includes('depart') ? 'departed' : /on time|board|sched/.test(s) ? 'ontime' : 'other';
+}
 function visible() {
-  const q = $('q').value.toLowerCase();
+  const terms = $('q').value.toLowerCase().split(/\s+/).filter(Boolean), now = new Date();
   return flights.filter((f) => {
     if (view === 'watch' && !S.watch.includes(code(f))) return false;
     if ((filter === 'A' || filter === 'D') && f.vector !== filter) return false;
     if (filter === 'military' && !mil(f)) return false;
     if (filter === 'rare' && !rare(f)) return false;
-    return `${code(f)} ${f.portName} ${f.portIATA} ${f.acType} ${f.acRego}`.toLowerCase().includes(q);
+    if (fx.al && f.airline !== fx.al) return false;
+    if (fx.ac && (f.acType || '') !== fx.ac) return false;
+    if (fx.st && statusOf(f) !== fx.st) return false;
+    if (fx.win) { const t = new Date(f.scheduled); if (isNaN(t)) return false; if (fx.win === 'today' ? t.toDateString() !== now.toDateString() : (t < now - 9e5 || t > +now + fx.win * 6e4)) return false; }
+    const hay = `${code(f)} ${f.portName} ${f.portIATA} ${f.acType} ${f.acRego} ${(plane(f) || {}).name || ''} ${(airline(f) || {}).name || ''}`.toLowerCase();
+    return terms.every((t) => hay.includes(t));
   });
 }
 function render() {
-  const list = visible(), tb = $('rows');
+  const list = visible(), tb = $('rows'); if (animNext) { tb.classList.remove('swap'); void tb.offsetWidth; tb.classList.add('swap'); animNext = false; }
   if (!list.length) {
     const msg = view === 'watch' ? 'No starred flights on the board. Click ★ next to a flight to follow it.' : (!feed.ok && !flights.length ? 'No live data right now. Open the feed status in the menu, or add your own movements.' : 'No flights match.');
     tb.innerHTML = `<tr><td colspan="8" class="empty">${esc(msg)}</td></tr>`; return;
   }
-  tb.innerHTML = list.map((f) => {
+  tb.innerHTML = list.map((f, ix) => {
     const p = plane(f) || { name: `Aircraft ${f.acType || ''}`, desc: 'No details on file. Add it in aircraft.json.' };
     const a = airline(f) || { name: `Operator ${f.airline || ''}`, desc: 'No details on file. Add it in airlines.json.' };
     const st = (f.statusMsgPublic || '').trim(), lo = st.toLowerCase(), arr = f.vector === 'A', k = key(f);
     const cls = lo.includes('delay') || lo.includes('cancel') ? 'late' : (lo.includes('on time') || lo.includes('boarding') || lo.includes('landed')) ? 'ok' : '';
     const on = S.watch.includes(code(f));
-    return `<tr class="${mil(f) ? 'hot' : rare(f) ? 'rare' : ''}${changed.has(k) ? ' flash' : ''}">
+    return `<tr style="--i:${Math.min(ix, 10)}" class="${arr ? 'ra' : 'rd'} ${mil(f) ? 'hot' : rare(f) ? 'rare' : ''}${changed.has(k) ? ' flash' : ''}">
       <td><button class="star${on ? ' on' : ''}" data-star="${esc(code(f))}" title="${on ? 'Unfollow' : 'Follow'} ${esc(code(f))}">★</button></td>
-      <td><span class="code tip" data-t="${esc(a.name)}" data-d="${esc(a.desc)}" data-c="${esc(f.airline)}">${esc(code(f))}</span>${f.custom ? '<span class="tag">yours</span>' : ''}<div class="mut">${arr ? 'Arrival' : 'Departure'}</div></td>
+      <td><span class="code tip" data-t="${esc(a.name)}" data-d="${esc(a.desc)}" data-c="${esc(f.airline)}">${esc(code(f))}</span>${mil(f) ? '<span class="tag hot">Military</span>' : rare(f) ? '<span class="tag rare">Rare</span>' : ''}${f.custom ? '<span class="tag">yours</span>' : ''}<div class="dir ${arr ? 'a' : 'd'}">${arr ? '▼ Arrival' : '▲ Departure'}</div></td>
       <td><b>${esc(f.portName)}</b><div class="mut">${esc(f.portIATA)} · ${esc(f.terminal || '')}</div></td>
       <td><span class="time">${esc(hm(f.scheduled))}</span> <span class="mut">${esc(day(f.scheduled))}</span>${f.estimated ? `<div class="mut">Est ${esc(hm(f.estimated))}</div>` : ''}</td>
       <td><span class="tip" data-t="${esc(p.name)}" data-d="${esc(p.desc)}" data-c="${esc(f.acType)}">${esc(f.acType || '')}</span></td>
@@ -286,7 +354,7 @@ async function load() {
   $('dot').className = 'dot' + (feed.ok ? ' live' : '');
   $('feedTxt').textContent = feed.ok ? `Live · ${feed.updated || ''}` : 'Offline · fix login';
   const r = $('ring'); r.classList.remove('go'); void r.getBoundingClientRect(); r.classList.add('go');
-  render(); if (view === 'stats') stats(); changed.clear();
+  fillFilters(); render(); if (view === 'stats') stats(); changed.clear(); moveBubs();
 }
 
 /* ---------- stats ---------- */
@@ -306,7 +374,7 @@ function stats() {
 
 /* ---------- header clock + next arrival ---------- */
 function tick() {
-  const d = new Date(); flap($('clock'), d.toLocaleTimeString('en-GB', { hour12: false }));
+  const d = new Date(); flap($('clock'), d.toLocaleTimeString('en-GB', { hour12: !S.h24 }));
   $('date').textContent = d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
   const nx = flights.filter((f) => f.vector === 'A' && new Date(f.scheduled) > d).sort((a, b) => new Date(a.scheduled) - new Date(b.scheduled))[0];
   if (nx) { const m = Math.round((new Date(nx.scheduled) - d) / 60000); $('next').textContent = `Next arrival: ${code(nx)} from ${nx.portName} in ${m < 60 ? m + ' min' : Math.floor(m / 60) + ' h ' + (m % 60) + ' min'}`; }
@@ -315,9 +383,9 @@ function tick() {
 
 /* ---------- navigation and panels ---------- */
 function setView(v) {
-  view = v; $('v-board').hidden = v === 'stats'; $('v-stats').hidden = v !== 'stats';
+  view = v; animNext = true; scrollTo({ top: 0, behavior: S.smooth ? 'smooth' : 'auto' }); $('v-board').hidden = v === 'stats'; $('v-stats').hidden = v !== 'stats';
   document.querySelectorAll('#nav [data-view]').forEach((b) => b.classList.toggle('on', b.dataset.view === v));
-  if (v === 'stats') stats(); else render();
+  if (v === 'stats') stats(); else render(); moveBubs(); const vt = $(v === 'stats' ? 'v-stats' : 'v-board'); vt.classList.remove('vin'); void vt.offsetWidth; vt.classList.add('vin');
 }
 function panel(name) {
   document.querySelectorAll('#panel [data-p]').forEach((s) => s.hidden = s.dataset.p !== name);
@@ -330,8 +398,8 @@ document.querySelectorAll('[data-x]').forEach((b) => b.onclick = () => panel('')
 $('veil').onclick = () => panel('');
 $('feed').onclick = () => panel('settings');
 $('collapse').onclick = () => { S.min = !S.min; save(); apply(); };
-$('chips').onclick = (e) => { if (!e.target.dataset.f) return; filter = e.target.dataset.f; document.querySelectorAll('#chips .chip').forEach((c) => c.classList.toggle('on', c === e.target)); render(); };
-$('q').oninput = render;
+$('chips').onclick = (e) => { if (!e.target.dataset.f) return; filter = e.target.dataset.f; document.querySelectorAll('#chips .chip').forEach((c) => c.classList.toggle('on', c === e.target)); animNext = true; moveBubs(); keep(); render(); };
+$('q').oninput = () => { animNext = false; render(); };
 $('rows').onclick = (e) => {
   const c = e.target.dataset && e.target.dataset.star; if (!c) return;
   S.watch = S.watch.includes(c) ? S.watch.filter((x) => x !== c) : [...S.watch, c]; save(); apply(); render();
@@ -403,12 +471,32 @@ $('cfAdd').onclick = async () => {
 };
 $('cfList').onclick = async (e) => { const id = e.target.dataset.del; if (id) { try { await api('/api/custom-flights/' + encodeURIComponent(id), { method: 'DELETE' }); customList(); load(); } catch (x) {} } };
 
+/* ---------- bubbles, filters, extra settings ---------- */
+function place(b, el) { if (!b || !el) return; b.style.left = el.offsetLeft + 'px'; b.style.top = el.offsetTop + 'px'; b.style.width = el.offsetWidth + 'px'; b.style.height = el.offsetHeight + 'px'; }
+function moveBubs() { place($('bub'), document.querySelector('#chips .chip.on')); place($('nbub'), document.querySelector('#nav [data-view].on')); }
+function keep() { if (S.remember) { S.f = filter; S.fx = fx; save(); } }
+function badge() { $('mfN').textContent = Object.values(fx).filter(Boolean).length || ''; }
+function fillFilters() {
+  const uniq = (get, name) => { const m = new Map(); flights.forEach((f) => { const c = get(f); if (c && !m.has(c)) m.set(c, name(f, c)); }); return [...m].sort((a, b) => a[1].localeCompare(b[1])); };
+  const fill = (id, k, rows, any) => { const el = $(id), sig = JSON.stringify(rows); if (el.dataset.sig !== sig) { el.dataset.sig = sig; el.innerHTML = `<option value="">${any}</option>` + rows.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join(''); } el.value = fx[k]; };
+  fill('fxAl', 'al', uniq((f) => f.airline, (f, c) => (airline(f) || {}).name || c), 'Any airline');
+  fill('fxAc', 'ac', uniq((f) => f.acType, (f, c) => (plane(f) || {}).name || c), 'Any aircraft');
+  $('fxSt').value = fx.st; $('fxWin').value = fx.win; badge();
+}
+$('mf').onclick = () => $('adv').classList.toggle('open');
+[['fxAl', 'al'], ['fxAc', 'ac'], ['fxSt', 'st'], ['fxWin', 'win']].forEach(([id, k]) => $(id).onchange = (e) => { fx[k] = e.target.value; keep(); animNext = true; render(); badge(); });
+$('fxClear').onclick = () => { fx = { al: '', ac: '', st: '', win: '' }; $('q').value = ''; keep(); animNext = true; fillFilters(); render(); };
+[['sSmooth', 'smooth'], ['sColor', 'dircolor'], ['sH24', 'h24'], ['sZebra', 'zebra'], ['sRemember', 'remember']].forEach(([id, k]) => $(id).onchange = (e) => { S[k] = e.target.checked; save(); apply(); render(); tick(); });
+$('sSize').onchange = (e) => { S.size = e.target.value; save(); apply(); moveBubs(); };
+
 /* ---------- start ---------- */
 (async () => {
   if (innerWidth < 820) S.min = true;
+  if (S.remember) { filter = S.f || 'all'; fx = { ...fx, ...(S.fx || {}) }; document.querySelectorAll('#chips .chip').forEach((c) => c.classList.toggle('on', c.dataset.f === filter)); }
+  if (document.fonts) document.fonts.ready.then(moveBubs); addEventListener('resize', moveBubs); $('app').addEventListener('transitionend', moveBubs);
   apply();
   try { const [db, st] = await Promise.all([api('/api/database'), api('/api/status')]);
-    ac = db.aircraft || {}; al = db.airlines || {}; $('dataDir').textContent = 'Data folder: ' + st.data_dir;
+    const up = (o) => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k.toUpperCase(), v])); ac = up(db.aircraft); al = up(db.airlines); $('dataDir').textContent = 'Data folder: ' + st.data_dir;
     if (st.title) { $('title').textContent = st.title; document.title = st.title; } } catch (e) {}
   tick(); setInterval(tick, 1000);
   await load(); poll();
