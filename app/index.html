@@ -372,6 +372,16 @@ input:checked + .slider:before { transform: translateX(18px); background-color: 
                 <option value="60000">Relaxed (60 seconds)</option>
             </select>
         </div>
+                <div class="section-label">Airport feed login</div>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Only needed if the airport site asks for a login. Stored on this computer only, in plain text, in your data folder.</p>
+        <div class="form-group" style="margin-bottom: 10px;"><input class="field" id="credEmail" type="text" placeholder="Email" autocomplete="off"></div>
+        <div class="form-group" style="margin-bottom: 10px;"><input class="field" id="credPass" type="password" placeholder="Password" autocomplete="new-password"></div>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn-primary" id="credSave" style="margin: 0; flex: 1;">Save and test</button>
+            <button class="btn-sm btn-danger" id="credClear">Clear</button>
+        </div>
+        <p id="credMsg" style="font-size: 11px; margin-top: 8px; color: var(--text-muted);"></p>
+        <p id="credNote" style="font-size: 10px; color: var(--warning);"></p>
         <p id="dataDirNote" style="font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; word-break: break-all;"></p>
     </div>
 </div>
@@ -642,7 +652,40 @@ input:checked + .slider:before { transform: translateX(18px); background-color: 
         if (!id) return;
         try { await api('/api/custom-flights/' + encodeURIComponent(id), { method: 'DELETE' }); await loadCustomList(); await fetchFlights(); } catch (err) {}
     });
-    $('settingsBtn').onclick = () => modal('settingsModal', true);
+    const openSettings = () => { loadCreds(); modal('settingsModal', true); };
+    $('settingsBtn').onclick = openSettings;
+    $('feedBadge').style.cursor = 'pointer';
+    $('feedBadge').onclick = openSettings;
+    $('feedBanner').style.cursor = 'pointer';
+    $('feedBanner').onclick = openSettings;
+
+    async function loadCreds() {
+        try {
+            const c = await api('/api/credentials');
+            $('credEmail').value = c.email || '';
+            $('credPass').value = '';
+            $('credPass').placeholder = c.has_password ? 'Password saved (type to replace)' : 'Password';
+            $('credNote').textContent = c.from_env ? 'OPENFIDS_UPSTREAM_* environment variables are set and take priority over this form.' : '';
+        } catch (e) {}
+    }
+    async function credRequest(method, body) {
+        $('credMsg').textContent = 'Working...';
+        try {
+            const r = await fetch('/api/credentials', {
+                method, headers: { 'Content-Type': 'application/json', 'X-OpenFIDS': '1' },
+                body: body ? JSON.stringify(body) : undefined,
+            });
+            if (!r.ok) throw new Error(r.status);
+            const data = await r.json();
+            feed = data.feed || feed;
+            $('credMsg').textContent = feed.ok ? 'Connected. The feed is live.' : (feed.message || 'Saved, but the feed is still offline.');
+            $('credPass').value = '';
+            await loadCreds();
+            await fetchFlights();
+        } catch (e) { $('credMsg').textContent = 'Could not save. Is OpenFIDS still running?'; }
+    }
+    $('credSave').onclick = () => credRequest('POST', { email: $('credEmail').value, password: $('credPass').value });
+    $('credClear').onclick = () => credRequest('DELETE');
     $('themeButtons').addEventListener('click', (e) => { if (e.target.dataset.theme) { settings.theme = e.target.dataset.theme; saveSettings(); applySettings(); } });
     $('compactToggle').onchange = (e) => { settings.compact = e.target.checked; saveSettings(); applySettings(); };
     $('fxToggle').onchange = (e) => { settings.fx = e.target.checked; saveSettings(); applySettings(); };

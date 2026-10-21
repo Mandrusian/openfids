@@ -339,6 +339,57 @@ def delete_custom_flight(flight_id: str):
     return {"flights": flights_list}
 
 
+@app.get("/api/credentials")
+def get_credentials():
+    cfg = load_config()
+    return {"email": cfg.get("upstream_email", ""),
+            "has_password": bool(cfg.get("upstream_password")),
+            "from_env": bool(os.environ.get("OPENFIDS_UPSTREAM_EMAIL"))}
+
+
+def _write_config(cfg: dict) -> None:
+    CONFIG_FILE.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
+    try:
+        os.chmod(CONFIG_FILE, 0o600)   # owner-only (no effect on Windows)
+    except OSError:
+        pass
+
+
+def _reset_feed_state() -> None:
+    global _login_retry_after
+    _login_retry_after = 0.0
+    _cache["time"] = 0.0
+    session.cookies.clear()
+
+
+@app.post("/api/credentials")
+def set_credentials(request: Request, data: dict = Body(...)):
+    if request.headers.get("x-openfids") != "1":
+        raise HTTPException(status_code=403, detail="forbidden")
+    cfg = load_config()
+    cfg["upstream_email"] = clean(data.get("email"), "", 200)
+    password = str(data.get("password") or "")
+    if password:                       # blank = keep the saved password
+        cfg["upstream_password"] = password[:200]
+    _write_config(cfg)
+    _reset_feed_state()
+    fetch_live_flights()               # test it right away
+    return {"feed": feed}
+
+
+@app.delete("/api/credentials")
+def clear_credentials(request: Request):
+    if request.headers.get("x-openfids") != "1":
+        raise HTTPException(status_code=403, detail="forbidden")
+    cfg = load_config()
+    cfg.pop("upstream_email", None)
+    cfg.pop("upstream_password", None)
+    _write_config(cfg)
+    _reset_feed_state()
+    fetch_live_flights()
+    return {"feed": feed}
+
+
 @app.post("/api/quit")
 def quit_app(request: Request):
     # Custom header forces a CORS preflight, so other websites can't trigger this.
