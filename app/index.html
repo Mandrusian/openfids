@@ -195,6 +195,11 @@ tr.ra td:first-child::before,tr.rd td:first-child::before,td:first-child::before
 .gb::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.3),transparent 55%)}
 .gb.late{--c:var(--warn)}.gb.ok{--c:var(--ok)}
 .gb.flip{animation:flap .55s ease-in-out}
+
+/* ---- v7: normal status bubble ---- */
+.gb{backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;overflow:visible;
+ background:color-mix(in srgb,var(--c) 16%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent)}
+.gb::after{content:none}
 </style>
 </head>
 <body>
@@ -397,10 +402,11 @@ function rowParts(f) {
   const p = plane(f) || { name: `Aircraft ${f.acType || ''}`, desc: 'No details on file. Add it in aircraft.json.' };
   const a = airline(f) || { name: `Operator ${f.airline || ''}`, desc: 'No details on file. Add it in airlines.json.' };
   const arr = f.vector === 'A', k = key(f), st = statusInfo(f), on = S.watch.includes(code(f));
+  const done = !st.b && /^(departed|landed|arrived)\b/i.test(st.t);
   const cls = `${arr ? 'ra' : 'rd'} ${mil(f) ? 'hot' : rare(f) ? 'rare' : ''}`.trim();
   const html = `<td><button class="star${on ? ' on' : ''}" data-star="${esc(code(f))}" title="${on ? 'Unfollow' : 'Follow'} ${esc(code(f))}">★</button></td>
     <td><span class="code tip" data-t="${esc(a.name)}" data-d="${esc(a.desc)}" data-c="${esc(f.airline)}">${esc(code(f))}</span>${mil(f) ? '<span class="tag hot">Military</span>' : rare(f) ? '<span class="tag rare">Rare</span>' : ''}${f.custom ? '<span class="tag">yours</span>' : ''}
-      <div class="ds"><span class="dir ${arr ? 'a' : 'd'}">${arr ? '▼ Arriving' : '▲ Departing'}</span>${st.b ? '' : `<span class="st ${st.c}${changed.has(k) && S.motion ? ' flip' : ''}">${esc(st.t)}</span>`}</div></td>
+      <div class="ds"><span class="dir ${arr ? 'a' : 'd'}">${done ? (arr ? '▼ ' : '▲ ') + esc(st.t) : arr ? '▼ Arriving' : '▲ Departing'}</span>${st.b || done ? '' : `<span class="st ${st.c}${changed.has(k) && S.motion ? ' flip' : ''}">${esc(st.t)}</span>`}</div></td>
     <td><b>${esc(f.portName)}</b><div class="mut">${esc(f.portIATA)} · ${esc(f.terminal || '')}</div></td>
     <td><span class="time">${esc(hm(f.scheduled))}</span> <span class="mut">${esc(day(f.scheduled))}</span>${f.estimated ? `<div class="mut">Est ${esc(hm(f.estimated))}</div>` : ''}</td>
     <td><span class="tip" data-t="${esc(p.name)}" data-d="${esc(p.desc)}" data-c="${esc(f.acType)}">${esc(f.acType || '')}</span></td>
