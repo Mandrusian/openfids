@@ -4,6 +4,27 @@ A flight information board that runs on your own computer. No accounts, no login
 It starts a small server on `127.0.0.1` (only your computer can reach it) and opens the board in your browser.
 Out of the box it shows Cairns Airport, and it can be pointed at other airports (see below).
 
+## Quick install (no git needed)
+
+**Linux and macOS** - paste into a terminal:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Mandrusian/openfids/main/install.sh | bash
+```
+
+**Windows** - paste into PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/Mandrusian/openfids/main/install.ps1 | iex
+```
+
+This downloads OpenFIDS into `~/openfids`, sets it up, and creates the shortcut. Run the same command again any time to update;
+your settings and data are kept. Options: `OPENFIDS_DIR=/some/folder` changes where it installs, and `OPENFIDS_REF=v1.0`
+installs a specific release or branch. If you'd rather read the script first, open it at
+`https://raw.githubusercontent.com/Mandrusian/openfids/main/install.sh`, or download it and run `bash install.sh`.
+
+Prefer to do it by hand? Use the table below.
+
 ## Install
 
 Unzip or clone the folder somewhere permanent (e.g. Documents), then:
