@@ -2,723 +2,417 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cairns Airport FIDS</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenFIDS</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-            --bg-primary: #060911;
-            --bg-secondary: #0d121f;
-            --bg-card: #141c2e;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --border-hover: rgba(56, 189, 248, 0.4);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #0284c7;
-            --accent-glow: rgba(2, 132, 199, 0.22);
-            --accent-hover: #0369a1;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --radius: 10px;
-            --shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
-            --fx-transition: none;
-            --row-padding: 14px 18px;
-        }
-
-body.fx-enabled {
-            --fx-transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-body.mode-compact {
-            --row-padding: 6px 12px;
-        }
-
-body.theme-amoled {
-            --bg-primary: #000000;
-            --bg-secondary: #08080a;
-            --bg-card: #101014;
-            --border-color: rgba(255, 255, 255, 0.12);
-            --border-hover: #38bdf8;
-            --text-main: #ffffff;
-            --text-muted: #a1a1aa;
-            --accent: #0284c7;
-            --accent-glow: rgba(56, 189, 248, 0.3);
-            --accent-hover: #0369a1;
-        }
-
-body.theme-cyberpunk {
-            --bg-primary: #000000;
-            --bg-secondary: #0a0a0c;
-            --bg-card: #121216;
-            --border-color: rgba(245, 158, 11, 0.25);
-            --border-hover: #f59e0b;
-            --text-main: #fffbeb;
-            --text-muted: #a1a1aa;
-            --accent: #f59e0b;
-            --accent-glow: rgba(245, 158, 11, 0.3);
-            --accent-hover: #d97706;
-        }
-
-body.theme-oceanic {
-            --bg-primary: #030a16;
-            --bg-secondary: #08162b;
-            --bg-card: #0f2342;
-            --border-color: rgba(56, 189, 248, 0.15);
-            --border-hover: #38bdf8;
-            --text-main: #f0f9ff;
-            --text-muted: #7dd3fc;
-            --accent: #0284c7;
-            --accent-glow: rgba(56, 189, 248, 0.3);
-            --accent-hover: #0369a1;
-        }
-
-body.theme-nordic {
-            --bg-primary: #111318;
-            --bg-secondary: #1a1d24;
-            --bg-card: #222630;
-            --border-color: rgba(255, 255, 255, 0.1);
-            --border-hover: #94a3b8;
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --accent: #64748b;
-            --accent-glow: rgba(100, 116, 139, 0.25);
-            --accent-hover: #475569;
-        }
-
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-
-body { background-color: var(--bg-primary); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
-
-.form-group { margin-bottom: 18px; }
-
-.form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-.field, select.field, textarea.field {
-            width: 100%; background: var(--bg-primary); border: 1px solid var(--border-color);
-            padding: 12px 16px; border-radius: 6px; color: var(--text-main); font-size: 13px; transition: var(--fx-transition);
-        }
-
-.field:focus, select.field:focus, textarea.field:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-
-.btn-primary {
-            width: 100%; background: var(--accent); color: white; border: none;
-            padding: 12px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; margin-top: 10px; transition: var(--fx-transition);
-        }
-
-.btn-primary:hover { background: var(--accent-hover); }
-
-.modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 7, 12, 0.85); backdrop-filter: blur(8px);
-            display: flex; align-items: center; justify-content: center; z-index: 10000;
-            opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease;
-        }
-
-.modal-overlay.active { opacity: 1; visibility: visible; }
-
-.modal-card {
-            background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: var(--radius); width: 90%; max-width: 850px; padding: 28px;
-            box-shadow: var(--shadow); max-height: 90vh; overflow-y: auto;
-        }
-
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 14px; }
-
-.modal-header h3 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
-
-.close-modal { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-muted); width: 30px; height: 30px; border-radius: 6px; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--fx-transition); }
-
-.close-modal:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
-
-.btn-sm {
-            padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700;
-            border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-main); cursor: pointer; transition: var(--fx-transition);
-        }
-
-.btn-sm:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
-
-.btn-danger { color: var(--danger); border-color: rgba(239,68,68,0.3); }
-
-.btn-danger:hover { background: rgba(239,68,68,0.15); }
-
-header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 16px 32px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color);
-            position: sticky; top: 0; z-index: 2000; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-
-.brand { display: flex; align-items: center; gap: 12px; }
-
-.logo-icon { width: 38px; height: 38px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 16px var(--accent-glow); }
-
-.brand-text h1 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
-
-.brand-text p { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
-
-.header-actions { display: flex; align-items: center; gap: 10px; }
-
-.hud-badge {
-            background: var(--bg-primary); border: 1px solid var(--border-color);
-            padding: 6px 12px; border-radius: 6px; display: flex; flex-direction: column; align-items: flex-end;
-            cursor: pointer; transition: var(--fx-transition);
-        }
-
-.hud-badge:hover { border-color: var(--accent); }
-
-.hud-badge .label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-
-.hud-badge .value { font-size: 13px; font-weight: 800; color: var(--text-main); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
-
-.icon-btn {
-            background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-main);
-            width: 38px; height: 38px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--fx-transition);
-            font-size: 16px; position: relative;
-        }
-
-.icon-btn:hover { border-color: var(--accent); background: var(--accent-glow); }
-
-.container { max-width: 1440px; margin: 28px auto; padding: 0 32px; }
-
-.controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 14px; flex-wrap: wrap; }
-
-.search-box { position: relative; flex: 1; min-width: 280px; }
-
-.search-box input {
-            width: 100%; background: var(--bg-secondary); border: 1px solid var(--border-color);
-            padding: 10px 14px 10px 38px; border-radius: 6px; color: var(--text-main); font-size: 13px; transition: var(--fx-transition);
-        }
-
-.search-box input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-
-.search-box svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 14px; height: 14px; }
-
-.actions-group { display: flex; gap: 8px; align-items: center; }
-
-.filter-tabs { display: flex; gap: 2px; background: var(--bg-secondary); padding: 3px; border-radius: 6px; border: 1px solid var(--border-color); }
-
-.tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 12px; font-size: 11px; font-weight: 700; border-radius: 4px; cursor: pointer; transition: var(--fx-transition); }
-
-.tab-btn.active, .tab-btn:hover { background: var(--accent); color: white; }
-
-.action-btn {
-            background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-main);
-            padding: 8px 14px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: var(--fx-transition);
-        }
-
-.action-btn:hover { border-color: var(--accent); background: var(--accent-glow); }
-
-.table-wrapper { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
-
-table { width: 100%; border-collapse: collapse; text-align: left; }
-
-th { background: rgba(0,0,0,0.3); padding: 14px 18px; font-size: 10px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-color); letter-spacing: 0.5px; }
-
-td { padding: var(--row-padding); border-bottom: 1px solid var(--border-color); font-size: 12px; }
-
-tbody tr { transition: var(--fx-transition); }
-
-tbody tr:hover { background: rgba(255,255,255,0.02); }
-
-tbody tr.rare-military-row { background: rgba(239, 68, 68, 0.08) !important; border-left: 3px solid var(--danger); }
-
-#global-tooltip {
-            position: fixed; background: var(--bg-card); border: 1px solid var(--border-color);
-            padding: 12px 16px; border-radius: 8px; width: 280px; box-shadow: var(--shadow);
-            opacity: 0; visibility: hidden; transition: opacity 0.15s ease; z-index: 99999; pointer-events: none;
-        }
-
-#global-tooltip.visible { opacity: 1; visibility: visible; }
-
-#global-tooltip h4 { font-size: 12px; font-weight: 800; margin-bottom: 4px; }
-
-#global-tooltip p { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
-
-.tooltip-trigger { cursor: help; border-bottom: 1px dashed var(--text-muted); }
-
-.flight-code { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent); }
-
-.rego-code { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--success); background: rgba(16,185,129,0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(16,185,129,0.2); }
-
-.time-box { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
-
-.date-sub { font-size: 10px; color: var(--text-muted); display: block; margin-top: 2px; }
-
-.time-est { color: var(--warning); font-size: 10px; display: block; margin-top: 2px; }
-
-.status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
-
-.status-on-time { background: rgba(16, 185, 129, 0.12); color: var(--success); border: 1px solid rgba(16,185,129,0.25); }
-
-.status-delayed { background: rgba(245, 158, 11, 0.12); color: var(--warning); border: 1px solid rgba(245,158,11,0.25); }
-
-.status-neutral { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border: 1px solid var(--border-color); }
-
-.switch { position: relative; display: inline-block; width: 38px; height: 20px; }
-
-.switch input { opacity: 0; width: 0; height: 0; }
-
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-primary); border: 1px solid var(--border-color); transition: .2s; border-radius: 20px; }
-
-.slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: var(--text-muted); transition: .2s; border-radius: 50%; }
-
-input:checked + .slider { background-color: var(--accent); }
-
-input:checked + .slider:before { transform: translateX(18px); background-color: #fff; }
-
-.state-container { text-align: center; padding: 60px 20px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
-
-.spinner { width: 32px; height: 32px; border: 3px solid var(--border-color); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px auto; }
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ---- additions for the local build ---- */
-.feed-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--warning); margin-right: 6px; }
-.feed-dot.live { background: var(--success); box-shadow: 0 0 8px var(--success); }
-.feed-dot.down { background: var(--danger); }
-#feedBanner { display: none; background: rgba(245, 158, 11, 0.12); border-bottom: 1px solid rgba(245, 158, 11, 0.35); color: var(--warning); font-size: 12px; padding: 10px 32px; line-height: 1.5; }
-#feedBanner.show { display: block; }
-.form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; }
-.form-grid.three { grid-template-columns: repeat(3, 1fr); }
-.field { padding: 9px 10px; }
-.setting-row { background: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.setting-row strong { font-size: 12px; font-weight: 700; display: block; }
-.setting-row span.hint { font-size: 10px; color: var(--text-muted); }
-.custom-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; margin-top: 8px; font-size: 12px; background: var(--bg-primary); }
-.custom-item code { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
-.section-label { font-size: 12px; font-weight: 800; margin: 18px 0 12px; color: var(--accent); text-transform: uppercase; }
-#stoppedOverlay { display: none; position: fixed; inset: 0; background: var(--bg-primary); z-index: 100000; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); font-size: 14px; }
-#stoppedOverlay.show { display: flex; }
-.tag-custom { font-size: 9px; font-weight: 800; letter-spacing: .5px; color: var(--warning); border: 1px solid rgba(245,158,11,.4); border-radius: 3px; padding: 1px 4px; margin-left: 6px; }
-@media (max-width: 760px) { .form-grid, .form-grid.three { grid-template-columns: 1fr 1fr; } .container { padding: 0 14px; } header { flex-wrap: wrap; gap: 10px; } }
+:root{--bg:#0b0e13;--panel:#11161d;--card:#171d26;--line:rgba(255,255,255,.08);--text:#eef1f5;--mute:#8a95a5;--accent:#ffb000;--on-accent:#1a1200;--ok:#4ade80;--warn:#fb923c;--bad:#f87171;--board:'Barlow Condensed','Arial Narrow',sans-serif;--body:'IBM Plex Sans',system-ui,sans-serif;--pad:13px 14px;--ease:cubic-bezier(.16,1,.3,1)}
+body.t-runway{--bg:#05100a;--panel:#0a1a10;--card:#102417;--line:rgba(120,255,160,.12);--text:#d9ffe6;--mute:#6fa586;--accent:#5dff9a;--on-accent:#02130a}
+body.t-blue{--bg:#070b16;--panel:#0d1424;--card:#141d33;--accent:#7cb4ff;--on-accent:#071226}
+body.t-day{--bg:#f3f1ec;--panel:#fff;--card:#fff;--line:rgba(0,0,0,.1);--text:#16181d;--mute:#5d6673;--accent:#b36b00;--on-accent:#fff;--ok:#15803d;--warn:#c2410c;--bad:#b91c1c}
+body.compact{--pad:6px 12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.45 var(--body);background:var(--bg);color:var(--text);min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:232px 1fr;transition:grid-template-columns .35s var(--ease)}
+.app.min{grid-template-columns:64px 1fr}
+aside{position:sticky;top:0;height:100vh;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:16px 10px;overflow:hidden}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px 18px;font:700 24px var(--board);letter-spacing:.5px;white-space:nowrap}
+.brand b{color:var(--accent)}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav button,.foot button{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;border-radius:8px;padding:10px;text-align:left;color:var(--mute);white-space:nowrap;transition:background .2s,color .2s}
+.nav button:hover,.foot button:hover{background:var(--card);color:var(--text)}
+.nav button.on{background:var(--card);color:var(--text);box-shadow:inset 3px 0 var(--accent)}
+.ic{width:22px;text-align:center;flex:none;font-size:16px}
+.lbl{transition:opacity .2s}.min .lbl{opacity:0;pointer-events:none}
+.count{margin-left:auto;background:var(--accent);color:var(--on-accent);border-radius:9px;padding:0 7px;font-size:11px;font-weight:600}
+.count:empty{display:none}
+.gap{flex:1}
+.feed{display:flex;align-items:center;gap:10px;padding:10px;border-top:1px solid var(--line);margin-top:8px;font-size:12px;color:var(--mute);white-space:nowrap;cursor:pointer}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--bad);flex:none}.dot.live{background:var(--ok);animation:pulse 2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 5px transparent;opacity:.6}0%,100%{box-shadow:0 0 0 0 var(--ok)}}
+.ring{width:22px;height:22px;flex:none;transform:rotate(-90deg)}.ring circle{fill:none;stroke:var(--accent);stroke-width:3;stroke-dasharray:57;stroke-dashoffset:57}.ring.go circle{animation:ring var(--poll,30s) linear forwards}
+@keyframes ring{to{stroke-dashoffset:0}}
+main{min-width:0;padding:22px 28px 40px}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+h1{font:700 34px/1 var(--board);letter-spacing:.3px}
+.sub{color:var(--mute);margin-top:6px;font-size:13px}
+.clock{text-align:right}.clock .big{font:600 40px/1 var(--board);display:flex;gap:3px;justify-content:flex-end}
+.clock small{color:var(--mute);font-size:12px}
+.fl{display:inline-block;min-width:.62em;text-align:center;background:var(--card);border-radius:4px;padding:0 3px;transform-origin:50% 50%}
+.fl.flip{animation:flap .5s ease-in-out both;animation-delay:var(--d,0s)}
+@keyframes flap{0%{transform:perspective(200px) rotateX(0)}45%{transform:perspective(200px) rotateX(-90deg)}55%{transform:perspective(200px) rotateX(90deg)}100%{transform:perspective(200px) rotateX(0)}}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.search{flex:1;min-width:220px;position:relative}
+.search input{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px 10px 34px;color:var(--text);font:inherit}
+.search span{position:absolute;left:11px;top:9px;color:var(--mute)}
+.search kbd{position:absolute;right:10px;top:9px;font-size:11px;color:var(--mute);border:1px solid var(--line);border-radius:4px;padding:0 5px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:6px 14px;color:var(--mute);transition:.2s}
+.chip:hover{color:var(--text)}.chip.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.btn{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 14px;transition:.2s}.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600;width:100%;margin-top:8px}
+.btn.danger{color:var(--bad)}
+.wrap{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:auto}
+table{width:100%;border-collapse:collapse}
+th{position:sticky;top:0;background:var(--panel);text-align:left;font-weight:500;color:var(--mute);font-size:12px;padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:var(--pad);border-bottom:1px solid var(--line);white-space:nowrap}
+tbody tr{transition:background .2s}tbody tr:hover{background:var(--card)}
+tr.hot td:first-child{box-shadow:inset 3px 0 var(--bad)}tr.rare td:first-child{box-shadow:inset 3px 0 var(--accent)}
+tr.flash{animation:flash 1.6s}@keyframes flash{0%{background:color-mix(in srgb,var(--accent) 35%,transparent)}100%{background:transparent}}
+.code{font:600 20px var(--board);color:var(--accent);letter-spacing:.4px}
+.time{font:600 20px var(--board)}.mut{color:var(--mute);font-size:12px}
+.star{background:none;border:0;font-size:17px;color:var(--mute);opacity:.5;transition:transform .25s var(--ease),color .2s,opacity .2s}
+.star:hover{opacity:1}.star.on{color:var(--accent);opacity:1;transform:scale(1.2) rotate(72deg)}
+.tag{font-size:11px;border:1px solid var(--line);border-radius:4px;padding:1px 6px;margin-left:6px;color:var(--warn)}
+.pill{display:inline-block;border-radius:5px;padding:3px 10px;font:600 15px var(--board);background:var(--card);color:var(--mute)}
+.pill.ok{color:var(--ok)}.pill.late{color:var(--warn)}.pill.flip{animation:flap .55s ease-in-out}
+.tip{cursor:help;border-bottom:1px dotted var(--mute)}
+#tip{position:fixed;z-index:50;max-width:270px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;opacity:0;pointer-events:none;transition:opacity .15s;box-shadow:0 10px 30px rgba(0,0,0,.4)}#tip.on{opacity:1}#tip b{display:block;margin-bottom:2px}#tip i{color:var(--accent);font-style:normal}
+.empty{padding:50px 20px;text-align:center;color:var(--mute)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}.card .n{font:700 40px/1 var(--board);display:flex;gap:3px}.card small{color:var(--mute)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.card h3{font:600 18px var(--board);margin-bottom:12px}
+.row{display:grid;grid-template-columns:120px 1fr 28px;gap:10px;align-items:center;font-size:13px;margin-bottom:8px}
+.row i{display:block;height:10px;border-radius:5px;background:var(--accent);width:var(--w);transform-origin:left;animation:grow .8s var(--ease)}@keyframes grow{from{transform:scaleX(0)}}
+.row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.row b{text-align:right}
+#panel{position:fixed;top:0;right:0;height:100vh;width:min(400px,100vw);background:var(--panel);border-left:1px solid var(--line);z-index:40;padding:22px;overflow:auto;transform:translateX(105%);transition:transform .4s var(--ease);box-shadow:-20px 0 50px rgba(0,0,0,.3)}#panel.open{transform:none}
+#veil{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:39;opacity:0;pointer-events:none;transition:opacity .3s}#veil.on{opacity:1;pointer-events:auto}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.ph h2{font:700 26px var(--board)}
+.x{background:none;border:0;font-size:20px;color:var(--mute)}
+h4{font:600 16px var(--board);margin:20px 0 8px}
+.f{display:grid;gap:8px;margin-bottom:8px}.f2{grid-template-columns:1fr 1fr}
+input.in,select.in{width:100%;background:var(--card);border:1px solid var(--line);border-radius:7px;padding:9px 10px;color:var(--text);font:inherit}
+.sw{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}.sw small{display:block;color:var(--mute);font-size:12px}
+.sw input{width:38px;height:22px;accent-color:var(--accent)}
+.themes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.themes button{border:2px solid var(--line);border-radius:8px;padding:10px 4px;font-size:12px;background:var(--card);transition:.2s}.themes button.on{border-color:var(--accent)}
+.item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;margin-top:7px;font-size:13px}
+.msg{font-size:12px;color:var(--mute);margin-top:8px}
+kbd{font:12px var(--body);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 6px;background:var(--card)}
+#toasts{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:60;align-items:center}
+.toast{background:var(--accent);color:var(--on-accent);border-radius:9px;padding:10px 16px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.35);animation:rise .45s var(--ease)}.toast.out{opacity:0;transition:opacity .4s}
+@keyframes rise{from{transform:translateY(20px);opacity:0}}
+#bye{display:none;position:fixed;inset:0;background:var(--bg);z-index:99;align-items:center;justify-content:center;text-align:center;color:var(--mute)}#bye.on{display:flex}#bye h2{font:700 34px var(--board);color:var(--text)}
+.nomo *,.nomo *::before{animation:none!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:820px){.app,.app.min{grid-template-columns:64px 1fr}.lbl{display:none}main{padding:16px}.clock{text-align:left}.clock .big{justify-content:flex-start}}
 </style>
 </head>
-<body class="fx-enabled">
+<body>
+<div class="app" id="app">
+<aside>
+  <div class="brand"><span class="ic">✈</span><span class="lbl">Open<b>FIDS</b></span></div>
+  <nav class="nav" id="nav">
+    <button data-view="board" class="on"><span class="ic">▤</span><span class="lbl">Flight board</span></button>
+    <button data-view="watch"><span class="ic">★</span><span class="lbl">Watchlist</span><span class="count lbl" id="wCount"></span></button>
+    <button data-view="stats"><span class="ic">◔</span><span class="lbl">Statistics</span></button>
+    <button data-panel="add"><span class="ic">＋</span><span class="lbl">Add a movement</span></button>
+    <button data-panel="settings"><span class="ic">⚙</span><span class="lbl">Settings</span></button>
+    <button data-panel="help"><span class="ic">?</span><span class="lbl">Shortcuts</span></button>
+  </nav>
+  <div class="gap"></div>
+  <div class="foot">
+    <div class="feed" id="feed" title="Open feed settings"><span class="dot" id="dot"></span><span class="lbl" id="feedTxt">Connecting</span><svg class="ring" id="ring" viewBox="0 0 22 22" style="margin-left:auto"><circle cx="11" cy="11" r="9"/></svg></div>
+    <button id="collapse"><span class="ic" id="colIc">«</span><span class="lbl">Collapse menu</span></button>
+    <button id="quit"><span class="ic">⏻</span><span class="lbl">Stop OpenFIDS</span></button>
+  </div>
+</aside>
 
-<div id="stoppedOverlay"><div><h2 style="color: var(--text-main); margin-bottom: 8px;">OpenFIDS has stopped</h2>You can close this tab. Open the OpenFIDS shortcut to start it again.</div></div>
+<main>
+  <div class="top">
+    <div><h1 id="title">Cairns Airport FIDS</h1><div class="sub" id="next">Waiting for flights</div></div>
+    <div class="clock"><div class="big" id="clock"></div><small id="date"></small></div>
+  </div>
 
-<div id="global-tooltip">
-    <h4 id="tooltip-title"></h4>
-    <p id="tooltip-desc"></p>
-    <div id="tooltip-code" style="margin-top: 4px; font-size: 10px; color: var(--accent); font-family: 'JetBrains Mono', monospace;"></div>
+  <section id="v-board">
+    <div class="bar">
+      <div class="search"><span>⌕</span><input id="q" placeholder="Search flight, airline, place or registration" autocomplete="off"><kbd>/</kbd></div>
+      <div class="chips" id="chips">
+        <button class="chip on" data-f="all">All</button><button class="chip" data-f="A">Arrivals</button><button class="chip" data-f="D">Departures</button><button class="chip" data-f="military">Military</button><button class="chip" data-f="rare">Rare</button>
+      </div>
+      <button class="btn" id="csv">Export CSV</button>
+    </div>
+    <div class="wrap"><table>
+      <thead><tr><th></th><th>Flight</th><th>Route</th><th>Scheduled</th><th>Aircraft</th><th>Registration</th><th>Gate</th><th>Status</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+  </section>
+
+  <section id="v-stats" hidden>
+    <div class="cards" id="cards"></div>
+    <div class="grid2"><div class="card"><h3>Busiest airlines</h3><div id="bAir"></div></div><div class="card"><h3>Aircraft types</h3><div id="bAc"></div></div><div class="card"><h3>Top destinations and origins</h3><div id="bPort"></div></div></div>
+  </section>
+</main>
 </div>
 
-<!-- Custom flights -->
-<div class="modal-overlay" id="customModal">
-    <div class="modal-card">
-        <div class="modal-header">
-            <h3>Add a Movement ➕</h3>
-            <button class="close-modal" data-close="customModal">✕</button>
-        </div>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Movements you add here are stored only on this computer and appear at the top of the board.</p>
-        <div class="form-grid">
-            <input class="field" id="cfAirline" placeholder="Airline (e.g. VIP)">
-            <input class="field" id="cfNumber" placeholder="Flight #">
-            <input class="field" id="cfAcType" placeholder="ICAO type (e.g. GLF6)">
-            <input class="field" id="cfRego" placeholder="Rego (e.g. N1VIP)">
-        </div>
-        <div class="form-grid">
-            <input class="field" id="cfPort" placeholder="Port name (e.g. Sydney)">
-            <input class="field" id="cfIata" placeholder="IATA (e.g. SYD)">
-            <select class="field" id="cfVector"><option value="A">Arrival</option><option value="D">Departure</option></select>
-            <input class="field" id="cfWhen" type="datetime-local">
-        </div>
-        <div class="form-grid three">
-            <input class="field" id="cfTerminal" placeholder="Terminal (T1)">
-            <input class="field" id="cfGate" placeholder="Gate / Bay">
-            <input class="field" id="cfStatus" placeholder="Status (e.g. Landed)">
-        </div>
-        <button class="btn-primary" id="cfAddBtn">Add to board</button>
-        <div class="section-label">Your added movements</div>
-        <div id="customList"></div>
-    </div>
+<div id="veil"></div>
+<div id="panel" aria-live="polite">
+  <div data-p="add" hidden>
+    <div class="ph"><h2>Add a movement</h2><button class="x" data-x>✕</button></div>
+    <p class="mut">Stored on this computer only. Shown at the top of the board.</p>
+    <h4>Flight</h4>
+    <div class="f f2"><input class="in" id="cfAirline" placeholder="Airline (VIP)"><input class="in" id="cfNumber" placeholder="Flight number"><input class="in" id="cfAcType" placeholder="Aircraft type (GLF6)"><input class="in" id="cfRego" placeholder="Registration"></div>
+    <h4>Route and time</h4>
+    <div class="f f2"><input class="in" id="cfPort" placeholder="Place (Sydney)"><input class="in" id="cfIata" placeholder="Code (SYD)"><select class="in" id="cfVector"><option value="A">Arrival</option><option value="D">Departure</option></select><input class="in" id="cfWhen" type="datetime-local"></div>
+    <div class="f f2"><input class="in" id="cfGate" placeholder="Gate or bay"><input class="in" id="cfStatus" placeholder="Status (Landed)"></div>
+    <button class="btn pri" id="cfAdd">Add to board</button>
+    <h4>Your movements</h4><div id="cfList"></div>
+  </div>
+
+  <div data-p="settings" hidden>
+    <div class="ph"><h2>Settings</h2><button class="x" data-x>✕</button></div>
+    <h4>Theme</h4>
+    <div class="themes" id="themes"><button data-t="default">Amber</button><button data-t="runway">Runway</button><button data-t="blue">Blue hour</button><button data-t="day">Daylight</button></div>
+    <div class="sw"><div>Compact rows<small>Fit more flights on screen</small></div><input type="checkbox" id="sCompact"></div>
+    <div class="sw"><div>Motion<small>Split-flap flips and slides</small></div><input type="checkbox" id="sMotion"></div>
+    <div class="sw"><div>Chime on watchlist changes<small>Plays when a starred flight updates</small></div><input type="checkbox" id="sAudio"></div>
+    <h4>Refresh every</h4>
+    <select class="in" id="sPoll"><option value="5000">5 seconds</option><option value="15000">15 seconds</option><option value="30000">30 seconds</option><option value="60000">60 seconds</option></select>
+    <h4>Airport feed login</h4>
+    <p class="mut" style="margin-bottom:8px">Only needed if the airport site asks for one. Saved in plain text in your data folder.</p>
+    <div class="f"><input class="in" id="cEmail" placeholder="Email" autocomplete="off"><input class="in" id="cPass" type="password" placeholder="Password" autocomplete="new-password"></div>
+    <div style="display:flex;gap:8px"><button class="btn pri" id="cSave" style="margin:0;flex:1">Save and test</button><button class="btn danger" id="cClear">Clear</button></div>
+    <p class="msg" id="cMsg"></p><p class="msg" id="cNote" style="color:var(--warn)"></p>
+    <p class="msg" id="dataDir" style="word-break:break-all"></p>
+  </div>
+
+  <div data-p="help" hidden>
+    <div class="ph"><h2>Shortcuts</h2><button class="x" data-x>✕</button></div>
+    <div class="sw"><span>Search</span><kbd>/</kbd></div><div class="sw"><span>Flight board</span><kbd>b</kbd></div><div class="sw"><span>Watchlist</span><kbd>w</kbd></div><div class="sw"><span>Statistics</span><kbd>s</kbd></div>
+    <div class="sw"><span>Add a movement</span><kbd>n</kbd></div><div class="sw"><span>Settings</span><kbd>,</kbd></div><div class="sw"><span>Collapse menu</span><kbd>[</kbd></div><div class="sw"><span>Close panel</span><kbd>Esc</kbd></div>
+    <p class="msg">Star a flight to add it to your watchlist. You'll get a message when its status changes.</p>
+  </div>
 </div>
 
-<!-- Settings -->
-<div class="modal-overlay" id="settingsModal">
-    <div class="modal-card" style="max-width: 440px;">
-        <div class="modal-header">
-            <h3>Interface Preferences ⚙️</h3>
-            <button class="close-modal" data-close="settingsModal">✕</button>
-        </div>
-        <div class="form-group">
-            <label>Theme Preset</label>
-            <div id="themeButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;">
-                <button class="tab-btn" data-theme="default">Midnight</button>
-                <button class="tab-btn" data-theme="amoled">AMOLED Black</button>
-                <button class="tab-btn" data-theme="cyberpunk">Cyberpunk</button>
-                <button class="tab-btn" data-theme="oceanic">Oceanic</button>
-                <button class="tab-btn" data-theme="nordic">Nordic</button>
-            </div>
-        </div>
-        <div class="setting-row">
-            <div><strong>Compact FIDS Mode</strong><span class="hint">Dense rows to see more flights.</span></div>
-            <label class="switch"><input type="checkbox" id="compactToggle"><span class="slider"></span></label>
-        </div>
-        <div class="setting-row">
-            <div><strong>Full High-FX Motion</strong><span class="hint">Smooth transitions and animations.</span></div>
-            <label class="switch"><input type="checkbox" id="fxToggle"><span class="slider"></span></label>
-        </div>
-        <div class="setting-row">
-            <div><strong>Audio Status Alert Chimes</strong><span class="hint">Play a chime when a flight's status changes.</span></div>
-            <label class="switch"><input type="checkbox" id="audioToggle"><span class="slider"></span></label>
-        </div>
-        <div class="form-group" style="margin-top: 16px;">
-            <label>Refresh Frequency</label>
-            <select id="pollSelect" class="field">
-                <option value="5000">Fast (5 seconds)</option>
-                <option value="15000">Balanced (15 seconds)</option>
-                <option value="30000">Standard (30 seconds)</option>
-                <option value="60000">Relaxed (60 seconds)</option>
-            </select>
-        </div>
-                <div class="section-label">Airport feed login</div>
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Only needed if the airport site asks for a login. Stored on this computer only, in plain text, in your data folder.</p>
-        <div class="form-group" style="margin-bottom: 10px;"><input class="field" id="credEmail" type="text" placeholder="Email" autocomplete="off"></div>
-        <div class="form-group" style="margin-bottom: 10px;"><input class="field" id="credPass" type="password" placeholder="Password" autocomplete="new-password"></div>
-        <div style="display: flex; gap: 8px;">
-            <button class="btn-primary" id="credSave" style="margin: 0; flex: 1;">Save and test</button>
-            <button class="btn-sm btn-danger" id="credClear">Clear</button>
-        </div>
-        <p id="credMsg" style="font-size: 11px; margin-top: 8px; color: var(--text-muted);"></p>
-        <p id="credNote" style="font-size: 10px; color: var(--warning);"></p>
-        <p id="dataDirNote" style="font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; word-break: break-all;"></p>
-    </div>
-</div>
-
-<header>
-    <div class="brand">
-        <div class="logo-icon">✈️</div>
-        <div class="brand-text">
-            <h1>Cairns Airport FIDS</h1>
-            <p>LIVE TELEMETRY · RUNNING LOCALLY</p>
-        </div>
-    </div>
-    <div class="header-actions">
-        <div class="hud-badge" id="feedBadge" title="State of the connection to the airport's flight data">
-            <span class="label">Feed</span>
-            <span class="value"><span class="feed-dot" id="feedDot"></span><span id="feedLabel">...</span></span>
-        </div>
-        <div class="hud-badge">
-            <span class="label">Movements</span>
-            <span class="value" id="total-count">0</span>
-        </div>
-        <button class="icon-btn" id="addBtn" title="Add a movement">➕</button>
-        <button class="icon-btn" id="settingsBtn" title="Settings">⚙️</button>
-        <button class="icon-btn" id="quitBtn" title="Stop OpenFIDS">⏻</button>
-    </div>
-</header>
-<div id="feedBanner"></div>
-
-<div class="container">
-    <div class="controls-bar">
-        <div class="search-box">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            <input type="text" id="searchInput" placeholder="Search flight, airline, destination, registration..." autocomplete="off">
-        </div>
-        <div class="actions-group">
-            <div class="filter-tabs" id="filterTabs">
-                <button class="tab-btn active" data-filter="all">All</button>
-                <button class="tab-btn" data-filter="A">Arrivals</button>
-                <button class="tab-btn" data-filter="D">Departures</button>
-                <button class="tab-btn" data-filter="military" style="color: var(--danger);">Military</button>
-                <button class="tab-btn" data-filter="rare" style="color: var(--warning);">Rare</button>
-            </div>
-            <button class="action-btn" id="csvBtn">Export CSV</button>
-        </div>
-    </div>
-
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>Flight</th><th>Type</th><th>Route</th><th>Terminal</th><th>Scheduled</th>
-                    <th>Aircraft</th><th>Registration</th><th>Gate</th><th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="flightTableBody">
-                <tr><td colspan="9"><div class="state-container"><div class="spinner"></div>Connecting to Cairns Airport data stream...</div></td></tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+<div id="tip"></div><div id="toasts"></div>
+<div id="bye"><div><h2>OpenFIDS has stopped</h2>You can close this tab. Open the OpenFIDS shortcut to start it again.</div></div>
 
 <script>
 (() => {
-    const $ = (id) => document.getElementById(id);
-    const KEY = 'openfids.settings';
-    const defaults = { theme: 'default', compact: false, fx: true, audio: false, poll: 30000 };
-    let settings = { ...defaults };
-    let allFlights = [], aircraftDb = {}, airlineDb = {}, feed = { ok: false };
-    let currentFilter = 'all', pollTimer = null, audioCtx = null;
-    const lastStatus = new Map();
-    let firstLoad = true;
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const api = async (u, o) => { const r = await fetch(u, o); if (!r.ok) throw new Error(r.status); return r.json(); };
+const LS = 'openfids.v2';
+let S = { theme: 'default', compact: false, motion: true, audio: false, poll: 30000, min: false, watch: [] };
+try { Object.assign(S, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (e) {}
+const save = () => { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} };
+let flights = [], ac = {}, al = {}, feed = { ok: false }, view = 'board', filter = 'all', timer, actx;
+const last = new Map(), changed = new Set(); let first = true;
 
-    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const api = async (url, opts) => { const r = await fetch(url, opts); if (!r.ok) throw new Error(r.status); return r.json(); };
-    const post = (url, body) => api(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+const code = (f) => `${f.airline || ''}${f.flightNumber || ''}`;
+const key = (f) => f.id || `${code(f)}|${f.vector}|${f.scheduled}`;
+const plane = (f) => ac[f.acType || ''] || null, airline = (f) => al[f.airline || ''] || null;
+const mil = (f) => !!((plane(f) || {}).military || (airline(f) || {}).military), rare = (f) => !!(plane(f) || {}).rare;
+const hm = (iso) => (String(iso || '').split('T')[1] || '').slice(0, 5);
+const day = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }); };
 
-    /* ---------- settings ---------- */
-    function loadSettings() { try { Object.assign(settings, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {} }
-    function saveSettings() { try { localStorage.setItem(KEY, JSON.stringify(settings)); } catch (e) {} }
-    function applySettings() {
-        document.body.className = document.body.className.replace(/theme-\S+/g, '').trim();
-        if (settings.theme !== 'default') document.body.classList.add('theme-' + settings.theme);
-        document.body.classList.toggle('mode-compact', settings.compact);
-        document.body.classList.toggle('fx-enabled', settings.fx);
-        document.querySelectorAll('#themeButtons .tab-btn').forEach((b) => b.classList.toggle('active', b.dataset.theme === settings.theme));
-        $('compactToggle').checked = settings.compact;
-        $('fxToggle').checked = settings.fx;
-        $('audioToggle').checked = settings.audio;
-        $('pollSelect').value = String(settings.poll);
+/* split-flap text: only characters that changed flip */
+function flap(el, text) {
+  text = String(text); const old = el.dataset.v || '';
+  if (old === text) return; el.dataset.v = text;
+  if (el.children.length !== text.length) el.innerHTML = [...text].map(() => '<span class="fl"></span>').join('');
+  [...text].forEach((ch, i) => { const s = el.children[i]; if (s.textContent !== ch) { s.textContent = ch; if (S.motion && old) { s.classList.remove('flip'); void s.offsetWidth; s.style.setProperty('--d', i * 0.05 + 's'); s.classList.add('flip'); } } });
+}
+
+function apply() {
+  document.body.className = (S.theme !== 'default' ? 't-' + S.theme : '') + (S.compact ? ' compact' : '') + (S.motion ? '' : ' nomo');
+  $('app').classList.toggle('min', S.min); $('colIc').textContent = S.min ? '»' : '«';
+  document.querySelectorAll('#themes button').forEach((b) => b.classList.toggle('on', b.dataset.t === S.theme));
+  $('sCompact').checked = S.compact; $('sMotion').checked = S.motion; $('sAudio').checked = S.audio; $('sPoll').value = String(S.poll);
+  document.documentElement.style.setProperty('--poll', S.poll + 'ms');
+  $('wCount').textContent = S.watch.length || '';
+}
+function poll() { clearInterval(timer); timer = setInterval(load, S.poll); }
+function chime() {
+  if (!S.audio) return;
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); const t = actx.currentTime;
+    [880, 1175].forEach((f, i) => { const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = f; g.gain.setValueAtTime(.0001, t + i * .18); g.gain.exponentialRampToValueAtTime(.15, t + i * .18 + .02); g.gain.exponentialRampToValueAtTime(.0001, t + i * .18 + .4); o.connect(g); g.connect(actx.destination); o.start(t + i * .18); o.stop(t + i * .18 + .45); });
+  } catch (e) {}
+}
+function toast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; $('toasts').appendChild(t);
+  setTimeout(() => t.classList.add('out'), 5000); setTimeout(() => t.remove(), 5600);
+}
+
+/* ---------- board ---------- */
+function visible() {
+  const q = $('q').value.toLowerCase();
+  return flights.filter((f) => {
+    if (view === 'watch' && !S.watch.includes(code(f))) return false;
+    if ((filter === 'A' || filter === 'D') && f.vector !== filter) return false;
+    if (filter === 'military' && !mil(f)) return false;
+    if (filter === 'rare' && !rare(f)) return false;
+    return `${code(f)} ${f.portName} ${f.portIATA} ${f.acType} ${f.acRego}`.toLowerCase().includes(q);
+  });
+}
+function render() {
+  const list = visible(), tb = $('rows');
+  if (!list.length) {
+    const msg = view === 'watch' ? 'No starred flights on the board. Click ★ next to a flight to follow it.' : (!feed.ok && !flights.length ? 'No live data right now. Open the feed status in the menu, or add your own movements.' : 'No flights match.');
+    tb.innerHTML = `<tr><td colspan="8" class="empty">${esc(msg)}</td></tr>`; return;
+  }
+  tb.innerHTML = list.map((f) => {
+    const p = plane(f) || { name: `Aircraft ${f.acType || ''}`, desc: 'No details on file. Add it in aircraft.json.' };
+    const a = airline(f) || { name: `Operator ${f.airline || ''}`, desc: 'No details on file. Add it in airlines.json.' };
+    const st = (f.statusMsgPublic || '').trim(), lo = st.toLowerCase(), arr = f.vector === 'A', k = key(f);
+    const cls = lo.includes('delay') || lo.includes('cancel') ? 'late' : (lo.includes('on time') || lo.includes('boarding') || lo.includes('landed')) ? 'ok' : '';
+    const on = S.watch.includes(code(f));
+    return `<tr class="${mil(f) ? 'hot' : rare(f) ? 'rare' : ''}${changed.has(k) ? ' flash' : ''}">
+      <td><button class="star${on ? ' on' : ''}" data-star="${esc(code(f))}" title="${on ? 'Unfollow' : 'Follow'} ${esc(code(f))}">★</button></td>
+      <td><span class="code tip" data-t="${esc(a.name)}" data-d="${esc(a.desc)}" data-c="${esc(f.airline)}">${esc(code(f))}</span>${f.custom ? '<span class="tag">yours</span>' : ''}<div class="mut">${arr ? 'Arrival' : 'Departure'}</div></td>
+      <td><b>${esc(f.portName)}</b><div class="mut">${esc(f.portIATA)} · ${esc(f.terminal || '')}</div></td>
+      <td><span class="time">${esc(hm(f.scheduled))}</span> <span class="mut">${esc(day(f.scheduled))}</span>${f.estimated ? `<div class="mut">Est ${esc(hm(f.estimated))}</div>` : ''}</td>
+      <td><span class="tip" data-t="${esc(p.name)}" data-d="${esc(p.desc)}" data-c="${esc(f.acType)}">${esc(f.acType || '')}</span></td>
+      <td>${esc(f.acRego || '')}</td><td>${esc(f.gate || '')}</td>
+      <td><span class="pill ${cls}${changed.has(k) && S.motion ? ' flip' : ''}">${esc(st || (arr ? 'Arriving' : 'Departing'))}</span></td></tr>`;
+  }).join('');
+}
+
+function track() {
+  flights.forEach((f) => {
+    const k = key(f), st = (f.statusMsgPublic || '').trim();
+    if (!first && last.has(k) && last.get(k) !== st) {
+      changed.add(k);
+      if (S.watch.includes(code(f))) { toast(`${code(f)} to ${f.portName}: ${st || 'updated'}`); chime(); }
     }
-    function startPolling() { clearInterval(pollTimer); pollTimer = setInterval(fetchFlights, settings.poll); }
+    last.set(k, st);
+  }); first = false;
+}
+async function load() {
+  try { const d = await api('/api/flights'); flights = d.flights || []; feed = d.feed || { ok: false }; track(); }
+  catch (e) { feed = { ok: false, message: 'OpenFIDS is not responding.' }; }
+  $('dot').className = 'dot' + (feed.ok ? ' live' : '');
+  $('feedTxt').textContent = feed.ok ? `Live · ${feed.updated || ''}` : 'Offline · fix login';
+  const r = $('ring'); r.classList.remove('go'); void r.getBoundingClientRect(); r.classList.add('go');
+  render(); if (view === 'stats') stats(); changed.clear();
+}
 
-    /* ---------- chime ---------- */
-    function chime() {
-        if (!settings.audio) return;
-        try {
-            audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-            const t = audioCtx.currentTime;
-            [880, 1175].forEach((freq, i) => {
-                const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-                o.type = 'sine'; o.frequency.value = freq;
-                g.gain.setValueAtTime(0.0001, t + i * 0.18);
-                g.gain.exponentialRampToValueAtTime(0.15, t + i * 0.18 + 0.02);
-                g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.18 + 0.4);
-                o.connect(g); g.connect(audioCtx.destination);
-                o.start(t + i * 0.18); o.stop(t + i * 0.18 + 0.45);
-            });
-        } catch (e) {}
-    }
+/* ---------- stats ---------- */
+function top(fn, n = 6) { const m = {}; flights.forEach((f) => { const k = fn(f); if (k) m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, n); }
+function bars(el, rows) {
+  const max = Math.max(1, ...rows.map((r) => r[1]));
+  el.innerHTML = rows.length ? rows.map(([l, n]) => `<div class="row"><span>${esc(l)}</span><div><i style="--w:${Math.round(n / max * 100)}%"></i></div><b>${n}</b></div>`).join('') : '<div class="mut">No data yet.</div>';
+}
+function stats() {
+  const n = [['Movements', flights.length], ['Arrivals', flights.filter((f) => f.vector === 'A').length], ['Departures', flights.filter((f) => f.vector === 'D').length], ['Rare', flights.filter(rare).length], ['Military', flights.filter(mil).length]];
+  if (document.querySelectorAll('#cards .n').length !== n.length) $('cards').innerHTML = n.map(([l]) => `<div class="card"><div class="n"></div><small>${l}</small></div>`).join('');
+  document.querySelectorAll('#cards .n').forEach((el, i) => flap(el, n[i][1]));
+  bars($('bAir'), top((f) => (airline(f) || {}).name || f.airline));
+  bars($('bAc'), top((f) => (plane(f) || {}).name || f.acType));
+  bars($('bPort'), top((f) => f.portName));
+}
 
-    /* ---------- tooltips (event delegation) ---------- */
-    const tip = $('global-tooltip');
-    document.addEventListener('mousemove', (e) => {
-        const t = e.target.closest && e.target.closest('[data-tip-title]');
-        if (!t) { tip.classList.remove('visible'); return; }
-        $('tooltip-title').textContent = t.dataset.tipTitle;
-        $('tooltip-desc').textContent = t.dataset.tipDesc;
-        $('tooltip-code').textContent = t.dataset.tipCode;
-        let left = e.clientX + 15;
-        if (left + 280 > window.innerWidth) left = e.clientX - 290;
-        tip.style.left = left + 'px';
-        tip.style.top = (e.clientY - 60) + 'px';
-        tip.classList.add('visible');
-    });
-    document.addEventListener('mouseleave', () => tip.classList.remove('visible'));
+/* ---------- header clock + next arrival ---------- */
+function tick() {
+  const d = new Date(); flap($('clock'), d.toLocaleTimeString('en-GB', { hour12: false }));
+  $('date').textContent = d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
+  const nx = flights.filter((f) => f.vector === 'A' && new Date(f.scheduled) > d).sort((a, b) => new Date(a.scheduled) - new Date(b.scheduled))[0];
+  if (nx) { const m = Math.round((new Date(nx.scheduled) - d) / 60000); $('next').textContent = `Next arrival: ${code(nx)} from ${nx.portName} in ${m < 60 ? m + ' min' : Math.floor(m / 60) + ' h ' + (m % 60) + ' min'}`; }
+  else $('next').textContent = flights.length ? `${flights.length} movements on the board` : 'Waiting for flights';
+}
 
-    /* ---------- flights ---------- */
-    function fmtDate(iso) {
-        const d = iso ? new Date(iso) : null;
-        if (!d || isNaN(d)) return { time: '', dateStr: '' };
-        return { time: (String(iso).split('T')[1] || '').substring(0, 5), dateStr: d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }) };
-    }
-    const planeOf = (f) => aircraftDb[f.acType || '738'] || null;
-    const airlineOf = (f) => airlineDb[f.airline || ''] || null;
-    const isMilitary = (f) => Boolean((planeOf(f) || {}).military || (airlineOf(f) || {}).military);
-    const isRare = (f) => Boolean((planeOf(f) || {}).rare);
+/* ---------- navigation and panels ---------- */
+function setView(v) {
+  view = v; $('v-board').hidden = v === 'stats'; $('v-stats').hidden = v !== 'stats';
+  document.querySelectorAll('#nav [data-view]').forEach((b) => b.classList.toggle('on', b.dataset.view === v));
+  if (v === 'stats') stats(); else render();
+}
+function panel(name) {
+  document.querySelectorAll('#panel [data-p]').forEach((s) => s.hidden = s.dataset.p !== name);
+  $('panel').classList.toggle('open', !!name); $('veil').classList.toggle('on', !!name);
+  if (name === 'settings') creds(); if (name === 'add') { if (!$('cfWhen').value) { const d = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4); $('cfWhen').value = d.toISOString().slice(0, 16); } customList(); }
+}
+document.querySelectorAll('#nav [data-view]').forEach((b) => b.onclick = () => setView(b.dataset.view));
+document.querySelectorAll('#nav [data-panel]').forEach((b) => b.onclick = () => panel(b.dataset.panel));
+document.querySelectorAll('[data-x]').forEach((b) => b.onclick = () => panel(''));
+$('veil').onclick = () => panel('');
+$('feed').onclick = () => panel('settings');
+$('collapse').onclick = () => { S.min = !S.min; save(); apply(); };
+$('chips').onclick = (e) => { if (!e.target.dataset.f) return; filter = e.target.dataset.f; document.querySelectorAll('#chips .chip').forEach((c) => c.classList.toggle('on', c === e.target)); render(); };
+$('q').oninput = render;
+$('rows').onclick = (e) => {
+  const c = e.target.dataset && e.target.dataset.star; if (!c) return;
+  S.watch = S.watch.includes(c) ? S.watch.filter((x) => x !== c) : [...S.watch, c]; save(); apply(); render();
+};
+$('csv').onclick = () => {
+  if (!flights.length) return toast('Nothing to export yet.');
+  const h = ['id','vector','airline','flightNumber','portIATA','portName','terminal','scheduled','estimated','statusMsgPublic','gate','stand','acType','acRego'];
+  const csv = [h.join(',')].concat(flights.map((f) => h.map((k) => `"${String(f[k] ?? '').replace(/"/g, '""')}"`).join(','))).join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = `openfids_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+};
+$('quit').onclick = async () => {
+  if (!confirm('Stop OpenFIDS? You can start it again from your shortcut.')) return;
+  try { await fetch('/api/quit', { method: 'POST', headers: { 'X-OpenFIDS': '1' } }); } catch (e) {}
+  $('bye').classList.add('on'); clearInterval(timer);
+};
 
-    function renderFeed() {
-        const dot = $('feedDot'), banner = $('feedBanner');
-        dot.className = 'feed-dot ' + (feed.ok ? 'live' : 'down');
-        $('feedLabel').textContent = feed.ok ? 'LIVE' : 'OFFLINE';
-        banner.textContent = feed.ok ? '' : (feed.message || 'Live feed unavailable.');
-        banner.classList.toggle('show', !feed.ok);
-    }
+/* tooltips */
+const tip = $('tip');
+document.addEventListener('mousemove', (e) => {
+  const t = e.target.closest && e.target.closest('[data-t]');
+  if (!t) return tip.classList.remove('on');
+  tip.innerHTML = `<b>${esc(t.dataset.t)}</b>${esc(t.dataset.d)}<br><i>${esc(t.dataset.c)}</i>`;
+  tip.style.left = Math.min(e.clientX + 14, innerWidth - 290) + 'px'; tip.style.top = (e.clientY + 16) + 'px'; tip.classList.add('on');
+});
 
-    function renderFlights(flights) {
-        const tbody = $('flightTableBody');
-        if (!flights.length) {
-            const msg = (!feed.ok && !allFlights.length) ? 'No live data right now. See the notice above, or add your own movements with ➕.' : 'No flight records found.';
-            tbody.innerHTML = `<tr><td colspan="9"><div class="state-container">${esc(msg)}</div></td></tr>`;
-            return;
-        }
-        tbody.innerHTML = flights.map((f) => {
-            const acKey = f.acType || '738';
-            const plane = planeOf(f) || { name: `Aircraft [${acKey}]`, desc: 'Standard commercial aircraft.' };
-            const code = f.airline || '';
-            const al = airlineOf(f) || { name: `Operator [${code}]`, desc: 'Active carrier code.' };
-            const highlight = (isMilitary(f) || isRare(f)) ? 'rare-military-row' : '';
-            const arr = f.vector === 'A';
-            const raw = (f.statusMsgPublic || '').trim();
-            const low = raw.toLowerCase();
-            const statusClass = low.includes('delay') ? 'status-delayed' : (low.includes('on time') || low.includes('boarding')) ? 'status-on-time' : 'status-neutral';
-            const sched = fmtDate(f.scheduled), est = fmtDate(f.estimated);
-            return `<tr class="${highlight}">
-                <td><span class="tooltip-trigger flight-code" data-tip-title="${esc(al.name)}" data-tip-desc="${esc(al.desc)}" data-tip-code="Code: ${esc(code)}">${esc(code)}${esc(f.flightNumber)}</span>${f.custom ? '<span class="tag-custom">LOCAL</span>' : ''}</td>
-                <td>${arr ? '<span style="color: var(--success); font-weight:800;">ARR</span>' : '<span style="color: var(--accent); font-weight:800;">DEP</span>'}</td>
-                <td><strong>${esc(f.portName)}</strong><br><span style="font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">${esc(f.portIATA)}</span></td>
-                <td><span style="font-family: 'JetBrains Mono', monospace; background: rgba(255,255,255,0.04); padding: 2px 6px; border-radius: 4px;">${esc(f.terminal || 'T2')}</span></td>
-                <td><span class="time-box">${esc(sched.time)}<span class="date-sub">${esc(sched.dateStr)}</span>${f.estimated ? `<span class="time-est">Est: ${esc(est.time)}</span>` : ''}</span></td>
-                <td><span class="tooltip-trigger" style="font-family: 'JetBrains Mono', monospace; color: var(--accent);" data-tip-title="${esc(plane.name)}" data-tip-desc="${esc(plane.desc)}" data-tip-code="ICAO: ${esc(acKey)}">${esc(acKey)}</span></td>
-                <td><span class="rego-code">${esc(f.acRego || 'N/A')}</span></td>
-                <td><span style="font-family: 'JetBrains Mono', monospace;">Gate ${esc(f.gate || 'TBD')}</span></td>
-                <td><span class="status-pill ${statusClass}">${esc(raw || (arr ? 'Arriving' : 'Departing'))}</span></td>
-            </tr>`;
-        }).join('');
-    }
+/* keyboard */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { panel(''); document.activeElement.blur(); return; }
+  if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName) || e.ctrlKey || e.metaKey || e.altKey) return;
+  const m = { '/': () => { setView('board'); $('q').focus(); }, b: () => setView('board'), w: () => setView('watch'), s: () => setView('stats'), n: () => panel('add'), ',': () => panel('settings'), '[': () => $('collapse').click() };
+  if (m[e.key]) { e.preventDefault(); m[e.key](); }
+});
 
-    function filterFlights() {
-        const q = $('searchInput').value.toLowerCase();
-        renderFlights(allFlights.filter((f) => {
-            let ok = true;
-            if (currentFilter === 'A' || currentFilter === 'D') ok = f.vector === currentFilter;
-            else if (currentFilter === 'military') ok = isMilitary(f);
-            else if (currentFilter === 'rare') ok = isRare(f);
-            const hay = `${f.airline}${f.flightNumber} ${f.portName} ${f.portIATA} ${f.acType} ${f.acRego}`.toLowerCase();
-            return ok && hay.includes(q);
-        }));
-    }
+/* ---------- settings ---------- */
+$('themes').onclick = (e) => { if (e.target.dataset.t) { S.theme = e.target.dataset.t; save(); apply(); } };
+$('sCompact').onchange = (e) => { S.compact = e.target.checked; save(); apply(); };
+$('sMotion').onchange = (e) => { S.motion = e.target.checked; save(); apply(); };
+$('sAudio').onchange = (e) => { S.audio = e.target.checked; save(); if (S.audio) chime(); };
+$('sPoll').onchange = (e) => { S.poll = parseInt(e.target.value, 10); save(); apply(); poll(); };
 
-    function detectChanges(flights) {
-        let changed = false;
-        flights.forEach((f) => {
-            const key = f.id || `${f.airline}${f.flightNumber}|${f.vector}|${f.scheduled}`;
-            const status = (f.statusMsgPublic || '').trim();
-            if (!firstLoad && lastStatus.has(key) && lastStatus.get(key) !== status) changed = true;
-            lastStatus.set(key, status);
-        });
-        firstLoad = false;
-        if (changed) chime();
-    }
+async function creds() {
+  try { const c = await api('/api/credentials'); $('cEmail').value = c.email || ''; $('cPass').value = ''; $('cPass').placeholder = c.has_password ? 'Password saved (type to replace)' : 'Password';
+    $('cNote').textContent = c.from_env ? 'OPENFIDS_UPSTREAM_* environment variables are set and override this form.' : ''; } catch (e) {}
+}
+async function credReq(method, body) {
+  $('cMsg').textContent = 'Working…';
+  try {
+    const r = await fetch('/api/credentials', { method, headers: { 'Content-Type': 'application/json', 'X-OpenFIDS': '1' }, body: body ? JSON.stringify(body) : undefined });
+    if (!r.ok) throw 0; feed = (await r.json()).feed || feed;
+    $('cMsg').textContent = feed.ok ? 'Connected. The feed is live.' : (feed.message || 'Saved, but the feed is still offline.');
+    await creds(); await load();
+  } catch (e) { $('cMsg').textContent = 'Could not save. Is OpenFIDS still running?'; }
+}
+$('cSave').onclick = () => credReq('POST', { email: $('cEmail').value, password: $('cPass').value });
+$('cClear').onclick = () => credReq('DELETE');
 
-    async function fetchFlights() {
-        try {
-            const data = await api('/api/flights');
-            allFlights = data.flights || [];
-            feed = data.feed || { ok: false };
-            $('total-count').textContent = allFlights.length;
-            detectChanges(allFlights);
-        } catch (e) {
-            feed = { ok: false, message: 'OpenFIDS is not responding. Is it still running?' };
-        }
-        renderFeed();
-        filterFlights();
-    }
+/* ---------- custom movements ---------- */
+async function customList() {
+  try { const l = (await api('/api/custom-flights')).flights || [];
+    $('cfList').innerHTML = l.length ? l.map((f) => `<div class="item"><span><b>${esc(code(f))}</b> ${f.vector === 'A' ? 'from' : 'to'} ${esc(f.portName)}</span><button class="btn danger" data-del="${esc(f.id)}">Remove</button></div>`).join('') : '<p class="msg">Nothing added yet.</p>'; } catch (e) {}
+}
+$('cfAdd').onclick = async () => {
+  const v = (id) => $(id).value.trim();
+  try {
+    await api('/api/custom-flights', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ airline: v('cfAirline'), flightNumber: v('cfNumber'), acType: v('cfAcType'), acRego: v('cfRego'), portName: v('cfPort'), portIATA: v('cfIata'), vector: v('cfVector'), scheduled: v('cfWhen') + ':00', gate: v('cfGate'), status: v('cfStatus') }) });
+    ['cfAirline','cfNumber','cfAcType','cfRego','cfPort','cfIata','cfGate','cfStatus'].forEach((i) => $(i).value = '');
+    toast('Added to the board.'); customList(); load();
+  } catch (e) { toast('Could not save that movement.'); }
+};
+$('cfList').onclick = async (e) => { const id = e.target.dataset.del; if (id) { try { await api('/api/custom-flights/' + encodeURIComponent(id), { method: 'DELETE' }); customList(); load(); } catch (x) {} } };
 
-    /* ---------- custom flights ---------- */
-    async function loadCustomList() {
-        try {
-            const data = await api('/api/custom-flights');
-            const list = data.flights || [];
-            $('customList').innerHTML = list.length ? list.map((f) => `
-                <div class="custom-item">
-                    <span><code>${esc(f.airline)}${esc(f.flightNumber)}</code> · ${f.vector === 'A' ? 'ARR' : 'DEP'} · ${esc(f.portName)} · ${esc(f.acType)} ${esc(f.acRego)}</span>
-                    <button class="btn-sm btn-danger" data-del="${esc(f.id)}">Remove</button>
-                </div>`).join('') : '<div style="font-size: 12px; color: var(--text-muted);">Nothing added yet.</div>';
-        } catch (e) {}
-    }
-    function defaultWhen() {
-        const d = new Date(Date.now() - new Date().getTimezoneOffset() * 60000);
-        return d.toISOString().slice(0, 16);
-    }
-    async function addCustom() {
-        const v = (id) => $(id).value.trim();
-        const when = v('cfWhen') || defaultWhen();
-        try {
-            await post('/api/custom-flights', {
-                airline: v('cfAirline'), flightNumber: v('cfNumber'), acType: v('cfAcType'), acRego: v('cfRego'),
-                portName: v('cfPort'), portIATA: v('cfIata'), vector: v('cfVector'), scheduled: when + ':00',
-                terminal: v('cfTerminal'), gate: v('cfGate'), status: v('cfStatus'),
-            });
-            ['cfAirline', 'cfNumber', 'cfAcType', 'cfRego', 'cfPort', 'cfIata', 'cfTerminal', 'cfGate', 'cfStatus'].forEach((id) => $(id).value = '');
-            await loadCustomList();
-            await fetchFlights();
-        } catch (e) { alert('Could not save that movement.'); }
-    }
-
-    /* ---------- csv ---------- */
-    function downloadCSV() {
-        if (!allFlights.length) return alert('No flight data to export.');
-        const headers = ['id', 'vector', 'airline', 'flightNumber', 'portIATA', 'portName', 'terminal', 'scheduled', 'estimated', 'statusMsgPublic', 'gate', 'stand', 'acType', 'acRego'];
-        const rows = [headers.join(',')].concat(allFlights.map((f) => headers.map((h) => `"${String(f[h] ?? '').replace(/"/g, '""')}"`).join(',')));
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(new Blob([rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' }));
-        link.download = `cairns_airport_fids_${new Date().toISOString().slice(0, 10)}.csv`;
-        link.click();
-    }
-
-    /* ---------- wiring ---------- */
-    const modal = (id, show) => $(id).classList.toggle('active', show);
-    document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => modal(b.dataset.close, false)));
-    document.querySelectorAll('.modal-overlay').forEach((m) => m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('active'); }));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.active').forEach((m) => m.classList.remove('active')); });
-
-    $('addBtn').onclick = () => { if (!$('cfWhen').value) $('cfWhen').value = defaultWhen(); loadCustomList(); modal('customModal', true); };
-    $('cfAddBtn').onclick = addCustom;
-    $('customList').addEventListener('click', async (e) => {
-        const id = e.target.dataset && e.target.dataset.del;
-        if (!id) return;
-        try { await api('/api/custom-flights/' + encodeURIComponent(id), { method: 'DELETE' }); await loadCustomList(); await fetchFlights(); } catch (err) {}
-    });
-    const openSettings = () => { loadCreds(); modal('settingsModal', true); };
-    $('settingsBtn').onclick = openSettings;
-    $('feedBadge').style.cursor = 'pointer';
-    $('feedBadge').onclick = openSettings;
-    $('feedBanner').style.cursor = 'pointer';
-    $('feedBanner').onclick = openSettings;
-
-    async function loadCreds() {
-        try {
-            const c = await api('/api/credentials');
-            $('credEmail').value = c.email || '';
-            $('credPass').value = '';
-            $('credPass').placeholder = c.has_password ? 'Password saved (type to replace)' : 'Password';
-            $('credNote').textContent = c.from_env ? 'OPENFIDS_UPSTREAM_* environment variables are set and take priority over this form.' : '';
-        } catch (e) {}
-    }
-    async function credRequest(method, body) {
-        $('credMsg').textContent = 'Working...';
-        try {
-            const r = await fetch('/api/credentials', {
-                method, headers: { 'Content-Type': 'application/json', 'X-OpenFIDS': '1' },
-                body: body ? JSON.stringify(body) : undefined,
-            });
-            if (!r.ok) throw new Error(r.status);
-            const data = await r.json();
-            feed = data.feed || feed;
-            $('credMsg').textContent = feed.ok ? 'Connected. The feed is live.' : (feed.message || 'Saved, but the feed is still offline.');
-            $('credPass').value = '';
-            await loadCreds();
-            await fetchFlights();
-        } catch (e) { $('credMsg').textContent = 'Could not save. Is OpenFIDS still running?'; }
-    }
-    $('credSave').onclick = () => credRequest('POST', { email: $('credEmail').value, password: $('credPass').value });
-    $('credClear').onclick = () => credRequest('DELETE');
-    $('themeButtons').addEventListener('click', (e) => { if (e.target.dataset.theme) { settings.theme = e.target.dataset.theme; saveSettings(); applySettings(); } });
-    $('compactToggle').onchange = (e) => { settings.compact = e.target.checked; saveSettings(); applySettings(); };
-    $('fxToggle').onchange = (e) => { settings.fx = e.target.checked; saveSettings(); applySettings(); };
-    $('audioToggle').onchange = (e) => { settings.audio = e.target.checked; saveSettings(); if (settings.audio) chime(); };
-    $('pollSelect').onchange = (e) => { settings.poll = parseInt(e.target.value, 10); saveSettings(); startPolling(); };
-    $('filterTabs').addEventListener('click', (e) => {
-        if (!e.target.dataset.filter) return;
-        currentFilter = e.target.dataset.filter;
-        document.querySelectorAll('#filterTabs .tab-btn').forEach((b) => b.classList.toggle('active', b === e.target));
-        filterFlights();
-    });
-    $('searchInput').addEventListener('input', filterFlights);
-    $('csvBtn').onclick = downloadCSV;
-    $('quitBtn').onclick = async () => {
-        if (!confirm('Stop OpenFIDS? You can start it again from your shortcut.')) return;
-        try { await fetch('/api/quit', { method: 'POST', headers: { 'X-OpenFIDS': '1' } }); } catch (e) {}
-        $('stoppedOverlay').classList.add('show');
-        clearInterval(pollTimer);
-    };
-
-    /* ---------- start ---------- */
-    (async function init() {
-        loadSettings(); applySettings();
-        try {
-            const db = await api('/api/database');
-            aircraftDb = db.aircraft || {}; airlineDb = db.airlines || {};
-            const st = await api('/api/status');
-            $('dataDirNote').textContent = 'Your data folder: ' + st.data_dir;
-            if (st.title) { document.title = st.title; document.querySelector('.brand-text h1').textContent = st.title; }
-        } catch (e) {}
-        await fetchFlights();
-        startPolling();
-    })();
+/* ---------- start ---------- */
+(async () => {
+  if (innerWidth < 820) S.min = true;
+  apply();
+  try { const [db, st] = await Promise.all([api('/api/database'), api('/api/status')]);
+    ac = db.aircraft || {}; al = db.airlines || {}; $('dataDir').textContent = 'Data folder: ' + st.data_dir;
+    if (st.title) { $('title').textContent = st.title; document.title = st.title; } } catch (e) {}
+  tick(); setInterval(tick, 1000);
+  await load(); poll();
+})();
 })();
 </script>
 </body>
