@@ -143,6 +143,29 @@ tr.hot td:first-child,tr.rare td:first-child{box-shadow:none}tr.hot{background:c
 .card{transition:transform .25s var(--ease),border-color .25s}.card:hover{transform:translateY(-3px);border-color:var(--accent)}
 #panel [data-p]:not([hidden])>*{animation:pin .45s var(--ease) both}@keyframes pin{from{opacity:0;transform:translateX(14px)}}
 #panel [data-p]>:nth-child(2){animation-delay:.04s!important}#panel [data-p]>:nth-child(3){animation-delay:.08s!important}#panel [data-p]>:nth-child(4){animation-delay:.12s!important}#panel [data-p]>:nth-child(5){animation-delay:.16s!important}#panel [data-p]>:nth-child(n+6){animation-delay:.2s!important}
+
+/* ---- v4: merged status, filter-drawer fix, silent refresh, liquid glass ---- */
+.advin{padding:0}.advin>*{outline-offset:-2px}
+.adv{visibility:hidden;transition:grid-template-rows .4s var(--ease),margin .4s var(--ease),visibility 0s .4s}
+.adv.open{visibility:visible;transition:grid-template-rows .4s var(--ease),margin .4s var(--ease),visibility 0s}
+.st{font:600 16px var(--board);margin-top:1px}.st.ok{color:var(--ok)}.st.late{color:var(--warn)}.st.bad{color:var(--bad)}.st.flip{animation:flap .55s ease-in-out}
+.rin{animation:rowin .45s var(--ease)}.rout{animation:rout .3s ease forwards;pointer-events:none}@keyframes rout{to{opacity:0;transform:translateX(14px)}}
+body.glass{--g:rgba(255,255,255,.07);--gb:rgba(255,255,255,.2);--gl:rgba(255,255,255,.4);--glow:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),rgba(255,255,255,.13),transparent 60%)}
+body.glass.t-day,body.glass.t-sky{--g:rgba(255,255,255,.5);--gb:rgba(255,255,255,.85);--gl:#fff;--glow:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),rgba(255,255,255,.7),transparent 60%)}
+body.glass::before{content:'';position:fixed;inset:-10%;z-index:-1;pointer-events:none;filter:blur(30px);animation:drift 26s ease-in-out infinite alternate;
+ background:radial-gradient(40% 40% at 20% 25%,color-mix(in srgb,var(--accent) 55%,transparent),transparent 70%),radial-gradient(35% 35% at 80% 20%,color-mix(in srgb,var(--arr) 40%,transparent),transparent 70%),radial-gradient(45% 45% at 70% 85%,color-mix(in srgb,var(--dep) 45%,transparent),transparent 70%)}
+@keyframes drift{to{transform:translate3d(4%,-3%,0) scale(1.12) rotate(6deg)}}
+body.glass :where(aside,.wrap,.card,.btn,.chip:not(.on),.search input,input.in,select.in,.themes button,.item),body.glass #panel,body.glass #tip{
+ background-color:var(--g);background-image:var(--glow);background-attachment:fixed;backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%);
+ border-color:var(--gb);box-shadow:inset 0 1px 0 var(--gl),inset 0 -1px 0 rgba(255,255,255,.05),0 10px 30px rgba(0,0,0,.22)}
+body.glass #panel{backdrop-filter:blur(28px) saturate(190%);-webkit-backdrop-filter:blur(28px) saturate(190%)}
+body.glass th{background:rgba(255,255,255,.06);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+body.glass tbody tr:hover{background:rgba(255,255,255,.07)}
+body.glass .fl{background:rgba(255,255,255,.1);box-shadow:inset 0 1px 0 var(--gl)}
+body.glass .toast{background:color-mix(in srgb,var(--accent) 75%,transparent);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 8px 24px rgba(0,0,0,.3)}
+body.glass .bub{background:color-mix(in srgb,var(--accent) 70%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 4px 18px color-mix(in srgb,var(--accent) 45%,transparent)}
+body.glass .nbub{background:rgba(255,255,255,.1);box-shadow:inset 0 1px 0 var(--gl),inset 3px 0 var(--accent)}
+body.glass #veil{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 </style>
 </head>
 <body>
@@ -187,7 +210,7 @@ tr.hot td:first-child,tr.rare td:first-child{box-shadow:none}tr.hot{background:c
       <button class="btn" id="fxClear">Clear all filters</button>
     </div></div>
     <div class="wrap"><table>
-      <thead><tr><th></th><th>Flight</th><th>Route</th><th>Scheduled</th><th>Aircraft</th><th>Registration</th><th>Gate</th><th>Status</th></tr></thead>
+      <thead><tr><th></th><th>Flight and status</th><th>Route</th><th>Scheduled</th><th>Aircraft</th><th>Registration</th><th>Gate</th></tr></thead>
       <tbody id="rows"></tbody>
     </table></div>
   </section>
@@ -217,6 +240,7 @@ tr.hot td:first-child,tr.rare td:first-child{box-shadow:none}tr.hot{background:c
     <div class="ph"><h2>Settings</h2><button class="x" data-x>✕</button></div>
     <h4>Theme</h4>
     <div class="themes" id="themes"><button data-t="default" style="--sw:#ffb000">Amber</button><button data-t="runway" style="--sw:#5dff9a">Runway</button><button data-t="blue" style="--sw:#7cb4ff">Blue hour</button><button data-t="violet" style="--sw:#a78bfa">Violet</button><button data-t="sunset" style="--sw:#ff7a59">Sunset</button><button data-t="mint" style="--sw:#5eead4">Mint</button><button data-t="mono" style="--sw:#e5e5e5">Mono</button><button data-t="contrast" style="--sw:#ffff00">Contrast</button><button data-t="day" style="--sw:#b36b00">Daylight</button><button data-t="sky" style="--sw:#0b6bcb">Sky</button></div>
+    <div class="sw"><div>Liquid glass<small>Frosted, see-through surfaces with a glow that follows your cursor</small></div><input type="checkbox" id="sGlass"></div>
     <div class="sw"><div>Compact rows<small>Fit more flights on screen</small></div><input type="checkbox" id="sCompact"></div>
     <div class="sw"><div>Motion<small>Split-flap flips and slides</small></div><input type="checkbox" id="sMotion"></div>
     <div class="sw"><div>Chime on watchlist changes<small>Plays when a starred flight updates</small></div><input type="checkbox" id="sAudio"></div>
@@ -253,7 +277,7 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const api = async (u, o) => { const r = await fetch(u, o); if (!r.ok) throw new Error(r.status); return r.json(); };
 const LS = 'openfids.v2';
-let S = { theme: 'default', compact: false, motion: true, audio: false, poll: 30000, min: false, watch: [], smooth: true, dircolor: true, h24: true, zebra: false, remember: true, size: 'm', f: 'all', fx: {} };
+let S = { theme: 'default', compact: false, motion: true, audio: false, poll: 30000, min: false, watch: [], smooth: true, dircolor: true, h24: true, zebra: false, remember: true, size: 'm', f: 'all', fx: {}, glass: false };
 let fx = { al: '', ac: '', st: '', win: '' }, animNext = false;
 try { Object.assign(S, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (e) {}
 const save = () => { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} };
@@ -276,10 +300,10 @@ function flap(el, text) {
 }
 
 function apply() {
-  document.body.className = (S.theme !== 'default' ? 't-' + S.theme : '') + (S.compact ? ' compact' : '') + (S.motion ? '' : ' nomo') + (S.dircolor ? '' : ' nocolor') + (S.zebra ? ' zebra' : '') + (S.size !== 'm' ? ' sz-' + S.size : '');
+  document.body.className = (S.theme !== 'default' ? 't-' + S.theme : '') + (S.compact ? ' compact' : '') + (S.motion ? '' : ' nomo') + (S.dircolor ? '' : ' nocolor') + (S.zebra ? ' zebra' : '') + (S.size !== 'm' ? ' sz-' + S.size : '') + (S.glass ? ' glass' : '');
   document.documentElement.classList.toggle('smooth', S.smooth); $('app').classList.toggle('min', S.min); moveBubs(); $('colIc').textContent = S.min ? '»' : '«';
   document.querySelectorAll('#themes button').forEach((b) => b.classList.toggle('on', b.dataset.t === S.theme));
-  $('sCompact').checked = S.compact; $('sMotion').checked = S.motion; $('sAudio').checked = S.audio; $('sSmooth').checked = S.smooth; $('sColor').checked = S.dircolor; $('sH24').checked = S.h24; $('sZebra').checked = S.zebra; $('sRemember').checked = S.remember; $('sSize').value = S.size; $('sPoll').value = String(S.poll);
+  $('sCompact').checked = S.compact; $('sMotion').checked = S.motion; $('sAudio').checked = S.audio; $('sSmooth').checked = S.smooth; $('sColor').checked = S.dircolor; $('sH24').checked = S.h24; $('sZebra').checked = S.zebra; $('sRemember').checked = S.remember; $('sSize').value = S.size; $('sGlass').checked = S.glass; $('sPoll').value = String(S.poll);
   document.documentElement.style.setProperty('--poll', S.poll + 'ms');
   $('wCount').textContent = S.watch.length || '';
 }
@@ -315,27 +339,52 @@ function visible() {
     return terms.every((t) => hay.includes(t));
   });
 }
+function statusInfo(f) {
+  const raw = (f.statusMsgPublic || '').trim(), lo = raw.toLowerCase(), s = new Date(f.scheduled), e = new Date(f.estimated);
+  const diff = f.estimated && !isNaN(s) && !isNaN(e) ? Math.round((e - s) / 60000) : 0;
+  const hhmm = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  if (lo.includes('cancel')) return { t: 'Cancelled', c: 'bad' };
+  if (diff >= 5) return { t: `Delayed by ${hhmm(diff)} hours`, c: 'late' };
+  if (lo.includes('delay')) return { t: raw, c: 'late' };
+  if (diff <= -5) return { t: `Early by ${hhmm(-diff)} hours`, c: 'ok' };
+  if (!raw) return { t: 'Scheduled', c: '' };
+  return { t: /on time/.test(lo) ? 'On time' : raw, c: /on time|board|land|arriv|depart|gate/.test(lo) ? 'ok' : '' };
+}
+function rowParts(f) {
+  const p = plane(f) || { name: `Aircraft ${f.acType || ''}`, desc: 'No details on file. Add it in aircraft.json.' };
+  const a = airline(f) || { name: `Operator ${f.airline || ''}`, desc: 'No details on file. Add it in airlines.json.' };
+  const arr = f.vector === 'A', k = key(f), st = statusInfo(f), on = S.watch.includes(code(f));
+  const cls = `${arr ? 'ra' : 'rd'} ${mil(f) ? 'hot' : rare(f) ? 'rare' : ''}`.trim();
+  const html = `<td><button class="star${on ? ' on' : ''}" data-star="${esc(code(f))}" title="${on ? 'Unfollow' : 'Follow'} ${esc(code(f))}">★</button></td>
+    <td><span class="code tip" data-t="${esc(a.name)}" data-d="${esc(a.desc)}" data-c="${esc(f.airline)}">${esc(code(f))}</span>${mil(f) ? '<span class="tag hot">Military</span>' : rare(f) ? '<span class="tag rare">Rare</span>' : ''}${f.custom ? '<span class="tag">yours</span>' : ''}
+      <div class="dir ${arr ? 'a' : 'd'}">${arr ? '▼ Arriving' : '▲ Departing'}</div><div class="st ${st.c}${changed.has(k) && S.motion ? ' flip' : ''}">${esc(st.t)}</div></td>
+    <td><b>${esc(f.portName)}</b><div class="mut">${esc(f.portIATA)} · ${esc(f.terminal || '')}</div></td>
+    <td><span class="time">${esc(hm(f.scheduled))}</span> <span class="mut">${esc(day(f.scheduled))}</span>${f.estimated ? `<div class="mut">Est ${esc(hm(f.estimated))}</div>` : ''}</td>
+    <td><span class="tip" data-t="${esc(p.name)}" data-d="${esc(p.desc)}" data-c="${esc(f.acType)}">${esc(f.acType || '')}</span></td>
+    <td>${esc(f.acRego || '')}</td><td>${esc(f.gate || '')}</td>`;
+  return { k, cls, html };
+}
+/* Silent refresh: rows are matched by key, so only changed rows update and single rows fade in or out. */
 function render() {
-  const list = visible(), tb = $('rows'); if (animNext) { tb.classList.remove('swap'); void tb.offsetWidth; tb.classList.add('swap'); animNext = false; }
+  const list = visible(), tb = $('rows'), swap = animNext; animNext = false;
+  if (swap) { tb.textContent = ''; tb.classList.remove('swap'); void tb.offsetWidth; tb.classList.add('swap'); }
   if (!list.length) {
     const msg = view === 'watch' ? 'No starred flights on the board. Click ★ next to a flight to follow it.' : (!feed.ok && !flights.length ? 'No live data right now. Open the feed status in the menu, or add your own movements.' : 'No flights match.');
-    tb.innerHTML = `<tr><td colspan="8" class="empty">${esc(msg)}</td></tr>`; return;
+    tb.innerHTML = `<tr class="emp"><td colspan="7" class="empty">${esc(msg)}</td></tr>`; return;
   }
-  tb.innerHTML = list.map((f, ix) => {
-    const p = plane(f) || { name: `Aircraft ${f.acType || ''}`, desc: 'No details on file. Add it in aircraft.json.' };
-    const a = airline(f) || { name: `Operator ${f.airline || ''}`, desc: 'No details on file. Add it in airlines.json.' };
-    const st = (f.statusMsgPublic || '').trim(), lo = st.toLowerCase(), arr = f.vector === 'A', k = key(f);
-    const cls = lo.includes('delay') || lo.includes('cancel') ? 'late' : (lo.includes('on time') || lo.includes('boarding') || lo.includes('landed')) ? 'ok' : '';
-    const on = S.watch.includes(code(f));
-    return `<tr style="--i:${Math.min(ix, 10)}" class="${arr ? 'ra' : 'rd'} ${mil(f) ? 'hot' : rare(f) ? 'rare' : ''}${changed.has(k) ? ' flash' : ''}">
-      <td><button class="star${on ? ' on' : ''}" data-star="${esc(code(f))}" title="${on ? 'Unfollow' : 'Follow'} ${esc(code(f))}">★</button></td>
-      <td><span class="code tip" data-t="${esc(a.name)}" data-d="${esc(a.desc)}" data-c="${esc(f.airline)}">${esc(code(f))}</span>${mil(f) ? '<span class="tag hot">Military</span>' : rare(f) ? '<span class="tag rare">Rare</span>' : ''}${f.custom ? '<span class="tag">yours</span>' : ''}<div class="dir ${arr ? 'a' : 'd'}">${arr ? '▼ Arrival' : '▲ Departure'}</div></td>
-      <td><b>${esc(f.portName)}</b><div class="mut">${esc(f.portIATA)} · ${esc(f.terminal || '')}</div></td>
-      <td><span class="time">${esc(hm(f.scheduled))}</span> <span class="mut">${esc(day(f.scheduled))}</span>${f.estimated ? `<div class="mut">Est ${esc(hm(f.estimated))}</div>` : ''}</td>
-      <td><span class="tip" data-t="${esc(p.name)}" data-d="${esc(p.desc)}" data-c="${esc(f.acType)}">${esc(f.acType || '')}</span></td>
-      <td>${esc(f.acRego || '')}</td><td>${esc(f.gate || '')}</td>
-      <td><span class="pill ${cls}${changed.has(k) && S.motion ? ' flip' : ''}">${esc(st || (arr ? 'Arriving' : 'Departing'))}</span></td></tr>`;
-  }).join('');
+  const emp = tb.querySelector('.emp'); if (emp) emp.remove();
+  const rows = new Map([...tb.children].filter((r) => r.dataset.k).map((r) => [r.dataset.k, r]));
+  const seen = new Set(); let prev = null;
+  list.forEach((f, ix) => {
+    const { k, cls, html } = rowParts(f); let tr = rows.get(k);
+    if (!tr) { tr = document.createElement('tr'); tr.dataset.k = k; tr.className = cls + (swap ? '' : ' rin'); tr.style.setProperty('--i', Math.min(ix, 10)); tr.innerHTML = html; tr._sig = cls + html; }
+    else { tr.classList.remove('rout'); if (tr._sig !== cls + html) { tr.className = cls + (changed.has(k) ? ' flash' : ''); tr.innerHTML = html; tr._sig = cls + html; } }
+    seen.add(k);
+    const want = prev ? prev.nextElementSibling : tb.firstElementChild;
+    if (tr !== want) tb.insertBefore(tr, want);
+    prev = tr;
+  });
+  rows.forEach((tr, k) => { if (!seen.has(k)) { tr.classList.add('rout'); setTimeout(() => { if (tr.classList.contains('rout')) tr.remove(); }, 320); } });
 }
 
 function track() {
@@ -360,6 +409,7 @@ async function load() {
 /* ---------- stats ---------- */
 function top(fn, n = 6) { const m = {}; flights.forEach((f) => { const k = fn(f); if (k) m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, n); }
 function bars(el, rows) {
+  const sig = JSON.stringify(rows); if (el.dataset.sig === sig) return; el.dataset.sig = sig;
   const max = Math.max(1, ...rows.map((r) => r[1]));
   el.innerHTML = rows.length ? rows.map(([l, n]) => `<div class="row"><span>${esc(l)}</span><div><i style="--w:${Math.round(n / max * 100)}%"></i></div><b>${n}</b></div>`).join('') : '<div class="mut">No data yet.</div>';
 }
@@ -488,6 +538,9 @@ $('mf').onclick = () => $('adv').classList.toggle('open');
 $('fxClear').onclick = () => { fx = { al: '', ac: '', st: '', win: '' }; $('q').value = ''; keep(); animNext = true; fillFilters(); render(); };
 [['sSmooth', 'smooth'], ['sColor', 'dircolor'], ['sH24', 'h24'], ['sZebra', 'zebra'], ['sRemember', 'remember']].forEach(([id, k]) => $(id).onchange = (e) => { S[k] = e.target.checked; save(); apply(); render(); tick(); });
 $('sSize').onchange = (e) => { S.size = e.target.value; save(); apply(); moveBubs(); };
+
+$('sGlass').onchange = (e) => { S.glass = e.target.checked; save(); apply(); };
+let gp = 0; addEventListener('mousemove', (e) => { if (!S.glass || gp) return; gp = requestAnimationFrame(() => { gp = 0; const r = document.documentElement.style; r.setProperty('--mx', e.clientX + 'px'); r.setProperty('--my', e.clientY + 'px'); }); });
 
 /* ---------- start ---------- */
 (async () => {
