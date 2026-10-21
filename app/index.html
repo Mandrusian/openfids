@@ -166,6 +166,24 @@ body.glass .toast{background:color-mix(in srgb,var(--accent) 75%,transparent);ba
 body.glass .bub{background:color-mix(in srgb,var(--accent) 70%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 4px 18px color-mix(in srgb,var(--accent) 45%,transparent)}
 body.glass .nbub{background:rgba(255,255,255,.1);box-shadow:inset 0 1px 0 var(--gl),inset 3px 0 var(--accent)}
 body.glass #veil{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+
+/* ---- v5: calmer colours, patterns for both directions, settings tabs, colour pickers ---- */
+body:not(#x){--arr:var(--accent);--dep:color-mix(in srgb,var(--text) 72%,var(--bg))}
+body.nocolor:not(#x){--arr:var(--mute);--dep:var(--mute)}
+.code{color:var(--text)}
+th:first-child,td:first-child{width:1%;padding-left:18px;padding-right:2px}
+td:first-child::before{width:6px}
+tr.ra td:first-child::before{background:radial-gradient(circle,var(--arr) 1.8px,transparent 2.4px) 0 0/6px 8px}
+tr.rd td:first-child::before{background:repeating-linear-gradient(45deg,var(--dep) 0 3px,transparent 3px 6px)}
+.ds{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8px;margin-top:1px}
+.ds .dir{font-size:12px}.ds .st{margin:0;font:500 15px var(--body)}.ds .st::before{content:'·';margin-right:8px;color:var(--mute)}
+.tabs{display:flex;gap:6px;position:relative;margin:0 0 4px}
+details.mt{margin:12px 0}details.mt summary{cursor:pointer;padding:9px 0;color:var(--mute);font-size:13px}details.mt summary:hover{color:var(--text)}
+#cGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:6px 0 10px}
+.cp{display:flex;align-items:center;gap:10px;font-size:13px}
+.cp input[type=color]{width:36px;height:30px;padding:0;border:1px solid var(--line);border-radius:7px;background:none;cursor:pointer;flex:none}
+.cprow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}.cprow small{display:block;color:var(--mute);font-size:12px}
+.cprow input[type=color]{width:48px;height:34px}
 </style>
 </head>
 <body>
@@ -238,26 +256,40 @@ body.glass #veil{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 
   <div data-p="settings" hidden>
     <div class="ph"><h2>Settings</h2><button class="x" data-x>✕</button></div>
-    <h4>Theme</h4>
-    <div class="themes" id="themes"><button data-t="default" style="--sw:#ffb000">Amber</button><button data-t="runway" style="--sw:#5dff9a">Runway</button><button data-t="blue" style="--sw:#7cb4ff">Blue hour</button><button data-t="violet" style="--sw:#a78bfa">Violet</button><button data-t="sunset" style="--sw:#ff7a59">Sunset</button><button data-t="mint" style="--sw:#5eead4">Mint</button><button data-t="mono" style="--sw:#e5e5e5">Mono</button><button data-t="contrast" style="--sw:#ffff00">Contrast</button><button data-t="day" style="--sw:#b36b00">Daylight</button><button data-t="sky" style="--sw:#0b6bcb">Sky</button></div>
-    <div class="sw"><div>Liquid glass<small>Frosted, see-through surfaces with a glow that follows your cursor</small></div><input type="checkbox" id="sGlass"></div>
-    <div class="sw"><div>Compact rows<small>Fit more flights on screen</small></div><input type="checkbox" id="sCompact"></div>
-    <div class="sw"><div>Motion<small>Split-flap flips and slides</small></div><input type="checkbox" id="sMotion"></div>
-    <div class="sw"><div>Chime on watchlist changes<small>Plays when a starred flight updates</small></div><input type="checkbox" id="sAudio"></div>
-    <div class="sw"><div>Smooth scrolling<small>Glide when changing views</small></div><input type="checkbox" id="sSmooth"></div>
-    <div class="sw"><div>Colour-code arrivals and departures<small>Symbols and stripes always show</small></div><input type="checkbox" id="sColor"></div>
-    <div class="sw"><div>24-hour time<small>Clock and board times</small></div><input type="checkbox" id="sH24"></div>
-    <div class="sw"><div>Striped rows<small>Easier to follow across the board</small></div><input type="checkbox" id="sZebra"></div>
-    <div class="sw"><div>Remember my filters<small>Restore them next time you open OpenFIDS</small></div><input type="checkbox" id="sRemember"></div>
-    <h4>Text size</h4><select class="in" id="sSize"><option value="s">Small</option><option value="m">Normal</option><option value="l">Large</option></select>
-    <h4>Refresh every</h4>
-    <select class="in" id="sPoll"><option value="5000">5 seconds</option><option value="15000">15 seconds</option><option value="30000">30 seconds</option><option value="60000">60 seconds</option></select>
-    <h4>Airport feed login</h4>
-    <p class="mut" style="margin-bottom:8px">Only needed if the airport site asks for one. Saved in plain text in your data folder.</p>
-    <div class="f"><input class="in" id="cEmail" placeholder="Email" autocomplete="off"><input class="in" id="cPass" type="password" placeholder="Password" autocomplete="new-password"></div>
-    <div style="display:flex;gap:8px"><button class="btn pri" id="cSave" style="margin:0;flex:1">Save and test</button><button class="btn danger" id="cClear">Clear</button></div>
-    <p class="msg" id="cMsg"></p><p class="msg" id="cNote" style="color:var(--warn)"></p>
-    <p class="msg" id="dataDir" style="word-break:break-all"></p>
+    <div class="tabs" id="tabs"><span class="bub" id="tbub"></span><button class="chip on" data-tab="look">Appearance</button><button class="chip" data-tab="how">Behaviour</button><button class="chip" data-tab="feed">Feed</button></div>
+
+    <div data-pane="look">
+      <h4>Theme</h4>
+      <div class="themes" id="themes"><button data-t="default" style="--sw:#ffb000">Amber</button><button data-t="runway" style="--sw:#5dff9a">Runway</button><button data-t="blue" style="--sw:#7cb4ff">Blue hour</button><button data-t="violet" style="--sw:#a78bfa">Violet</button><button data-t="sunset" style="--sw:#ff7a59">Sunset</button><button data-t="mint" style="--sw:#5eead4">Mint</button><button data-t="mono" style="--sw:#e5e5e5">Mono</button><button data-t="contrast" style="--sw:#ffff00">Contrast</button><button data-t="day" style="--sw:#b36b00">Daylight</button><button data-t="sky" style="--sw:#0b6bcb">Sky</button></div>
+      <p class="msg">Picking a theme resets any custom colours.</p>
+      <div class="cprow"><div>Accent colour<small>Highlights, buttons and the arrivals pattern</small></div><input type="color" id="cAccent"></div>
+      <details class="mt"><summary>Customise every colour</summary><div id="cGrid"></div></details>
+      <button class="btn" id="cReset">Reset colours</button>
+      <div class="sw"><div>Liquid glass<small>Frosted, see-through surfaces with a glow that follows your cursor</small></div><input type="checkbox" id="sGlass"></div>
+      <div class="sw"><div>Colour-code arrivals and departures<small>The dotted and striped patterns always show</small></div><input type="checkbox" id="sColor"></div>
+      <div class="sw"><div>Striped rows<small>Easier to follow across the board</small></div><input type="checkbox" id="sZebra"></div>
+      <h4>Text size</h4><select class="in" id="sSize"><option value="s">Small</option><option value="m">Normal</option><option value="l">Large</option></select>
+    </div>
+
+    <div data-pane="how" hidden>
+      <div class="sw"><div>Compact rows<small>Fit more flights on screen</small></div><input type="checkbox" id="sCompact"></div>
+      <div class="sw"><div>Motion<small>Split-flap flips and slides</small></div><input type="checkbox" id="sMotion"></div>
+      <div class="sw"><div>Smooth scrolling<small>Glide when changing views</small></div><input type="checkbox" id="sSmooth"></div>
+      <div class="sw"><div>Chime on watchlist changes<small>Plays when a starred flight updates</small></div><input type="checkbox" id="sAudio"></div>
+      <div class="sw"><div>24-hour time<small>Clock and board times</small></div><input type="checkbox" id="sH24"></div>
+      <div class="sw"><div>Remember my filters<small>Restore them next time you open OpenFIDS</small></div><input type="checkbox" id="sRemember"></div>
+      <h4>Refresh every</h4>
+      <select class="in" id="sPoll"><option value="5000">5 seconds</option><option value="15000">15 seconds</option><option value="30000">30 seconds</option><option value="60000">60 seconds</option></select>
+    </div>
+
+    <div data-pane="feed" hidden>
+      <h4>Airport feed login</h4>
+      <p class="mut" style="margin-bottom:8px">Only needed if the airport site asks for one. Saved in plain text in your data folder.</p>
+      <div class="f"><input class="in" id="cEmail" placeholder="Email" autocomplete="off"><input class="in" id="cPass" type="password" placeholder="Password" autocomplete="new-password"></div>
+      <div style="display:flex;gap:8px"><button class="btn pri" id="cSave" style="margin:0;flex:1">Save and test</button><button class="btn danger" id="cClear">Clear</button></div>
+      <p class="msg" id="cMsg"></p><p class="msg" id="cNote" style="color:var(--warn)"></p>
+      <p class="msg" id="dataDir" style="word-break:break-all"></p>
+    </div>
   </div>
 
   <div data-p="help" hidden>
@@ -277,7 +309,7 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const api = async (u, o) => { const r = await fetch(u, o); if (!r.ok) throw new Error(r.status); return r.json(); };
 const LS = 'openfids.v2';
-let S = { theme: 'default', compact: false, motion: true, audio: false, poll: 30000, min: false, watch: [], smooth: true, dircolor: true, h24: true, zebra: false, remember: true, size: 'm', f: 'all', fx: {}, glass: false };
+let S = { theme: 'default', compact: false, motion: true, audio: false, poll: 30000, min: false, watch: [], smooth: true, dircolor: true, h24: true, zebra: false, remember: true, size: 'm', f: 'all', fx: {}, glass: false, colors: {} };
 let fx = { al: '', ac: '', st: '', win: '' }, animNext = false;
 try { Object.assign(S, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (e) {}
 const save = () => { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} };
@@ -305,7 +337,7 @@ function apply() {
   document.querySelectorAll('#themes button').forEach((b) => b.classList.toggle('on', b.dataset.t === S.theme));
   $('sCompact').checked = S.compact; $('sMotion').checked = S.motion; $('sAudio').checked = S.audio; $('sSmooth').checked = S.smooth; $('sColor').checked = S.dircolor; $('sH24').checked = S.h24; $('sZebra').checked = S.zebra; $('sRemember').checked = S.remember; $('sSize').value = S.size; $('sGlass').checked = S.glass; $('sPoll').value = String(S.poll);
   document.documentElement.style.setProperty('--poll', S.poll + 'ms');
-  $('wCount').textContent = S.watch.length || '';
+  $('wCount').textContent = S.watch.length || ''; applyColors();
 }
 function poll() { clearInterval(timer); timer = setInterval(load, S.poll); }
 function chime() {
@@ -342,11 +374,11 @@ function visible() {
 function statusInfo(f) {
   const raw = (f.statusMsgPublic || '').trim(), lo = raw.toLowerCase(), s = new Date(f.scheduled), e = new Date(f.estimated);
   const diff = f.estimated && !isNaN(s) && !isNaN(e) ? Math.round((e - s) / 60000) : 0;
-  const hhmm = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  const dur = (m) => m < 60 ? `${m} min` : `${Math.floor(m / 60)} h` + (m % 60 ? ` ${m % 60} min` : '');
   if (lo.includes('cancel')) return { t: 'Cancelled', c: 'bad' };
-  if (diff >= 5) return { t: `Delayed by ${hhmm(diff)} hours`, c: 'late' };
+  if (diff >= 5) return { t: `Delayed by ${dur(diff)}`, c: 'late' };
   if (lo.includes('delay')) return { t: raw, c: 'late' };
-  if (diff <= -5) return { t: `Early by ${hhmm(-diff)} hours`, c: 'ok' };
+  if (diff <= -5) return { t: `Early by ${dur(-diff)}`, c: 'ok' };
   if (!raw) return { t: 'Scheduled', c: '' };
   return { t: /on time/.test(lo) ? 'On time' : raw, c: /on time|board|land|arriv|depart|gate/.test(lo) ? 'ok' : '' };
 }
@@ -357,7 +389,7 @@ function rowParts(f) {
   const cls = `${arr ? 'ra' : 'rd'} ${mil(f) ? 'hot' : rare(f) ? 'rare' : ''}`.trim();
   const html = `<td><button class="star${on ? ' on' : ''}" data-star="${esc(code(f))}" title="${on ? 'Unfollow' : 'Follow'} ${esc(code(f))}">★</button></td>
     <td><span class="code tip" data-t="${esc(a.name)}" data-d="${esc(a.desc)}" data-c="${esc(f.airline)}">${esc(code(f))}</span>${mil(f) ? '<span class="tag hot">Military</span>' : rare(f) ? '<span class="tag rare">Rare</span>' : ''}${f.custom ? '<span class="tag">yours</span>' : ''}
-      <div class="dir ${arr ? 'a' : 'd'}">${arr ? '▼ Arriving' : '▲ Departing'}</div><div class="st ${st.c}${changed.has(k) && S.motion ? ' flip' : ''}">${esc(st.t)}</div></td>
+      <div class="ds"><span class="dir ${arr ? 'a' : 'd'}">${arr ? '▼ Arriving' : '▲ Departing'}</span><span class="st ${st.c}${changed.has(k) && S.motion ? ' flip' : ''}">${esc(st.t)}</span></div></td>
     <td><b>${esc(f.portName)}</b><div class="mut">${esc(f.portIATA)} · ${esc(f.terminal || '')}</div></td>
     <td><span class="time">${esc(hm(f.scheduled))}</span> <span class="mut">${esc(day(f.scheduled))}</span>${f.estimated ? `<div class="mut">Est ${esc(hm(f.estimated))}</div>` : ''}</td>
     <td><span class="tip" data-t="${esc(p.name)}" data-d="${esc(p.desc)}" data-c="${esc(f.acType)}">${esc(f.acType || '')}</span></td>
@@ -440,7 +472,7 @@ function setView(v) {
 function panel(name) {
   document.querySelectorAll('#panel [data-p]').forEach((s) => s.hidden = s.dataset.p !== name);
   $('panel').classList.toggle('open', !!name); $('veil').classList.toggle('on', !!name);
-  if (name === 'settings') creds(); if (name === 'add') { if (!$('cfWhen').value) { const d = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4); $('cfWhen').value = d.toISOString().slice(0, 16); } customList(); }
+  if (name === 'settings') { creds(); buildGrid(); placeTab(); } if (name === 'add') { if (!$('cfWhen').value) { const d = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4); $('cfWhen').value = d.toISOString().slice(0, 16); } customList(); }
 }
 document.querySelectorAll('#nav [data-view]').forEach((b) => b.onclick = () => setView(b.dataset.view));
 document.querySelectorAll('#nav [data-panel]').forEach((b) => b.onclick = () => panel(b.dataset.panel));
@@ -484,7 +516,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 /* ---------- settings ---------- */
-$('themes').onclick = (e) => { if (e.target.dataset.t) { S.theme = e.target.dataset.t; save(); apply(); } };
+$('themes').onclick = (e) => { if (e.target.dataset.t) { S.theme = e.target.dataset.t; S.colors = {}; save(); apply(); buildGrid(); } };
 $('sCompact').onchange = (e) => { S.compact = e.target.checked; save(); apply(); };
 $('sMotion').onchange = (e) => { S.motion = e.target.checked; save(); apply(); };
 $('sAudio').onchange = (e) => { S.audio = e.target.checked; save(); if (S.audio) chime(); };
@@ -541,6 +573,36 @@ $('sSize').onchange = (e) => { S.size = e.target.value; save(); apply(); moveBub
 
 $('sGlass').onchange = (e) => { S.glass = e.target.checked; save(); apply(); };
 let gp = 0; addEventListener('mousemove', (e) => { if (!S.glass || gp) return; gp = requestAnimationFrame(() => { gp = 0; const r = document.documentElement.style; r.setProperty('--mx', e.clientX + 'px'); r.setProperty('--my', e.clientY + 'px'); }); });
+
+/* ---------- colour pickers and settings tabs ---------- */
+const COLS = [['bg', 'Background'], ['panel', 'Panels'], ['card', 'Cards'], ['text', 'Text'], ['mute', 'Secondary text'], ['accent', 'Accent'], ['arr', 'Arrivals'], ['dep', 'Departures'], ['ok', 'On time'], ['warn', 'Delays'], ['bad', 'Alerts']];
+const lum = (hex) => { const n = parseInt(hex.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
+function toHex(name) {
+  const el = document.createElement('span'); el.style.color = `var(--${name})`; document.body.appendChild(el);
+  const c = getComputedStyle(el).color; el.remove();
+  let v = (c.match(/[\d.]+/g) || [0, 0, 0]).slice(0, 3).map(Number); if (c.startsWith('color(')) v = v.map((x) => x * 255);
+  return '#' + v.map((x) => Math.max(0, Math.min(255, Math.round(x))).toString(16).padStart(2, '0')).join('');
+}
+function applyColors() {
+  const b = document.body.style, c = S.colors || {};
+  COLS.forEach(([k]) => c[k] ? b.setProperty('--' + k, c[k]) : b.removeProperty('--' + k));
+  c.accent ? b.setProperty('--on-accent', lum(c.accent) > .6 ? '#111' : '#fff') : b.removeProperty('--on-accent');
+  c.bg ? b.setProperty('--line', lum(c.bg) > .5 ? 'rgba(0,0,0,.12)' : 'rgba(255,255,255,.1)') : b.removeProperty('--line');
+}
+function buildGrid() {
+  $('cGrid').innerHTML = COLS.map(([k, l]) => `<label class="cp"><input type="color" data-col="${k}" value="${toHex(k)}"><span>${l}</span></label>`).join('');
+  $('cAccent').value = toHex('accent');
+}
+$('cGrid').oninput = (e) => { const k = e.target.dataset.col; if (!k) return; S.colors[k] = e.target.value; save(); applyColors(); if (k === 'accent') $('cAccent').value = e.target.value; };
+$('cAccent').oninput = (e) => { S.colors.accent = e.target.value; save(); applyColors(); const g = document.querySelector('[data-col="accent"]'); if (g) g.value = e.target.value; };
+$('cReset').onclick = () => { S.colors = {}; save(); applyColors(); buildGrid(); toast('Colours reset to the theme.'); };
+function placeTab() { place($('tbub'), document.querySelector('#tabs .chip.on')); }
+$('tabs').onclick = (e) => {
+  const t = e.target.dataset.tab; if (!t) return;
+  document.querySelectorAll('#tabs .chip').forEach((c) => c.classList.toggle('on', c === e.target));
+  document.querySelectorAll('[data-pane]').forEach((s) => s.hidden = s.dataset.pane !== t);
+  placeTab();
+};
 
 /* ---------- start ---------- */
 (async () => {
