@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a0e19"><meta name="description" content="OpenFIDS: a beautiful, free and open source flight information board. Try a live Cairns Airport demo in your browser.">
+<meta property="og:title" content="OpenFIDS — The flight board you'll love looking at">
+<meta property="og:description" content="Your own flight information display. Linux, macOS and Windows."><title>OpenFIDS — Flight information, beautifully displayed</title>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css"><script src="./site.js" defer></script>
+</head><body>
+<header class="header"><nav class="wrap nav" aria-label="Main navigation">
+<a class="logo" href="#top"><span class="logo-mark">✈</span>Open<span>FIDS</span></a>
+<div class="navlinks"><a href="#features">Features</a><a href="#demo">Live demo</a><a href="#install">Download</a></div>
+<a class="github" href="https://github.com/Mandrusian/openfids" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+</nav></header>
+<main id="top">
+<section class="hero wrap"><div class="hero-copy">
+<p class="eyebrow"><i></i> FREE · OPEN SOURCE · LOCAL FIRST</p>
+<h1>Your airport board.<br><span>Beautifully yours.</span></h1>
+<p class="lede">A modern flight information display for your computer. Real airport data, buttery-smooth animations, watchlists and gorgeous themes. All yours, with no subscription.</p>
+<div class="actions"><a class="button primary" href="#demo">✈ &nbsp; Try the live demo <span>↗</span></a><a class="button ghost" href="#install">Download OpenFIDS ↓</a></div>
+<p class="under">Made for Linux, macOS and Windows. No accounts required.</p>
+</div><div class="hero-art" aria-hidden="true">
+<div class="orb"></div><div class="mock-top"><span class="mock-icon">✈</span><span><b>OpenFIDS</b><small>FLIGHT INFORMATION DISPLAY</small></span><em>● LIVE</em></div>
+<div class="mock-route"><div><strong>CNS</strong><small>CAIRNS</small></div><span>○ ━━━━━ ✈ ━━━━━ ○</span><div><strong>SYD</strong><small>SYDNEY</small></div></div>
+<div class="mock-flights"><div class="mock-caption">FLIGHT INFORMATION <span>UPDATED AUTOMATICALLY</span></div><div><i>ARR</i><b>QF923</b><span>Sydney</span><strong>16:20</strong></div><div><i>DEP</i><b>VA785</b><span>Brisbane</span><strong>17:25</strong></div><div><i>ARR</i><b>JQ944</b><span>Melbourne</span><strong>18:10</strong></div></div>
+<div class="art-chip topchip">✧ Liquid Glass</div><div class="art-chip bottomchip">★ Flight watchlists</div>
+</div></section>
+<section class="facts wrap" aria-label="Quick facts"><div>◎ <span><b>Local-first</b><small>Your settings stay on your machine</small></span></div><div>◇ <span><b>Three platforms</b><small>Windows · macOS · Linux</small></span></div><div>✦ <span><b>Completely free</b><small>Open-source, no subscription</small></span></div></section>
+<section class="wrap features" id="features"><p class="kicker">THE DETAILS MATTER</p><h2>Everything you need.<br><span>Nothing you don't.</span></h2><p class="section-copy">An information-dense airport display that still feels beautiful. Switch from a comfortable board to all the operational detail whenever you like.</p>
+<div class="feature-grid">
+<article><span class="feature-icon">✈</span><h3>Real airport data</h3><p>Arrivals, departures, terminals, aircraft, registrations, gate information and estimated times from North Queensland Airports.</p></article>
+<article><span class="feature-icon">◈</span><h3>Liquid Glass, reimagined</h3><p>Frosted surfaces, soft colour gradients, beautiful motion and adjustable glass depth to suit your setup.</p></article>
+<article><span class="feature-icon">★</span><h3>Flight watchlists</h3><p>Star the movements you care about, with optional chimes when flight details change.</p></article>
+<article><span class="feature-icon">▤</span><h3>Deep flight information</h3><p>Scheduled, estimated, actual and block times, codeshares, parking bays, baggage carousels and much more.</p></article>
+<article><span class="feature-icon">＋</span><h3>Your own movements</h3><p>Add custom flights and special movements locally in the installed desktop application.</p></article>
+<article><span class="feature-icon">⌁</span><h3>Extensible and private</h3><p>Use your own JSON feed or Python adapter. OpenFIDS keeps your settings and custom movements on your computer.</p></article>
+</div></section>
+<section class="demo-band" id="demo"><div class="wrap">
+<div class="demo-heading"><div><p class="kicker">AN INTERACTIVE PREVIEW</p><h2>Try it. <span>Right here.</span></h2><p>Explore the actual OpenFIDS interface with real Cairns and Mackay flights from the public NQA JSON API.</p></div><a class="button ghost" href="./demo/" target="_blank" rel="noopener noreferrer">Open fullscreen demo ↗</a></div>
+<div class="demo-shell"><div class="windowbar"><span class="traffic"><i></i><i></i><i></i></span><span class="window-title">OpenFIDS / Browser Preview</span><span class="status" id="demoStatus" role="status">● Connecting…</span></div>
+<iframe src="./demo/" title="Interactive live OpenFIDS demonstration" id="demoFrame" loading="lazy"></iframe></div>
+<p class="disclaimer">The demo is read-only. It uses the NQA public flight feed directly in your browser; data may be delayed or unavailable. Not affiliated with or endorsed by North Queensland Airports. Custom flights are available in the installed version.</p></div></section>
+<section id="install" class="wrap install"><p class="kicker">READY WHEN YOU ARE</p><h2>Make it <span>your own.</span></h2><p class="section-copy">Install the complete local version in minutes, or read the source before running anything.</p>
+<div class="installs"><article><div class="install-top"><span>⌘</span><div><h3>Linux and macOS</h3><p>Paste into your Bash terminal</p></div></div><div class="code-row"><code id="unixCmd">curl -fsSL https://raw.githubusercontent.com/Mandrusian/openfids/main/install.sh | bash</code><button data-copy="unixCmd" type="button">Copy</button></div></article>
+<article><div class="install-top"><span>⊞</span><div><h3>Windows</h3><p>Paste into PowerShell</p></div></div><div class="code-row"><code id="winCmd">irm https://raw.githubusercontent.com/Mandrusian/openfids/main/install.ps1 | iex</code><button data-copy="winCmd" type="button">Copy</button></div></article></div>
+<p class="install-note">Always review installation scripts first. <a href="https://github.com/Mandrusian/openfids#advanced" target="_blank" rel="noopener noreferrer">Manual installation instructions ↗</a></p>
+</section></main>
+<footer><div class="wrap footer"><a class="logo" href="#top"><span class="logo-mark">✈</span>Open<span>FIDS</span></a><span>Made for everyone who loves aviation.</span><div><a href="https://github.com/Mandrusian/openfids">Source ↗</a><a href="#demo">Live demo</a></div></div></footer>
+</body></html>

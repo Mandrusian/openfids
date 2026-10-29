@@ -303,3 +303,24 @@ curl -s http://127.0.0.1:8000/api/status
 - The server only listens on `127.0.0.1` and rejects requests whose Host header isn't localhost.
 - Stopping the app needs a custom header, so other websites can't trigger it.
 - `adapter.py` runs as ordinary Python with your permissions.
+
+## Website and embedded live demo
+
+The OpenFIDS GitHub Pages website is generated from the static files in `docs/`:
+
+- Website: https://mandrusian.github.io/openfids/
+- Interactive preview: https://mandrusian.github.io/openfids/demo/
+
+The embedded preview uses the **actual OpenFIDS interface** and the public `https://flights.nqa.au/v1/flights` JSON endpoint. It translates the NQA response to the same flight fields the desktop app uses; no account or proxy is needed. It relies on browser CORS access and on NQA being reachable, and does not fabricate flight information when the feed is unavailable.
+
+The website demo is read-only; adding custom flights and stopping the local server are disabled. All desktop features remain in the installed app.
+
+`scripts/build_pages.py` rebuilds the static demo UI from `app/index.html` and exports aircraft/airline lookups from `app/database.py`. `.github/workflows/pages.yml` publishes on relevant pushes to `main`.
+
+**To enable publishing for the first time:** GitHub repository Settings → Pages → Build and deployment → Source → **GitHub Actions**. The Pages deployment may fail until this is enabled.
+
+Example embed:
+
+```html
+<iframe title="OpenFIDS live demo" src="https://mandrusian.github.io/openfids/demo/" style="width:100%;height:650px;border:0"></iframe>
+```

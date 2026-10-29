@@ -24,3 +24,8 @@ jobs:
           PY
           node --check /tmp/openfids-board.js
       - run: node tests/test_time.js
+      - name: Check website scripts
+        run: |
+          python scripts/build_pages.py
+          node --check docs/site.js
+          node --check docs/demo/shim.js
