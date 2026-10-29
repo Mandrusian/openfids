@@ -32,6 +32,12 @@ class PagesTests(unittest.TestCase):
         self.assertIn('id="flightTable"',demo)
         self.assertIn('id="airportPick"',demo)
         self.assertIn('id="timeFormat"',demo)
+    def test_demo_uses_own_preferences(self):
+        build()
+        demo=(ROOT/'docs/demo/index.html').read_text(encoding='utf-8')
+        self.assertIn("const LS = 'openfids.demo.v1';",demo)
+        self.assertNotIn("const LS = 'openfids.v2';",demo)
+
     def test_live_source_and_read_only(self):
         import json
         lookup=json.loads((ROOT/'docs/demo/database.json').read_text(encoding='utf-8'))

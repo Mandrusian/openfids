@@ -533,7 +533,7 @@ body.glass.nomo::before{animation:none}
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const api = async (u, o) => { const r = await fetch(u, o); if (!r.ok) throw new Error(r.status); return r.json(); };
-const LS = 'openfids.v2';
+const LS = 'openfids.demo.v1';
 let S = { theme: 'default', compact: false, motion: true, audio: false, poll: 30000, min: false, watch: [], smooth: true, dircolor: true, h24: true, zebra: false, remember: true, size: 'm', f: 'all', fx: {}, glass: false, glassDepth: 'balanced', layout: 'comfortable', colors: {}, airport: 'CNS', terminalSelections: { CNS: ['T1', 'T2'], MKY: ['MTB'] } };
 let fx = { al: '', ac: '', st: '', win: '' }, animNext = false;
 let hasSavedAirport = false, savedState = {};

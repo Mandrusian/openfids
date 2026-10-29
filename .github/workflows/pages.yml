@@ -7,6 +7,8 @@ on:
       - "app/index.html"
       - "app/database.py"
       - "scripts/build_pages.py"
+      - "tests/test_pages.py"
+      - "tests/test_demo.js"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 permissions:
@@ -14,7 +16,7 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: pages
+  group: openfids-pages
   cancel-in-progress: true
 jobs:
   deploy:
@@ -24,12 +26,34 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Generate demo from OpenFIDS
-        run: python scripts/build_pages.py
-      - name: Syntax check website
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and test website
         run: |
+          python scripts/build_pages.py
+          python -m unittest discover -s tests -p test_pages.py -v
           node --check docs/site.js
           node --check docs/demo/shim.js
+          node tests/test_demo.js
+      - name: Configure Pages publishing source
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Publish the generated docs artifact rather than the repository root.
+            const {owner, repo} = context.repo;
+            try {
+              const {data} = await github.request('GET /repos/{owner}/{repo}/pages', {owner, repo});
+              if (data.build_type !== 'workflow') {
+                await github.request('PUT /repos/{owner}/{repo}/pages', {owner, repo, build_type: 'workflow'});
+              }
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              await github.request('POST /repos/{owner}/{repo}/pages', {owner, repo, build_type: 'workflow'});
+            }
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
