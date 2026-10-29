@@ -80,14 +80,14 @@ Nothing is installed system-wide, so that's everything. (Python, if the installe
 
 ## Using the board
 
-- **Flight board.** Search by flight, airline, place, registration or aircraft name. Several words work, for example `qantas 738`.
+- **Flight board.** Select Cairns or Mackay, toggle T1/T2, then browse arrivals, departures, or both. See ARR/DEP totals, codeshares, freight/charter labels, aircraft type/registration, scheduled/estimated/actual/block times, bay, gate, baggage carousel and public status, grouped by date. Search flight, codeshare, airline, place, registration, or aircraft name. Several words work, for example `qantas 738`.
   The chips switch between All, Arrivals, Departures, Military and Rare.
 - **More filters.** Filter by airline, aircraft, status and time window. A badge shows how many are active.
 - **Early and delayed flights** get a coloured bubble on the right, such as "Delayed by 15 min".
 - **Watchlist.** Click ★ next to a flight to follow it. You'll get a message (and an optional chime) when its status changes.
 - **Statistics.** Counts and the busiest airlines, aircraft and destinations.
 - **Add a movement.** Put your own flight on the board. It's stored on your computer only.
-- **Export CSV** saves the current board to a spreadsheet file.
+- **Export CSV** saves the current filtered board, including the new operational columns, to a spreadsheet file.
 - **Settings.** Themes, accent colour, custom colours, liquid glass, compact rows, motion, text size, 12/24-hour time, refresh rate and feed information.
 - **Keyboard shortcuts.** `/` search, `b` board, `w` watchlist, `s` statistics, `n` add, `,` settings, `[` collapse menu, `Esc` close a panel.
 
@@ -169,17 +169,17 @@ so edits apply within a few seconds. Reload the page after changing `title`.
 
 By default OpenFIDS reads `https://flights.nqa.au/v1/flights`, the JSON endpoint used by the Cairns Airport flight board. **No login or API key is needed.**
 
-The built-in NQA adapter maps arrivals/departures, flight number, origin/destination, scheduled and estimated times, public status, gate, stand, baggage carousel and aircraft registration to the existing OpenFIDS fields. The API contains Cairns (CNS) and Mackay (MKY); only **public Cairns** movements are shown by default.
+The built-in NQA adapter maps arrivals/departures, flight number, origin/destination, scheduled and estimated times, public status, gate, stand, baggage carousel and aircraft registration to the existing OpenFIDS fields. The API contains Cairns (CNS) and Mackay (MKY); OpenFIDS loads both and initially displays **Cairns**. The new airport and terminal selectors switch views without a second request. The source's `public` flag does not necessarily mean a record is absent from its public-facing board: for example, the airport displays freight movements flagged `N`. Accordingly, the built-in feed includes those records by default.
 
 To change the airport or include non-public records, use `config.json` in your OpenFIDS data directory:
 
 ```json
-{ "airport": "CNS", "include_non_public": false }
+{ "airport": "CNS", "include_non_public": true }
 ```
 
-Choose `"MKY"` for Mackay, or `"ALL"` for both. Set `"include_non_public": true` only to deliberately include the additional records that the API marks non-public. These options affect the default NQA source, not custom feeds or `adapter.py`.
+Set `"airport": "MKY"` to make Mackay the initial selection (the UI offers CNS and MKY). Set `"include_non_public": false` to hide records flagged `N`; this also hides some freight movements shown by the airport itself. These settings affect the built-in NQA source, not custom feeds or `adapter.py`.
 
-Settings → Feed shows source timestamps, stale state and the URL. OpenFIDS keeps the last fetched flights if the upstream request fails, and retries automatically. Note that the airport feed may lag the actual movement time.
+Settings → Feed and the board header show source timestamps, stale state and the URL. OpenFIDS keeps the last fetched flights if the upstream request fails, and retries automatically. Note that the airport feed may lag the actual movement time.
 
 Old `upstream_email` and `upstream_password` keys are **no longer used**. If you had configured them, you can remove them from your local `config.json`. The former login form and endpoints have been retired.
 ## Adding aircraft and airlines

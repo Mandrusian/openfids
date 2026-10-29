@@ -50,9 +50,9 @@ class NQATests(unittest.TestCase):
         body = {"flights": [sample(), sample(airport="MKY"), sample(public="N")],
                 "stale": False, "ageSeconds": 376}
         fs, meta = extract_flights(body)
-        self.assertEqual((len(fs), meta["count"], meta["ageSeconds"]), (1, 1, 376))
-        self.assertEqual(len(extract_flights(body, airport="ALL")[0]), 2)
-        self.assertEqual(len(extract_flights(body, include_non_public=True)[0]), 2)
+        self.assertEqual((len(fs), meta["count"], meta["ageSeconds"]), (2, 2, 376))
+        self.assertEqual(len(extract_flights(body, airport="ALL")[0]), 3)
+        self.assertEqual(len(extract_flights(body, include_non_public=False)[0]), 1)
 
     def test_stale_and_invalid(self):
         self.assertTrue(extract_flights({"flights": [], "stale": True})[1]["stale"])
@@ -75,6 +75,34 @@ class NQATests(unittest.TestCase):
         self.assertEqual(flights[0]["statusMsgPublic"], "Landed")
         self.assertEqual(metadata["source"], FEED_URL)
         self.assertEqual(get.call_args.args[0], FEED_URL)
+
+
+    def test_server_returns_both_airports_by_default(self):
+        class Response:
+            status_code = 200
+            def json(self):
+                return {"flights": [sample(), sample(airport="MKY"), sample(public="N")],
+                        "stale": False}
+        with patch.object(server, "load_config", return_value={}), \
+             patch.object(server, "load_adapter", return_value=None), \
+             patch.object(server.session, "get", return_value=Response()):
+            flights, problem, metadata = server._try_fetch()
+        self.assertIsNone(problem)
+        self.assertEqual(len(flights), 3)
+        self.assertEqual(set(f["airport"] for f in flights), {"CNS", "MKY"})
+        self.assertEqual(metadata["count"], 3)
+
+    def test_explicit_opt_out_non_public(self):
+        class Response:
+            status_code = 200
+            def json(self):
+                return {"flights": [sample(), sample(public="N")], "stale": False}
+        with patch.object(server, "load_config", return_value={"include_non_public": False}), \
+             patch.object(server, "load_adapter", return_value=None), \
+             patch.object(server.session, "get", return_value=Response()):
+            flights, problem, _ = server._try_fetch()
+        self.assertIsNone(problem)
+        self.assertEqual(len(flights), 1)
 
     def test_custom_feed_override(self):
         class Response:

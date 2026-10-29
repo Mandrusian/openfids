@@ -200,6 +200,53 @@ tr.ra td:first-child::before,tr.rd td:first-child::before,td:first-child::before
 .gb{backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;overflow:visible;
  background:color-mix(in srgb,var(--c) 16%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent)}
 .gb::after{content:none}
+
+/* Airport-board information density, without sacrificing OpenFIDS themes. */
+body.t-airport{--bg:#0d1015;--panel:#15191f;--card:#1c222a;--accent:#ffd400;--on-accent:#141414;--arr:#62bdff;--dep:#a2de72}
+.airport-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding:10px 12px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.airport-pick,.terminal-pick{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.airport-pick button,.terminal-pick button{border:1px solid var(--line);border-radius:8px;background:var(--card);padding:7px 12px;font-weight:600;color:var(--mute);transition:background .2s,color .2s}
+.airport-pick button[aria-pressed=true],.terminal-pick button[aria-pressed=true]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.airport-pick small{font-size:10px;margin-left:4px;font-weight:500}
+.airport-controls .terminal-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.airport-controls .gap{min-width:10px}
+.source-line{font-size:12px;color:var(--mute);text-align:right;max-width:280px}
+.board-summary{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 10px}
+.board-summary strong{font:700 21px var(--board);margin-right:4px}
+.board-num{font:700 13px var(--body);background:var(--accent);color:var(--on-accent);padding:3px 10px;border-radius:18px}
+.board-num.arr{background:color-mix(in srgb,#38aef0 22%,var(--panel));color:#67c8ff}
+.board-num.dep{background:color-mix(in srgb,#78d455 23%,var(--panel));color:#a4f190}
+.board-wrap{position:relative}
+.board-wrap table{min-width:1390px}
+.board-wrap th{padding:10px 8px;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+.board-wrap td{padding:10px 8px;font-size:13px;line-height:1.22}
+.board-wrap th:first-child,.board-wrap td:first-child{padding-left:13px}
+.board-wrap td:nth-child(3){min-width:126px}
+.board-wrap td:nth-child(6){min-width:126px}
+.board-wrap td:last-child{padding-right:14px}
+.board-wrap .code{font-size:19px;color:var(--accent)}
+.board-wrap .time{font-size:16px}
+.board-wrap .mut{font-size:11px}
+.board-wrap .subflight{font-size:11px;color:var(--mute);white-space:normal;margin-top:4px;max-width:200px}
+.board-wrap .dir-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.02em;padding:4px 7px;border-radius:5px;background:color-mix(in srgb,var(--arr) 20%,transparent);color:var(--arr)}
+.board-wrap .dir-badge.depart{background:color-mix(in srgb,var(--dep) 20%,transparent);color:var(--dep)}
+.board-wrap .loc{font-weight:600;font-size:14px}
+.board-wrap .bay{display:inline-block;background:var(--accent);color:var(--on-accent);padding:3px 7px;border-radius:5px;font:700 14px var(--board)}
+.board-wrap .flight-status{display:inline-block;border-radius:99px;padding:5px 9px;background:var(--card);font-size:12px;font-weight:600;white-space:nowrap}
+.board-wrap .flight-status.ok{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
+.board-wrap .flight-status.late{background:color-mix(in srgb,var(--warn) 15%,transparent);color:var(--warn)}
+.board-wrap .flight-status.bad{background:color-mix(in srgb,var(--bad) 15%,transparent);color:var(--bad)}
+.board-wrap tr.day-row td{background:var(--card);color:var(--mute);font:600 12px var(--body);letter-spacing:.05em;text-transform:uppercase;padding:8px 12px}
+.board-wrap .tag.kind{color:var(--mute)}
+.board-wrap .clocktime{font:600 15px var(--board);font-variant-numeric:tabular-nums}
+.board-wrap .esttime{color:var(--warn)}
+.board-wrap .star{font-size:15px}
+.board-wrap tr.ra td:first-child,.board-wrap tr.rd td:first-child{border-left:3px solid var(--arr)}
+.board-wrap tr.rd td:first-child{border-left-color:var(--dep)}
+.board-wrap .sort-indicator{font-size:10px;color:var(--mute)}
+body.compact .board-wrap td{padding-top:5px;padding-bottom:5px}
+@media(max-width:1000px){.airport-controls{gap:8px}.board-wrap table{min-width:1320px}.source-line{text-align:left;max-width:none}}
+
 </style>
 </head>
 <body>
@@ -228,11 +275,26 @@ tr.ra td:first-child::before,tr.rd td:first-child::before,td:first-child::before
     <div class="clock"><div class="big" id="clock"></div><small id="date"></small></div>
   </div>
 
+  <div class="airport-controls" aria-label="Airport and terminal selection">
+    <div class="airport-pick" id="airportPick" role="group" aria-label="Airport">
+      <button type="button" data-airport="CNS" aria-pressed="true">Cairns <small>CNS</small></button>
+      <button type="button" data-airport="MKY" aria-pressed="false">Mackay <small>MKY</small></button>
+    </div>
+    <span class="terminal-label">Terminal</span>
+    <div class="terminal-pick" id="terminalPick" role="group" aria-label="Terminals">
+      <button type="button" data-terminal="T1" aria-pressed="true">T1</button>
+      <button type="button" data-terminal="T2" aria-pressed="true">T2</button>
+    </div>
+    <div class="gap"></div>
+    <button class="btn" id="refreshNow" type="button" title="Fetch updated flight data">↻ Refresh</button>
+    <span class="source-line" id="sourceAsOf" aria-live="polite">Waiting for source update</span>
+  </div>
+
   <section id="v-board">
     <div class="bar">
       <div class="search"><span>⌕</span><input id="q" placeholder="Search flight, airline, place or registration" autocomplete="off"><kbd>/</kbd></div>
       <div class="chips" id="chips"><span class="bub" id="bub"></span>
-        <button class="chip on" data-f="all">All</button><button class="chip" data-f="A">Arrivals</button><button class="chip" data-f="D">Departures</button><button class="chip" data-f="military">Military</button><button class="chip" data-f="rare">Rare</button>
+        <button class="chip on" data-f="all">Both</button><button class="chip" data-f="A">Arrivals</button><button class="chip" data-f="D">Departures</button><button class="chip" data-f="military">Military</button><button class="chip" data-f="rare">Rare</button>
       </div>
       <button class="btn" id="mf">More filters <span class="count" id="mfN"></span></button><button class="btn" id="csv">Export CSV</button>
     </div>
@@ -243,8 +305,14 @@ tr.ra td:first-child::before,tr.rd td:first-child::before,td:first-child::before
       <select class="in" id="fxWin"><option value="">Any time</option><option value="120">Next 2 hours</option><option value="360">Next 6 hours</option><option value="today">Today only</option></select>
       <button class="btn" id="fxClear">Clear all filters</button>
     </div></div>
-    <div class="wrap"><table>
-      <thead><tr><th></th><th>Flight and status</th><th>Route</th><th>Scheduled</th><th>Aircraft</th><th>Registration</th><th>Gate</th><th></th></tr></thead>
+    <div class="board-summary" id="boardSummary" aria-live="polite">
+      <strong id="boardCaption">Arrivals and departures</strong>
+      <span class="board-num" id="totalCount">0</span>
+      <span class="board-num arr" id="arrCount">ARR 0</span>
+      <span class="board-num dep" id="depCount">DEP 0</span>
+    </div>
+    <div class="wrap board-wrap" role="region" aria-label="Live flight information" tabindex="0"><table>
+      <thead><tr><th title="Watchlist">★</th><th>Arr/Dep</th><th>Flight</th><th>A/C</th><th>Reg</th><th>From / To</th><th>Sched</th><th>Est</th><th>Act</th><th>Block</th><th>TM</th><th>Bay</th><th>Gate</th><th>Car</th><th>Status</th></tr></thead>
       <tbody id="rows"></tbody>
     </table></div>
   </section>
@@ -264,7 +332,7 @@ tr.ra td:first-child::before,tr.rd td:first-child::before,td:first-child::before
     <h4>Flight</h4>
     <div class="f f2"><input class="in" id="cfAirline" placeholder="Airline (VIP)"><input class="in" id="cfNumber" placeholder="Flight number"><input class="in" id="cfAcType" placeholder="Aircraft type (GLF6)"><input class="in" id="cfRego" placeholder="Registration"></div>
     <h4>Route and time</h4>
-    <div class="f f2"><input class="in" id="cfPort" placeholder="Place (Sydney)"><input class="in" id="cfIata" placeholder="Code (SYD)"><select class="in" id="cfVector"><option value="A">Arrival</option><option value="D">Departure</option></select><input class="in" id="cfWhen" type="datetime-local"></div>
+    <div class="f f2"><select class="in" id="cfAirport"><option value="CNS">Cairns (CNS)</option><option value="MKY">Mackay (MKY)</option></select><input class="in" id="cfPort" placeholder="Place (Sydney)"><input class="in" id="cfIata" placeholder="Code (SYD)"><select class="in" id="cfVector"><option value="A">Arrival</option><option value="D">Departure</option></select><input class="in" id="cfWhen" type="datetime-local"></div>
     <div class="f f2"><input class="in" id="cfGate" placeholder="Gate or bay"><input class="in" id="cfStatus" placeholder="Status (Landed)"></div>
     <button class="btn pri" id="cfAdd">Add to board</button>
     <h4>Your movements</h4><div id="cfList"></div>
@@ -276,7 +344,7 @@ tr.ra td:first-child::before,tr.rd td:first-child::before,td:first-child::before
 
     <div data-pane="look">
       <h4>Theme</h4>
-      <div class="themes" id="themes"><button data-t="default" style="--sw:#ffb000">Amber</button><button data-t="runway" style="--sw:#5dff9a">Runway</button><button data-t="blue" style="--sw:#7cb4ff">Blue hour</button><button data-t="violet" style="--sw:#a78bfa">Violet</button><button data-t="sunset" style="--sw:#ff7a59">Sunset</button><button data-t="mint" style="--sw:#5eead4">Mint</button><button data-t="mono" style="--sw:#e5e5e5">Mono</button><button data-t="contrast" style="--sw:#ffff00">Contrast</button><button data-t="day" style="--sw:#b36b00">Daylight</button><button data-t="sky" style="--sw:#0b6bcb">Sky</button></div>
+      <div class="themes" id="themes"><button data-t="airport" style="--sw:#ffd400">Airport board</button><button data-t="default" style="--sw:#ffb000">Amber</button><button data-t="runway" style="--sw:#5dff9a">Runway</button><button data-t="blue" style="--sw:#7cb4ff">Blue hour</button><button data-t="violet" style="--sw:#a78bfa">Violet</button><button data-t="sunset" style="--sw:#ff7a59">Sunset</button><button data-t="mint" style="--sw:#5eead4">Mint</button><button data-t="mono" style="--sw:#e5e5e5">Mono</button><button data-t="contrast" style="--sw:#ffff00">Contrast</button><button data-t="day" style="--sw:#b36b00">Daylight</button><button data-t="sky" style="--sw:#0b6bcb">Sky</button></div>
       <p class="msg">Picking a theme resets any custom colours.</p>
       <div class="cprow"><div>Accent colour<small>Highlights, buttons and the arrivals pattern</small></div><input type="color" id="cAccent"></div>
       <details class="mt"><summary>Customise every colour</summary><div id="cGrid"></div></details>
@@ -325,9 +393,14 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const api = async (u, o) => { const r = await fetch(u, o); if (!r.ok) throw new Error(r.status); return r.json(); };
 const LS = 'openfids.v2';
-let S = { theme: 'default', compact: false, motion: true, audio: false, poll: 30000, min: false, watch: [], smooth: true, dircolor: true, h24: true, zebra: false, remember: true, size: 'm', f: 'all', fx: {}, glass: false, colors: {} };
+let S = { theme: 'default', compact: false, motion: true, audio: false, poll: 30000, min: false, watch: [], smooth: true, dircolor: true, h24: true, zebra: false, remember: true, size: 'm', f: 'all', fx: {}, glass: false, colors: {}, airport: 'CNS', terminals: ['T1', 'T2'] };
 let fx = { al: '', ac: '', st: '', win: '' }, animNext = false;
-try { Object.assign(S, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (e) {}
+let hasSavedAirport = false;
+try { const saved = JSON.parse(localStorage.getItem(LS) || '{}'); hasSavedAirport = !!saved.airport; Object.assign(S, saved); } catch (e) {}
+if (!['CNS','MKY'].includes(S.airport)) S.airport = 'CNS';
+if (!Array.isArray(S.terminals)) S.terminals = ['T1', 'T2'];
+S.terminals = S.terminals.filter((v) => ['T1', 'T2'].includes(v));
+if (!S.terminals.length) S.terminals = ['T1', 'T2'];
 const save = () => { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} };
 let flights = [], ac = {}, al = {}, feed = { ok: false }, view = 'board', filter = 'all', timer, actx;
 const last = new Map(), changed = new Set(); let first = true;
@@ -367,6 +440,57 @@ function toast(msg) {
   setTimeout(() => t.classList.add('out'), 5000); setTimeout(() => t.remove(), 5600);
 }
 
+
+/* Airport scopes and timetable fields used by the detailed board. */
+function airportScope() {
+  return flights.filter((f) => (f.airport || 'CNS').toUpperCase() === S.airport &&
+    (!f.terminal || !['T1','T2'].includes(f.terminal) || S.terminals.includes(f.terminal)));
+}
+function updateScopeUI() {
+  document.querySelectorAll('#airportPick [data-airport]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.airport === S.airport)));
+  document.querySelectorAll('#terminalPick [data-terminal]').forEach((b) => b.setAttribute('aria-pressed', String(S.terminals.includes(b.dataset.terminal))));
+  const scoped = airportScope();
+  const arr = scoped.filter((f) => f.vector === 'A').length;
+  const dep = scoped.filter((f) => f.vector === 'D').length;
+  $('totalCount').textContent = String(scoped.length);
+  $('arrCount').textContent = 'ARR ' + arr;
+  $('depCount').textContent = 'DEP ' + dep;
+  $('boardCaption').textContent = filter === 'A' ? 'Arrivals' : filter === 'D' ? 'Departures' :
+    filter === 'military' ? 'Military movements' : filter === 'rare' ? 'Rare aircraft' : 'Arrivals and departures';
+}
+function asOf() {
+  if (feed.sourceTimestamp) {
+    const stamp = new Date(feed.sourceTimestamp);
+    const fmt = Number.isNaN(+stamp) ? String(feed.sourceTimestamp) :
+      stamp.toLocaleString('en-AU', {timeZone:'Australia/Brisbane',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:false});
+    $('sourceAsOf').textContent = (feed.stale || !feed.ok ? 'Stale / offline · ' : 'Data as of ') + fmt + ' AEST';
+  } else {
+    $('sourceAsOf').textContent = feed.message || 'Waiting for source data';
+  }
+}
+const fmtTime = (iso) => iso ? (S.h24 ? hm(iso).replace(':','') : hm(iso)) : '';
+const dayKey = (f) => String(f.scheduled || '').slice(0, 10) || 'unknown';
+function localDayLabel(iso) {
+  const d = new Date(iso);
+  return Number.isNaN(+d) ? 'Unknown date' : d.toLocaleDateString('en-AU',
+    {timeZone:'Australia/Brisbane',weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+const bestTime = (f) => Date.parse(f.actual || f.estimated || f.scheduled) || 0;
+function sortFlights(rows) {
+  return rows.slice().sort((a,b) => dayKey(a).localeCompare(dayKey(b)) ||
+    bestTime(a) - bestTime(b) || String(a.flightNumber||'').localeCompare(String(b.flightNumber||'')));
+}
+function flightKind(f) {
+  const k = String(f.flightType || '').toUpperCase();
+  if (k === 'F') return 'Freight';
+  if (k === 'C') return 'Charter';
+  return '';
+}
+function gateLabel(f) {
+  const g = String(f.gate || '');
+  return /^D\d+$/i.test(g) ? g.slice(1) : g;
+}
+
 /* ---------- board ---------- */
 function statusOf(f) {
   const s = (f.statusMsgPublic || '').toLowerCase();
@@ -374,7 +498,7 @@ function statusOf(f) {
 }
 function visible() {
   const terms = $('q').value.toLowerCase().split(/\s+/).filter(Boolean), now = new Date();
-  return flights.filter((f) => {
+  return airportScope().filter((f) => {
     if (view === 'watch' && !S.watch.includes(code(f))) return false;
     if ((filter === 'A' || filter === 'D') && f.vector !== filter) return false;
     if (filter === 'military' && !mil(f)) return false;
@@ -383,67 +507,104 @@ function visible() {
     if (fx.ac && (f.acType || '') !== fx.ac) return false;
     if (fx.st && statusOf(f) !== fx.st) return false;
     if (fx.win) { const t = new Date(f.scheduled); if (isNaN(t)) return false; if (fx.win === 'today' ? t.toDateString() !== now.toDateString() : (t < now - 9e5 || t > +now + fx.win * 6e4)) return false; }
-    const hay = `${code(f)} ${f.portName} ${f.portIATA} ${f.acType} ${f.acRego} ${(plane(f) || {}).name || ''} ${(airline(f) || {}).name || ''}`.toLowerCase();
+    const hay = `${code(f)} ${(f.codeShares || []).join(" ")} ${f.portName} ${f.portIATA} ${f.acType} ${f.acRego} ${f.gate} ${f.stand} ${f.carousel} ${(plane(f) || {}).name || ''} ${(airline(f) || {}).name || ''}`.toLowerCase();
     return terms.every((t) => hay.includes(t));
   });
 }
 function statusInfo(f) {
-  const raw = (f.statusMsgPublic || '').trim(), lo = raw.toLowerCase(), s = new Date(f.scheduled), e = new Date(f.estimated);
-  const diff = f.estimated && !isNaN(s) && !isNaN(e) ? Math.round((e - s) / 60000) : 0;
-  const dur = (m) => m < 60 ? `${m} min` : `${Math.floor(m / 60)} h` + (m % 60 ? ` ${m % 60} min` : '');
-  if (lo.includes('cancel')) return { t: 'Cancelled', c: 'bad' };
-  if (/landed|arrived|departed|boarding|gate closed|final call/.test(lo)) return { t: raw, c: 'ok' };
-  if (diff >= 5) return { t: `Delayed by ${dur(diff)}`, c: 'late', b: 1 };
-  if (lo.includes('delay')) return { t: raw, c: 'late', b: 1 };
-  if (diff <= -5) return { t: `Early by ${dur(-diff)}`, c: 'ok', b: 1 };
-  if (!raw) return { t: 'Scheduled', c: '' };
-  return { t: /on time/.test(lo) ? 'On time' : raw, c: /on time|board|land|arriv|depart|gate/.test(lo) ? 'ok' : '' };
+  const raw = String(f.statusMsgPublic || '').trim();
+  const lo = raw.toLowerCase();
+  const scheduled = Date.parse(f.scheduled), estimated = Date.parse(f.estimated);
+  const offset = f.estimated && Number.isFinite(scheduled) && Number.isFinite(estimated) ?
+    Math.round((estimated - scheduled)/60000) : 0;
+  if (/cancel/.test(lo)) return {t: raw || 'Cancelled',c:'bad'};
+  if (/delay/.test(lo)) return {t:raw || 'Delayed',c:'late'};
+  if (/on block|off block|land|arriv|depart|board|flight closed|gate closed|final call/.test(lo))
+    return {t:raw,c:'ok'};
+  if (/estimated|early|on time/.test(lo)) return {t:raw,c:/early|on time/.test(lo)?'ok':offset>=5?'late':''};
+  if (offset >= 5) return {t:raw || 'Delayed by '+offset+' min',c:'late'};
+  if (offset <= -5) return {t:raw || 'Early by '+(-offset)+' min',c:'ok'};
+  return {t:raw || 'Scheduled',c:''};
 }
 function rowParts(f) {
-  const p = plane(f) || { name: `Aircraft ${f.acType || ''}`, desc: 'No details on file. Add it in aircraft.json.' };
-  const a = airline(f) || { name: `Operator ${f.airline || ''}`, desc: 'No details on file. Add it in airlines.json.' };
+  const p = plane(f) || {name:'Aircraft '+(f.acType||''),desc:'No aircraft details on file.'};
+  const a = airline(f) || {name:'Operator '+(f.airline||''),desc:'No airline details on file.'};
   const arr = f.vector === 'A', k = key(f), st = statusInfo(f), on = S.watch.includes(code(f));
-  const done = !st.b && /^(departed|landed|arrived)\b/i.test(st.t);
-  const cls = `${arr ? 'ra' : 'rd'} ${mil(f) ? 'hot' : rare(f) ? 'rare' : ''}`.trim();
-  const html = `<td><button class="star${on ? ' on' : ''}" data-star="${esc(code(f))}" title="${on ? 'Unfollow' : 'Follow'} ${esc(code(f))}">★</button></td>
-    <td><span class="code tip" data-t="${esc(a.name)}" data-d="${esc(a.desc)}" data-c="${esc(f.airline)}">${esc(code(f))}</span>${mil(f) ? '<span class="tag hot">Military</span>' : rare(f) ? '<span class="tag rare">Rare</span>' : ''}${f.custom ? '<span class="tag">yours</span>' : ''}
-      <div class="ds"><span class="dir ${arr ? 'a' : 'd'}">${done ? (arr ? '▼ ' : '▲ ') + esc(st.t) : arr ? '▼ Arriving' : '▲ Departing'}</span>${st.b || done ? '' : `<span class="st ${st.c}${changed.has(k) && S.motion ? ' flip' : ''}">${esc(st.t)}</span>`}</div></td>
-    <td><b>${esc(f.portName)}</b><div class="mut">${esc(f.portIATA)} · ${esc(f.terminal || '')}</div></td>
-    <td><span class="time">${esc(hm(f.scheduled))}</span> <span class="mut">${esc(day(f.scheduled))}</span>${f.estimated ? `<div class="mut">Est ${esc(hm(f.estimated))}</div>` : ''}</td>
-    <td><span class="tip" data-t="${esc(p.name)}" data-d="${esc(p.desc)}" data-c="${esc(f.acType)}">${esc(f.acType || '')}</span></td>
-    <td>${esc(f.acRego || '')}</td><td>${esc(f.gate || '')}</td>
-    <td class="sb">${st.b ? `<span class="gb ${st.c}${changed.has(k) && S.motion ? ' flip' : ''}">${esc(st.t)}</span>` : ''}</td>`;
-  return { k, cls, html };
+  const kind = flightKind(f);
+  const blockTime = arr ? f.onBlock : f.offBlock;
+  const shares = Array.isArray(f.codeShares) ? f.codeShares.filter((s)=>typeof s==='string').join(' · ') : '';
+  const cls = (arr ? 'ra' : 'rd') + (mil(f) ? ' hot' : rare(f) ? ' rare' : '');
+  const cell = (v,extra='') => '<td class="'+extra+'">'+(v || '')+'</td>';
+  const html =
+    cell('<button class="star'+(on?' on':'')+'" data-star="'+esc(code(f))+'" aria-label="'+(on?'Unfollow ':'Follow ')+esc(code(f))+'" title="Watch this flight">★</button>') +
+    cell('<span class="dir-badge'+(arr?'':' depart')+'">'+(arr?'ARR':'DEP')+'</span>') +
+    cell('<span class="code tip" data-t="'+esc(a.name)+'" data-d="'+esc(a.desc)+'" data-c="'+esc(f.airline)+'">'+esc(code(f))+'</span>'+
+      (kind?'<span class="tag kind">'+esc(kind)+'</span>':'')+
+      (mil(f)?'<span class="tag hot">Military</span>':'')+(rare(f)?'<span class="tag rare">Rare</span>':'')+
+      (f.custom?'<span class="tag">Yours</span>':'')+
+      (shares?'<div class="subflight" title="Codeshare flights">'+esc(shares)+'</div>':'')) +
+    cell('<span class="tip" data-t="'+esc(p.name)+'" data-d="'+esc(p.desc)+'" data-c="'+esc(f.acType)+'">'+esc(f.acType||'')+'</span>') +
+    cell(esc(f.acRego||'')) +
+    cell('<span class="loc">'+esc(f.portName||f.portIATA||'—')+'</span><div class="mut">'+(arr?'from ':'to ')+esc(f.portIATA||'')+'</div>') +
+    cell('<span class="clocktime">'+esc(fmtTime(f.scheduled))+'</span>') +
+    cell('<span class="clocktime esttime">'+esc(fmtTime(f.estimated))+'</span>') +
+    cell('<span class="clocktime">'+esc(fmtTime(f.actual))+'</span>') +
+    cell('<span class="clocktime">'+esc(fmtTime(blockTime))+'</span>') +
+    cell(esc(f.terminal||'')) +
+    cell(f.stand?'<span class="bay">'+esc(f.stand)+'</span>':'') +
+    cell(f.gate?'<span class="bay" title="'+esc(f.gate)+'">'+esc(gateLabel(f))+'</span>':'') +
+    cell(esc(f.carousel||'')) +
+    cell('<span class="flight-status '+esc(st.c)+'">'+esc(st.t)+'</span>','sb');
+  return {k,cls,html};
 }
-/* Silent refresh: rows are matched by key, so only changed rows update and single rows fade in or out. */
+/* Incremental DOM updates keep focus and avoid rebuilding the board on every refresh. */
 function render() {
-  const list = visible(), tb = $('rows'), swap = animNext; animNext = false;
-  if (swap) { tb.textContent = ''; tb.classList.remove('swap'); void tb.offsetWidth; tb.classList.add('swap'); }
+  const list = sortFlights(visible()), tb = $('rows'), swap = animNext;
+  animNext = false;
+  updateScopeUI();
+  if (swap) {tb.textContent='';tb.classList.remove('swap');void tb.offsetWidth;tb.classList.add('swap');}
   if (!list.length) {
-    const msg = view === 'watch' ? 'No starred flights on the board. Click ★ next to a flight to follow it.' : (!feed.ok && !flights.length ? 'No live data right now. Open the feed status in the menu, or add your own movements.' : 'No flights match.');
-    tb.innerHTML = `<tr class="emp"><td colspan="8" class="empty">${esc(msg)}</td></tr>`; return;
+    const msg=view==='watch'?'No watched flights match this airport or terminal.':
+      (!feed.ok && !flights.length?'No live data right now. Check the feed panel.':'No flights match the selected filters.');
+    tb.innerHTML='<tr class="emp"><td colspan="15" class="empty">'+esc(msg)+'</td></tr>';
+    return;
   }
-  const emp = tb.querySelector('.emp'); if (emp) emp.remove();
-  const rows = new Map([...tb.children].filter((r) => r.dataset.k).map((r) => [r.dataset.k, r]));
-  const seen = new Set(); let prev = null;
-  list.forEach((f, ix) => {
-    const { k, cls, html } = rowParts(f); let tr = rows.get(k);
-    if (!tr) { tr = document.createElement('tr'); tr.dataset.k = k; tr.className = cls + (swap ? '' : ' rin'); tr.style.setProperty('--i', Math.min(ix, 10)); tr.innerHTML = html; tr._sig = cls + html; }
-    else { tr.classList.remove('rout'); if (tr._sig !== cls + html) { tr.className = cls + (changed.has(k) ? ' flash' : ''); tr.innerHTML = html; tr._sig = cls + html; } }
+  const emp=tb.querySelector('.emp'); if(emp)emp.remove();
+  const rows=new Map([...tb.children].filter((r)=>r.dataset.k).map((r)=>[r.dataset.k,r]));
+  const entries=[],seen=new Set();
+  let currentDay=null;
+  for(const f of list) {
+    const dk=dayKey(f);
+    if(dk!==currentDay) {
+      currentDay=dk;
+      entries.push({k:'day-'+dk,cls:'day-row',html:'<td colspan="15">'+esc(localDayLabel(f.scheduled))+'</td>'});
+    }
+    entries.push(rowParts(f));
+  }
+  let prev=null;
+  entries.forEach(({k,cls,html},ix)=>{
+    let tr=rows.get(k);
+    if(!tr) {
+      tr=document.createElement('tr');tr.dataset.k=k;tr.className=cls+(swap?'':' rin');
+      tr.style.setProperty('--i',Math.min(ix,10));tr.innerHTML=html;tr._sig=cls+html;
+    } else {
+      tr.classList.remove('rout');
+      if(tr._sig!==cls+html) {tr.className=cls+(changed.has(k)?' flash':'');tr.innerHTML=html;tr._sig=cls+html;}
+    }
     seen.add(k);
-    const want = prev ? prev.nextElementSibling : tb.firstElementChild;
-    if (tr !== want) tb.insertBefore(tr, want);
-    prev = tr;
+    const want=prev?prev.nextElementSibling:tb.firstElementChild;
+    if(tr!==want)tb.insertBefore(tr,want);
+    prev=tr;
   });
-  rows.forEach((tr, k) => { if (!seen.has(k)) { tr.classList.add('rout'); setTimeout(() => { if (tr.classList.contains('rout')) tr.remove(); }, 320); } });
+  rows.forEach((tr,k)=>{if(!seen.has(k)){tr.classList.add('rout');setTimeout(()=>{if(tr.classList.contains('rout'))tr.remove();},320);}});
 }
 
 function track() {
   flights.forEach((f) => {
-    const k = key(f), st = (f.statusMsgPublic || '').trim();
+    const k = key(f), st = JSON.stringify([f.statusMsgPublic,f.estimated,f.actual,f.onBlock,f.offBlock,f.gate,f.stand,f.carousel]);
     if (!first && last.has(k) && last.get(k) !== st) {
       changed.add(k);
-      if (S.watch.includes(code(f))) { toast(`${code(f)} to ${f.portName}: ${st || 'updated'}`); chime(); }
+      if (S.watch.includes(code(f))) { toast(`${code(f)} to ${f.portName}: flight information updated`); chime(); }
     }
     last.set(k, st);
   }); first = false;
@@ -455,18 +616,18 @@ async function load() {
   $('feedDetails').textContent = (feed.message || 'Waiting for data') + (feed.sourceTimestamp ? ' · Source update: ' + new Date(feed.sourceTimestamp).toLocaleString('en-AU') : '') + (feed.count != null ? ' · ' + feed.count + ' flights' : '') + (feed.source ? ' · Source: ' + feed.source : '');
   $('feedTxt').textContent = feed.ok ? `Live · ${feed.updated || ''}` : (feed.stale ? 'Stale · check feed' : 'Offline · retrying');
   const r = $('ring'); r.classList.remove('go'); void r.getBoundingClientRect(); r.classList.add('go');
-  fillFilters(); render(); if (view === 'stats') stats(); changed.clear(); moveBubs();
+  asOf(); fillFilters(); render(); if (view === 'stats') stats(); changed.clear(); moveBubs();
 }
 
 /* ---------- stats ---------- */
-function top(fn, n = 6) { const m = {}; flights.forEach((f) => { const k = fn(f); if (k) m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, n); }
+function top(fn, n = 6) { const m = {}; airportScope().forEach((f) => { const k = fn(f); if (k) m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, n); }
 function bars(el, rows) {
   const sig = JSON.stringify(rows); if (el.dataset.sig === sig) return; el.dataset.sig = sig;
   const max = Math.max(1, ...rows.map((r) => r[1]));
   el.innerHTML = rows.length ? rows.map(([l, n]) => `<div class="row"><span>${esc(l)}</span><div><i style="--w:${Math.round(n / max * 100)}%"></i></div><b>${n}</b></div>`).join('') : '<div class="mut">No data yet.</div>';
 }
 function stats() {
-  const n = [['Movements', flights.length], ['Arrivals', flights.filter((f) => f.vector === 'A').length], ['Departures', flights.filter((f) => f.vector === 'D').length], ['Rare', flights.filter(rare).length], ['Military', flights.filter(mil).length]];
+  const scoped = airportScope(); const n = [['Movements', scoped.length], ['Arrivals', scoped.filter((f) => f.vector === 'A').length], ['Departures', scoped.filter((f) => f.vector === 'D').length], ['Rare', scoped.filter(rare).length], ['Military', scoped.filter(mil).length]];
   if (document.querySelectorAll('#cards .n').length !== n.length) $('cards').innerHTML = n.map(([l]) => `<div class="card"><div class="n"></div><small>${l}</small></div>`).join('');
   document.querySelectorAll('#cards .n').forEach((el, i) => flap(el, n[i][1]));
   bars($('bAir'), top((f) => (airline(f) || {}).name || f.airline));
@@ -478,9 +639,9 @@ function stats() {
 function tick() {
   const d = new Date(); flap($('clock'), d.toLocaleTimeString('en-GB', { hour12: !S.h24 }));
   $('date').textContent = d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
-  const nx = flights.filter((f) => f.vector === 'A' && new Date(f.scheduled) > d).sort((a, b) => new Date(a.scheduled) - new Date(b.scheduled))[0];
+  const nx = airportScope().filter((f) => f.vector === 'A' && new Date(f.scheduled) > d).sort((a, b) => new Date(a.scheduled) - new Date(b.scheduled))[0];
   if (nx) { const m = Math.round((new Date(nx.scheduled) - d) / 60000); $('next').textContent = `Next arrival: ${code(nx)} from ${nx.portName} in ${m < 60 ? m + ' min' : Math.floor(m / 60) + ' h ' + (m % 60) + ' min'}`; }
-  else $('next').textContent = flights.length ? `${flights.length} movements on the board` : 'Waiting for flights';
+  else $('next').textContent = airportScope().length ? `${airportScope().length} movements at ${S.airport}` : 'Waiting for flights';
 }
 
 /* ---------- navigation and panels ---------- */
@@ -492,7 +653,7 @@ function setView(v) {
 function panel(name) {
   document.querySelectorAll('#panel [data-p]').forEach((s) => s.hidden = s.dataset.p !== name);
   $('panel').classList.toggle('open', !!name); $('veil').classList.toggle('on', !!name);
-  if (name === 'settings') { buildGrid(); placeTab(); } if (name === 'add') { if (!$('cfWhen').value) { const d = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4); $('cfWhen').value = d.toISOString().slice(0, 16); } customList(); }
+  if (name === 'settings') { buildGrid(); placeTab(); } if (name === 'add') { $('cfAirport').value = S.airport; if (!$('cfWhen').value) { const d = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4); $('cfWhen').value = d.toISOString().slice(0, 16); } customList(); }
 }
 document.querySelectorAll('#nav [data-view]').forEach((b) => b.onclick = () => setView(b.dataset.view));
 document.querySelectorAll('#nav [data-panel]').forEach((b) => b.onclick = () => panel(b.dataset.panel));
@@ -500,6 +661,25 @@ document.querySelectorAll('[data-x]').forEach((b) => b.onclick = () => panel('')
 $('veil').onclick = () => panel('');
 $('feed').onclick = () => panel('settings');
 $('collapse').onclick = () => { S.min = !S.min; save(); apply(); };
+$('airportPick').onclick = (event) => {
+  const airport=event.target.closest('[data-airport]')?.dataset.airport;
+  if(!['CNS','MKY'].includes(airport))return;
+  S.airport=airport;save();animNext=true;
+  updateScopeUI();fillFilters();render();tick();if(view==='stats')stats();
+};
+$('terminalPick').onclick = (event) => {
+  const terminal=event.target.closest('[data-terminal]')?.dataset.terminal;
+  if(!['T1','T2'].includes(terminal))return;
+  const next=S.terminals.includes(terminal)?S.terminals.filter((t)=>t!==terminal):[...S.terminals,terminal];
+  if(!next.length){toast('Choose at least one terminal.');return;}
+  S.terminals=next;save();animNext=true;
+  updateScopeUI();fillFilters();render();tick();if(view==='stats')stats();
+};
+$('refreshNow').onclick = async () => {
+  $('refreshNow').disabled=true;
+  try {await load();} finally {$('refreshNow').disabled=false;}
+};
+
 $('chips').onclick = (e) => { if (!e.target.dataset.f) return; filter = e.target.dataset.f; document.querySelectorAll('#chips .chip').forEach((c) => c.classList.toggle('on', c === e.target)); animNext = true; moveBubs(); keep(); render(); };
 $('q').oninput = () => { animNext = false; render(); };
 $('rows').onclick = (e) => {
@@ -508,8 +688,8 @@ $('rows').onclick = (e) => {
 };
 $('csv').onclick = () => {
   if (!flights.length) return toast('Nothing to export yet.');
-  const h = ['id','vector','airline','flightNumber','portIATA','portName','terminal','scheduled','estimated','statusMsgPublic','gate','stand','acType','acRego'];
-  const csv = [h.join(',')].concat(flights.map((f) => h.map((k) => `"${String(f[k] ?? '').replace(/"/g, '""')}"`).join(','))).join('\r\n');
+  const h = ['id','airport','vector','airline','flightNumber','portIATA','portName','terminal','scheduled','estimated','actual','onBlock','offBlock','statusMsgPublic','gate','stand','carousel','acType','acRego','codeShares','flightType'];
+  const csv = [h.join(',')].concat(visible().map((f) => h.map((k) => `"${String(Array.isArray(f[k]) ? f[k].join(" ") : (f[k] ?? '')).replace(/"/g, '""')}"`).join(','))).join('\r\n');
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = `openfids_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
 };
 $('quit').onclick = async () => {
@@ -551,7 +731,7 @@ async function customList() {
 $('cfAdd').onclick = async () => {
   const v = (id) => $(id).value.trim();
   try {
-    await api('/api/custom-flights', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ airline: v('cfAirline'), flightNumber: v('cfNumber'), acType: v('cfAcType'), acRego: v('cfRego'), portName: v('cfPort'), portIATA: v('cfIata'), vector: v('cfVector'), scheduled: v('cfWhen') + ':00', gate: v('cfGate'), status: v('cfStatus') }) });
+    await api('/api/custom-flights', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ airport: v('cfAirport'), airline: v('cfAirline'), flightNumber: v('cfNumber'), acType: v('cfAcType'), acRego: v('cfRego'), portName: v('cfPort'), portIATA: v('cfIata'), vector: v('cfVector'), scheduled: v('cfWhen') + ':00', gate: v('cfGate'), status: v('cfStatus') }) });
     ['cfAirline','cfNumber','cfAcType','cfRego','cfPort','cfIata','cfGate','cfStatus'].forEach((i) => $(i).value = '');
     toast('Added to the board.'); customList(); load();
   } catch (e) { toast('Could not save that movement.'); }
@@ -564,7 +744,7 @@ function moveBubs() { place($('bub'), document.querySelector('#chips .chip.on'))
 function keep() { if (S.remember) { S.f = filter; S.fx = fx; save(); } }
 function badge() { $('mfN').textContent = Object.values(fx).filter(Boolean).length || ''; }
 function fillFilters() {
-  const uniq = (get, name) => { const m = new Map(); flights.forEach((f) => { const c = get(f); if (c && !m.has(c)) m.set(c, name(f, c)); }); return [...m].sort((a, b) => a[1].localeCompare(b[1])); };
+  const uniq = (get, name) => { const m = new Map(); airportScope().forEach((f) => { const c = get(f); if (c && !m.has(c)) m.set(c, name(f, c)); }); return [...m].sort((a, b) => a[1].localeCompare(b[1])); };
   const fill = (id, k, rows, any) => { const el = $(id), sig = JSON.stringify(rows); if (el.dataset.sig !== sig) { el.dataset.sig = sig; el.innerHTML = `<option value="">${any}</option>` + rows.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join(''); } el.value = fx[k]; };
   fill('fxAl', 'al', uniq((f) => f.airline, (f, c) => (airline(f) || {}).name || c), 'Any airline');
   fill('fxAc', 'ac', uniq((f) => f.acType, (f, c) => (plane(f) || {}).name || c), 'Any aircraft');
@@ -617,7 +797,8 @@ $('tabs').onclick = (e) => {
   apply();
   try { const [db, st] = await Promise.all([api('/api/database'), api('/api/status')]);
     const up = (o) => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k.toUpperCase(), v])); ac = up(db.aircraft); al = up(db.airlines); $('dataDir').textContent = 'Data folder: ' + st.data_dir;
-    if (st.title) { $('title').textContent = st.title; document.title = st.title; } } catch (e) {}
+    if (st.title) { $('title').textContent = st.title; document.title = st.title; }
+    if (!hasSavedAirport && ['CNS','MKY'].includes(st.defaultAirport)) S.airport=st.defaultAirport; } catch (e) {}
   tick(); setInterval(tick, 1000);
   await load(); poll();
 })();

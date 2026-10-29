@@ -14,3 +14,12 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install -r app/requirements.txt
       - run: python -m unittest discover -s tests -v
+      - name: Validate inline board JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('app/index.html').read_text(encoding='utf-8')
+          js = text.split('<script>', 1)[1].split('</script>', 1)[0]
+          Path('/tmp/openfids-board.js').write_text(js, encoding='utf-8')
+          PY
+          node --check /tmp/openfids-board.js

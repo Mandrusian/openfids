@@ -45,7 +45,7 @@ def convert_flight(raw):
     }
 
 
-def extract_flights(data, airport="CNS", include_non_public=False):
+def extract_flights(data, airport="CNS", include_non_public=True):
     """Extract (flights, metadata) for CNS, MKY, or ALL."""
     if not isinstance(data, dict) or not isinstance(data.get("flights"), list):
         raise ValueError("NQA response must contain a flights array")

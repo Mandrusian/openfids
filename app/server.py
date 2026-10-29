@@ -196,8 +196,8 @@ def _try_fetch():
         return flights, None, {"source": url, "stale": False, "count": len(flights)}
     try:
         flights, meta = extract_flights(
-            data, airport=config.get("airport", "CNS"),
-            include_non_public=config.get("include_non_public") is True,
+            data, airport="ALL",
+            include_non_public=config.get("include_non_public", True) is True,
         )
     except ValueError as exc:
         return None, f"invalid NQA feed: {exc}", {"source": url}
@@ -244,7 +244,8 @@ def index():
 @app.get("/api/status")
 def status():
     return {"app": "openfids", "data_dir": str(DATA_DIR),
-            "title": load_config().get("title", "Cairns Airport FIDS"), "feed": feed}
+            "title": load_config().get("title", "Cairns Airport FIDS"),
+            "defaultAirport": load_config().get("airport", "CNS"), "feed": feed}
 
 
 @app.get("/api/database")
@@ -274,8 +275,12 @@ def add_custom_flight(data: dict = Body(...)):
         datetime.fromisoformat(scheduled)
     except ValueError:
         scheduled = datetime.now().replace(microsecond=0).isoformat()
+    airport = clean(data.get("airport"), "CNS", 3).upper()
+    if airport not in ("CNS", "MKY"):
+        airport = "CNS"
     flight = {
         "id": f"CF-{int(time.time() * 1000)}",
+        "airport": airport,
         "vector": vector,
         "airline": airline,
         "flightNumber": number,
