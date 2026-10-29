@@ -36,8 +36,10 @@ class PagesTests(unittest.TestCase):
         build()
         landing=(ROOT/'index.html').read_text(encoding='utf-8')
         demo=(ROOT/'demo/index.html').read_text(encoding='utf-8')
-        self.assertIn('<base href="./docs/">',landing)
-        self.assertIn('<base href="../docs/demo/">',demo)
+        self.assertIn('href="./docs/styles.css"',landing)
+        self.assertIn('src="./demo/"',landing)
+        self.assertNotIn('<base ',landing)
+        self.assertIn('src="../docs/demo/shim.js"',demo)
         self.assertIn('id="flightTable"',demo)
 
     def test_demo_uses_own_preferences(self):
