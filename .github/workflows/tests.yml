@@ -23,3 +23,4 @@ jobs:
           Path('/tmp/openfids-board.js').write_text(js, encoding='utf-8')
           PY
           node --check /tmp/openfids-board.js
+      - run: node tests/test_time.js
