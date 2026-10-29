@@ -299,11 +299,11 @@ tr.ra td:first-child::before,tr.rd td:first-child::before,td:first-child::before
     </div>
 
     <div data-pane="feed" hidden>
-      <h4>Airport feed login</h4>
-      <p class="mut" style="margin-bottom:8px">Only needed if the airport site asks for one. Saved in plain text in your data folder.</p>
-      <div class="f"><input class="in" id="cEmail" placeholder="Email" autocomplete="off"><input class="in" id="cPass" type="password" placeholder="Password" autocomplete="new-password"></div>
-      <div style="display:flex;gap:8px"><button class="btn pri" id="cSave" style="margin:0;flex:1">Save and test</button><button class="btn danger" id="cClear">Clear</button></div>
-      <p class="msg" id="cMsg"></p><p class="msg" id="cNote" style="color:var(--warn)"></p>
+      <h4>North Queensland Airports feed</h4>
+      <p class="mut" style="margin-bottom:8px">The airport flight feed is public. No login or API key needed.</p>
+      <p class="msg"><a href="https://flights.nqa.au/v1/flights" target="_blank" rel="noopener noreferrer">NQA v1 flights API</a></p>
+      <p class="msg" id="feedDetails" aria-live="polite">Connecting…</p>
+      <p class="msg">Choose Cairns, Mackay or both, and optional non-public flights, in your local config.json. See README.</p>
       <p class="msg" id="dataDir" style="word-break:break-all"></p>
     </div>
   </div>
@@ -392,6 +392,7 @@ function statusInfo(f) {
   const diff = f.estimated && !isNaN(s) && !isNaN(e) ? Math.round((e - s) / 60000) : 0;
   const dur = (m) => m < 60 ? `${m} min` : `${Math.floor(m / 60)} h` + (m % 60 ? ` ${m % 60} min` : '');
   if (lo.includes('cancel')) return { t: 'Cancelled', c: 'bad' };
+  if (/landed|arrived|departed|boarding|gate closed|final call/.test(lo)) return { t: raw, c: 'ok' };
   if (diff >= 5) return { t: `Delayed by ${dur(diff)}`, c: 'late', b: 1 };
   if (lo.includes('delay')) return { t: raw, c: 'late', b: 1 };
   if (diff <= -5) return { t: `Early by ${dur(-diff)}`, c: 'ok', b: 1 };
@@ -451,7 +452,8 @@ async function load() {
   try { const d = await api('/api/flights'); flights = d.flights || []; feed = d.feed || { ok: false }; track(); }
   catch (e) { feed = { ok: false, message: 'OpenFIDS is not responding.' }; }
   $('dot').className = 'dot' + (feed.ok ? ' live' : '');
-  $('feedTxt').textContent = feed.ok ? `Live · ${feed.updated || ''}` : 'Offline · fix login';
+  $('feedDetails').textContent = (feed.message || 'Waiting for data') + (feed.sourceTimestamp ? ' · Source update: ' + new Date(feed.sourceTimestamp).toLocaleString('en-AU') : '') + (feed.count != null ? ' · ' + feed.count + ' flights' : '') + (feed.source ? ' · Source: ' + feed.source : '');
+  $('feedTxt').textContent = feed.ok ? `Live · ${feed.updated || ''}` : (feed.stale ? 'Stale · check feed' : 'Offline · retrying');
   const r = $('ring'); r.classList.remove('go'); void r.getBoundingClientRect(); r.classList.add('go');
   fillFilters(); render(); if (view === 'stats') stats(); changed.clear(); moveBubs();
 }
@@ -490,7 +492,7 @@ function setView(v) {
 function panel(name) {
   document.querySelectorAll('#panel [data-p]').forEach((s) => s.hidden = s.dataset.p !== name);
   $('panel').classList.toggle('open', !!name); $('veil').classList.toggle('on', !!name);
-  if (name === 'settings') { creds(); buildGrid(); placeTab(); } if (name === 'add') { if (!$('cfWhen').value) { const d = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4); $('cfWhen').value = d.toISOString().slice(0, 16); } customList(); }
+  if (name === 'settings') { buildGrid(); placeTab(); } if (name === 'add') { if (!$('cfWhen').value) { const d = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4); $('cfWhen').value = d.toISOString().slice(0, 16); } customList(); }
 }
 document.querySelectorAll('#nav [data-view]').forEach((b) => b.onclick = () => setView(b.dataset.view));
 document.querySelectorAll('#nav [data-panel]').forEach((b) => b.onclick = () => panel(b.dataset.panel));
@@ -540,21 +542,6 @@ $('sMotion').onchange = (e) => { S.motion = e.target.checked; save(); apply(); }
 $('sAudio').onchange = (e) => { S.audio = e.target.checked; save(); if (S.audio) chime(); };
 $('sPoll').onchange = (e) => { S.poll = parseInt(e.target.value, 10); save(); apply(); poll(); };
 
-async function creds() {
-  try { const c = await api('/api/credentials'); $('cEmail').value = c.email || ''; $('cPass').value = ''; $('cPass').placeholder = c.has_password ? 'Password saved (type to replace)' : 'Password';
-    $('cNote').textContent = c.from_env ? 'OPENFIDS_UPSTREAM_* environment variables are set and override this form.' : ''; } catch (e) {}
-}
-async function credReq(method, body) {
-  $('cMsg').textContent = 'Working…';
-  try {
-    const r = await fetch('/api/credentials', { method, headers: { 'Content-Type': 'application/json', 'X-OpenFIDS': '1' }, body: body ? JSON.stringify(body) : undefined });
-    if (!r.ok) throw 0; feed = (await r.json()).feed || feed;
-    $('cMsg').textContent = feed.ok ? 'Connected. The feed is live.' : (feed.message || 'Saved, but the feed is still offline.');
-    await creds(); await load();
-  } catch (e) { $('cMsg').textContent = 'Could not save. Is OpenFIDS still running?'; }
-}
-$('cSave').onclick = () => credReq('POST', { email: $('cEmail').value, password: $('cPass').value });
-$('cClear').onclick = () => credReq('DELETE');
 
 /* ---------- custom movements ---------- */
 async function customList() {

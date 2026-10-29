@@ -5,7 +5,6 @@ accounts or logins: whoever is sitting at the machine is the user.
 """
 import json
 import os
-import re
 import sys
 import threading
 import time
@@ -17,6 +16,7 @@ from fastapi import Body, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from database import AIRCRAFT_DB, AIRLINE_DB
+from nqa import FEED_URL, extract_flights
 
 APP_DIR = Path(__file__).resolve().parent
 
@@ -80,53 +80,13 @@ def clean(value, default="", limit=60) -> str:
 # --------------------------------------------------------------------------
 # Live feed from Cairns Airport
 # --------------------------------------------------------------------------
-BASE_URL = "https://flights.cairnsairport.com.au"
-FEED_URL = BASE_URL + "/flights/data"
-LOGIN_URL = BASE_URL + "/login"
 
 session = requests.Session()
 session.headers.update({"User-Agent": "Mozilla/5.0 (OpenFIDS local app)"})
 
-feed = {"ok": False, "message": "Connecting to Cairns Airport...", "updated": None}
+feed = {"ok": False, "message": "Connecting to NQA...", "updated": None, "source": FEED_URL, "stale": False}
 _feed_lock = threading.Lock()
 _cache = {"time": 0.0, "flights": []}
-_login_retry_after = 0.0
-
-
-def upstream_credentials():
-    """Optional login for the airport site, supplied by the user themselves.
-
-    Nothing is bundled with the app. Set OPENFIDS_UPSTREAM_EMAIL and
-    OPENFIDS_UPSTREAM_PASSWORD, or put {"upstream_email": "...",
-    "upstream_password": "..."} in config.json inside the data folder.
-    """
-    email = os.environ.get("OPENFIDS_UPSTREAM_EMAIL", "")
-    password = os.environ.get("OPENFIDS_UPSTREAM_PASSWORD", "")
-    if not (email and password):
-        try:
-            cfg = json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
-            email = cfg.get("upstream_email", "")
-            password = cfg.get("upstream_password", "")
-        except Exception:
-            pass
-    return (email, password) if email and password else None
-
-
-def upstream_login(email: str, password: str) -> bool:
-    try:
-        page = session.get(LOGIN_URL, timeout=8)
-        match = re.search(r'name=["\']_token["\'][^>]*value=["\']([^"\']+)', page.text) or \
-            re.search(r'value=["\']([^"\']+)["\'][^>]*name=["\']_token["\']', page.text)
-        token = match.group(1) if match else ""
-        headers = {"Referer": LOGIN_URL}
-        xsrf = session.cookies.get("XSRF-TOKEN")
-        if xsrf:
-            headers["X-XSRF-TOKEN"] = xsrf
-        resp = session.post(LOGIN_URL, data={"_token": token, "email": email, "password": password},
-                            headers=headers, timeout=8)
-        return resp.status_code in (200, 302)
-    except requests.RequestException:
-        return False
 
 
 def _set_feed(ok: bool, message: str):
@@ -201,69 +161,72 @@ def extra_db(name: str) -> dict:
 
 
 def _try_fetch():
+    """Fetch a user adapter, configured feed, or default NQA feed."""
     try:
         adapter = load_adapter()
     except Exception as exc:
-        return None, f"adapter failed to load: {exc}"
+        return None, f"adapter failed to load: {exc}", {}
     if adapter:
         try:
             flights = adapter(session)
         except requests.RequestException:
             raise
         except Exception as exc:
-            return None, f"adapter error: {exc}"
-        return [f for f in (flights or []) if isinstance(f, dict)], None
+            return None, f"adapter error: {exc}", {}
+        return [f for f in (flights or []) if isinstance(f, dict)], None, {"source": "Local adapter", "stale": False}
 
-    cfg = load_config().get("feed") or {}
+    config = load_config()
+    cfg = config.get("feed") or {}
+    if not isinstance(cfg, dict):
+        return None, "feed configuration must be an object", {}
     custom = bool(cfg.get("url"))
-    resp = session.get(cfg.get("url") or FEED_URL, timeout=8, headers=cfg.get("headers") or None)
-    if not custom and ("login" in resp.url or resp.status_code in (401, 403, 419)):
-        return None, "login"
+    url = cfg.get("url") or FEED_URL
+    resp = session.get(url, timeout=8, headers=cfg.get("headers") or None)
     if resp.status_code != 200:
-        return None, f"http {resp.status_code}"
+        return None, f"http {resp.status_code}", {"source": url}
     try:
         data = resp.json()
     except ValueError:
-        return None, ("response was not JSON" if custom else "login")
+        return None, "response was not JSON", {"source": url}
     if custom:
         items = dig(data, cfg["flights_path"]) if cfg.get("flights_path") else data
         if not isinstance(items, list):
-            return None, "flights_path did not point at a list"
+            return None, "flights_path did not point at a list", {"source": url}
         flights = [f for f in (normalise(i, cfg.get("fields")) for i in items) if f]
-    else:
-        flights = data.get("flights", []) if isinstance(data, dict) else []
-    return flights, None
+        return flights, None, {"source": url, "stale": False, "count": len(flights)}
+    try:
+        flights, meta = extract_flights(
+            data, airport=config.get("airport", "CNS"),
+            include_non_public=config.get("include_non_public") is True,
+        )
+    except ValueError as exc:
+        return None, f"invalid NQA feed: {exc}", {"source": url}
+    meta["source"] = url
+    return flights, None, meta
 
 
 def fetch_live_flights() -> list:
-    global _login_retry_after
     with _feed_lock:
         if time.time() - _cache["time"] < 4:
             return _cache["flights"]
         try:
-            flights, problem = _try_fetch()
-            if problem == "login":
-                creds = upstream_credentials()
-                if not creds:
-                    _set_feed(False, "The airport's flight feed asked for a login and none is configured. "
-                                     "Only flights you add yourself are shown. See the README, \"Live feed\".")
-                    return []
-                if time.time() < _login_retry_after:
-                    return _cache["flights"]
-                if upstream_login(*creds):
-                    flights, problem = _try_fetch()
-                else:
-                    _login_retry_after = time.time() + 60
-                    _set_feed(False, "Login to the airport feed failed. Check the credentials in config.json.")
-                    return []
+            flights, problem, metadata = _try_fetch()
             if problem:
+                feed.update(metadata)
+                feed["stale"] = True
                 _set_feed(False, f"Airport feed unavailable ({problem}). Retrying automatically.")
                 return _cache["flights"]
             _cache.update(time=time.time(), flights=flights)
-            _set_feed(True, "Live")
+            feed.update(metadata)
+            if feed.get("stale"):
+                reasons = ", ".join(map(str, feed.get("staleReasons") or []))
+                _set_feed(False, f"NQA data is stale{': ' + reasons if reasons else ''}.")
+            else:
+                _set_feed(True, "Live")
             return flights
         except requests.RequestException:
-            _set_feed(False, "Can't reach the airport feed. Check your internet connection.")
+            feed["stale"] = True
+            _set_feed(False, "Can't reach the airport feed. Showing last received flights, if available.")
             return _cache["flights"]
 
 
@@ -337,57 +300,6 @@ def delete_custom_flight(flight_id: str):
     flights_list = [f for f in load_custom_flights() if f.get("id") != flight_id]
     save_custom_flights(flights_list)
     return {"flights": flights_list}
-
-
-@app.get("/api/credentials")
-def get_credentials():
-    cfg = load_config()
-    return {"email": cfg.get("upstream_email", ""),
-            "has_password": bool(cfg.get("upstream_password")),
-            "from_env": bool(os.environ.get("OPENFIDS_UPSTREAM_EMAIL"))}
-
-
-def _write_config(cfg: dict) -> None:
-    CONFIG_FILE.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
-    try:
-        os.chmod(CONFIG_FILE, 0o600)   # owner-only (no effect on Windows)
-    except OSError:
-        pass
-
-
-def _reset_feed_state() -> None:
-    global _login_retry_after
-    _login_retry_after = 0.0
-    _cache["time"] = 0.0
-    session.cookies.clear()
-
-
-@app.post("/api/credentials")
-def set_credentials(request: Request, data: dict = Body(...)):
-    if request.headers.get("x-openfids") != "1":
-        raise HTTPException(status_code=403, detail="forbidden")
-    cfg = load_config()
-    cfg["upstream_email"] = clean(data.get("email"), "", 200)
-    password = str(data.get("password") or "")
-    if password:                       # blank = keep the saved password
-        cfg["upstream_password"] = password[:200]
-    _write_config(cfg)
-    _reset_feed_state()
-    fetch_live_flights()               # test it right away
-    return {"feed": feed}
-
-
-@app.delete("/api/credentials")
-def clear_credentials(request: Request):
-    if request.headers.get("x-openfids") != "1":
-        raise HTTPException(status_code=403, detail="forbidden")
-    cfg = load_config()
-    cfg.pop("upstream_email", None)
-    cfg.pop("upstream_password", None)
-    _write_config(cfg)
-    _reset_feed_state()
-    fetch_live_flights()
-    return {"feed": feed}
 
 
 @app.post("/api/quit")

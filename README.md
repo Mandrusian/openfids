@@ -88,14 +88,14 @@ Nothing is installed system-wide, so that's everything. (Python, if the installe
 - **Statistics.** Counts and the busiest airlines, aircraft and destinations.
 - **Add a movement.** Put your own flight on the board. It's stored on your computer only.
 - **Export CSV** saves the current board to a spreadsheet file.
-- **Settings.** Themes, accent colour, custom colours, liquid glass, compact rows, motion, text size, 12/24-hour time, refresh rate and the feed login.
+- **Settings.** Themes, accent colour, custom colours, liquid glass, compact rows, motion, text size, 12/24-hour time, refresh rate and feed information.
 - **Keyboard shortcuts.** `/` search, `b` board, `w` watchlist, `s` statistics, `n` add, `,` settings, `[` collapse menu, `Esc` close a panel.
 
 ## If something looks wrong
 
 | You see | What to do |
 |---|---|
-| "Offline" in the left menu | Click it, open the **Feed** tab and enter your airport login if the site needs one. Otherwise check your internet connection. |
+| "Offline" or "Stale" in the left menu | Open **Settings → Feed** to see source freshness; check your connection or wait for NQA to update. |
 | Aircraft or airline shows as "Operator XX" | The code isn't in the built-in list. See *Adding aircraft and airlines* under Advanced. |
 | macOS says a file "can't be opened" | Right-click it, choose **Open**, then **Open** again. |
 | Linux desktop icon shows a warning | Right-click it and choose **Allow Launching**. |
@@ -157,7 +157,7 @@ Override it with the `OPENFIDS_DATA` environment variable. It holds everything y
 | File | Purpose |
 |---|---|
 | `custom_flights.json` | Movements you add with the Add button (managed by the app) |
-| `config.json` | Feed settings, board title, optional login (see below) |
+| `config.json` | Airport selection, feed settings and board title |
 | `adapter.py` | Optional Python function that fetches flights from any source |
 | `aircraft.json`, `airlines.json` | Extra aircraft and airline info, merged over the built-in lists |
 | `openfids.log` | Log file |
@@ -167,20 +167,21 @@ so edits apply within a few seconds. Reload the page after changing `title`.
 
 ## Live feed (default: Cairns Airport)
 
-By default the board reads `https://flights.cairnsairport.com.au/flights/data`.
+By default OpenFIDS reads `https://flights.nqa.au/v1/flights`, the JSON endpoint used by the Cairns Airport flight board. **No login or API key is needed.**
 
-- If it works without a login, the left menu shows **Live**.
-- If the airport site asks for a login, it shows **Offline** and only movements you add yourself appear.
-  If you have your own account, enter it under **Settings, Feed, Airport feed login**, or add it to `config.json`:
+The built-in NQA adapter maps arrivals/departures, flight number, origin/destination, scheduled and estimated times, public status, gate, stand, baggage carousel and aircraft registration to the existing OpenFIDS fields. The API contains Cairns (CNS) and Mackay (MKY); only **public Cairns** movements are shown by default.
+
+To change the airport or include non-public records, use `config.json` in your OpenFIDS data directory:
 
 ```json
-{ "upstream_email": "you@example.com", "upstream_password": "your-password" }
+{ "airport": "CNS", "include_non_public": false }
 ```
 
-You can also set the environment variables `OPENFIDS_UPSTREAM_EMAIL` and `OPENFIDS_UPSTREAM_PASSWORD`, which take priority over the file.
-The password is stored in plain text in your data folder. On Linux and macOS the file is readable only by you. Never commit it.
-No credentials are bundled with OpenFIDS.
+Choose `"MKY"` for Mackay, or `"ALL"` for both. Set `"include_non_public": true` only to deliberately include the additional records that the API marks non-public. These options affect the default NQA source, not custom feeds or `adapter.py`.
 
+Settings → Feed shows source timestamps, stale state and the URL. OpenFIDS keeps the last fetched flights if the upstream request fails, and retries automatically. Note that the airport feed may lag the actual movement time.
+
+Old `upstream_email` and `upstream_password` keys are **no longer used**. If you had configured them, you can remove them from your local `config.json`. The former login form and endpoints have been retired.
 ## Adding aircraft and airlines
 
 The built-in lists are keyed by IATA and ICAO codes, case-insensitive (so `737`, `738`, `B738`, `QF` and `QFA` all work).
@@ -299,5 +300,5 @@ curl -s http://127.0.0.1:8000/api/status
 ## Security notes
 
 - The server only listens on `127.0.0.1` and rejects requests whose Host header isn't localhost.
-- Actions that change things (stopping the app, saving the feed login) need a custom header, so other websites can't trigger them.
+- Stopping the app needs a custom header, so other websites can't trigger it.
 - `adapter.py` runs as ordinary Python with your permissions.
