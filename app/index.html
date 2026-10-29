@@ -393,14 +393,33 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const api = async (u, o) => { const r = await fetch(u, o); if (!r.ok) throw new Error(r.status); return r.json(); };
 const LS = 'openfids.v2';
-let S = { theme: 'default', compact: false, motion: true, audio: false, poll: 30000, min: false, watch: [], smooth: true, dircolor: true, h24: true, zebra: false, remember: true, size: 'm', f: 'all', fx: {}, glass: false, colors: {}, airport: 'CNS', terminals: ['T1', 'T2'] };
+let S = { theme: 'default', compact: false, motion: true, audio: false, poll: 30000, min: false, watch: [], smooth: true, dircolor: true, h24: true, zebra: false, remember: true, size: 'm', f: 'all', fx: {}, glass: false, colors: {}, airport: 'CNS', terminalSelections: { CNS: ['T1', 'T2'], MKY: ['MTB'] } };
 let fx = { al: '', ac: '', st: '', win: '' }, animNext = false;
-let hasSavedAirport = false;
-try { const saved = JSON.parse(localStorage.getItem(LS) || '{}'); hasSavedAirport = !!saved.airport; Object.assign(S, saved); } catch (e) {}
-if (!['CNS','MKY'].includes(S.airport)) S.airport = 'CNS';
-if (!Array.isArray(S.terminals)) S.terminals = ['T1', 'T2'];
-S.terminals = S.terminals.filter((v) => ['T1', 'T2'].includes(v));
-if (!S.terminals.length) S.terminals = ['T1', 'T2'];
+let hasSavedAirport = false, savedState = {};
+const AIRPORT_TERMINALS = { CNS: ['T1', 'T2'], MKY: ['MTB'] };
+const cleanTerminals = (input, valid) => {
+  const selected = Array.isArray(input) ? [...new Set(input.filter((t) => valid.includes(t)))] : [];
+  return selected.length ? selected : [...valid];
+};
+try {
+  savedState = JSON.parse(localStorage.getItem(LS) || '{}') || {};
+  hasSavedAirport = !!savedState.airport;
+  Object.assign(S, savedState);
+} catch (e) {}
+if (!AIRPORT_TERMINALS[S.airport]) S.airport = 'CNS';
+const savedSelections = savedState.terminalSelections || {};
+S.terminalSelections = {
+  CNS: cleanTerminals(savedSelections.CNS ?? savedState.terminals, AIRPORT_TERMINALS.CNS),
+  MKY: cleanTerminals(savedSelections.MKY, AIRPORT_TERMINALS.MKY),
+};
+// Upgrade existing localStorage.v2 settings without losing Cairns terminal choices.
+delete S.terminals;
+let customTitle = '';
+function updateAirportTitle() {
+  const name = customTitle || (S.airport === 'MKY' ? 'Mackay Airport FIDS' : 'Cairns Airport FIDS');
+  $('title').textContent = name;
+  document.title = name;
+}
 const save = () => { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} };
 let flights = [], ac = {}, al = {}, feed = { ok: false }, view = 'board', filter = 'all', timer, actx;
 const last = new Map(), changed = new Set(); let first = true;
@@ -443,12 +462,22 @@ function toast(msg) {
 
 /* Airport scopes and timetable fields used by the detailed board. */
 function airportScope() {
+  const terminals = AIRPORT_TERMINALS[S.airport];
+  const selected = S.terminalSelections[S.airport];
   return flights.filter((f) => (f.airport || 'CNS').toUpperCase() === S.airport &&
-    (!f.terminal || !['T1','T2'].includes(f.terminal) || S.terminals.includes(f.terminal)));
+    (!f.terminal || !terminals.includes(f.terminal) || selected.includes(f.terminal)));
 }
 function updateScopeUI() {
   document.querySelectorAll('#airportPick [data-airport]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.airport === S.airport)));
-  document.querySelectorAll('#terminalPick [data-terminal]').forEach((b) => b.setAttribute('aria-pressed', String(S.terminals.includes(b.dataset.terminal))));
+  const terminalPick = $('terminalPick');
+  // Mackay has a single MTB terminal; Cairns has T1 and T2.
+  if (terminalPick.dataset.airport !== S.airport) {
+    terminalPick.innerHTML = AIRPORT_TERMINALS[S.airport].map((t) =>
+      '<button type="button" data-terminal="' + t + '">' + t + '</button>').join('');
+    terminalPick.dataset.airport = S.airport;
+  }
+  terminalPick.querySelectorAll('[data-terminal]').forEach((b) =>
+    b.setAttribute('aria-pressed', String(S.terminalSelections[S.airport].includes(b.dataset.terminal))));
   const scoped = airportScope();
   const arr = scoped.filter((f) => f.vector === 'A').length;
   const dep = scoped.filter((f) => f.vector === 'D').length;
@@ -665,14 +694,16 @@ $('airportPick').onclick = (event) => {
   const airport=event.target.closest('[data-airport]')?.dataset.airport;
   if(!['CNS','MKY'].includes(airport))return;
   S.airport=airport;save();animNext=true;
-  updateScopeUI();fillFilters();render();tick();if(view==='stats')stats();
+  updateAirportTitle();updateScopeUI();fillFilters();render();tick();if(view==='stats')stats();
 };
 $('terminalPick').onclick = (event) => {
   const terminal=event.target.closest('[data-terminal]')?.dataset.terminal;
-  if(!['T1','T2'].includes(terminal))return;
-  const next=S.terminals.includes(terminal)?S.terminals.filter((t)=>t!==terminal):[...S.terminals,terminal];
-  if(!next.length){toast('Choose at least one terminal.');return;}
-  S.terminals=next;save();animNext=true;
+  if (!AIRPORT_TERMINALS[S.airport].includes(terminal)) return;
+  const selected = S.terminalSelections[S.airport];
+  const next = selected.includes(terminal) ? selected.filter((t) => t !== terminal) : [...selected, terminal];
+  if (!next.length) { toast('Choose at least one terminal.'); return; }
+  S.terminalSelections[S.airport] = next;
+  save();animNext=true;
   updateScopeUI();fillFilters();render();tick();if(view==='stats')stats();
 };
 $('refreshNow').onclick = async () => {
@@ -797,8 +828,9 @@ $('tabs').onclick = (e) => {
   apply();
   try { const [db, st] = await Promise.all([api('/api/database'), api('/api/status')]);
     const up = (o) => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k.toUpperCase(), v])); ac = up(db.aircraft); al = up(db.airlines); $('dataDir').textContent = 'Data folder: ' + st.data_dir;
-    if (st.title) { $('title').textContent = st.title; document.title = st.title; }
-    if (!hasSavedAirport && ['CNS','MKY'].includes(st.defaultAirport)) S.airport=st.defaultAirport; } catch (e) {}
+    if (typeof st.customTitle === 'string') customTitle = st.customTitle;
+    if (!hasSavedAirport && ['CNS','MKY'].includes(st.defaultAirport)) S.airport=st.defaultAirport;
+    updateAirportTitle(); } catch (e) {}
   tick(); setInterval(tick, 1000);
   await load(); poll();
 })();

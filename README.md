@@ -80,7 +80,7 @@ Nothing is installed system-wide, so that's everything. (Python, if the installe
 
 ## Using the board
 
-- **Flight board.** Select Cairns or Mackay, toggle T1/T2, then browse arrivals, departures, or both. See ARR/DEP totals, codeshares, freight/charter labels, aircraft type/registration, scheduled/estimated/actual/block times, bay, gate, baggage carousel and public status, grouped by date. Search flight, codeshare, airline, place, registration, or aircraft name. Several words work, for example `qantas 738`.
+- **Flight board.** Select Cairns (T1/T2) or Mackay (MTB), then browse arrivals, departures, or both. See ARR/DEP totals, codeshares, freight/charter labels, aircraft type/registration, scheduled/estimated/actual/block times, bay, gate, baggage carousel and public status, grouped by date. Search flight, codeshare, airline, place, registration, or aircraft name. Several words work, for example `qantas 738`.
   The chips switch between All, Arrivals, Departures, Military and Rare.
 - **More filters.** Filter by airline, aircraft, status and time window. A badge shows how many are active.
 - **Early and delayed flights** get a coloured bubble on the right, such as "Delayed by 15 min".
@@ -177,7 +177,7 @@ To change the airport or include non-public records, use `config.json` in your O
 { "airport": "CNS", "include_non_public": true }
 ```
 
-Set `"airport": "MKY"` to make Mackay the initial selection (the UI offers CNS and MKY). Set `"include_non_public": false` to hide records flagged `N`; this also hides some freight movements shown by the airport itself. These settings affect the built-in NQA source, not custom feeds or `adapter.py`.
+Set `"airport": "MKY"` to make Mackay the initial selection (the UI offers CNS and MKY). The terminal controls automatically switch between Cairns **T1/T2** and Mackay **MTB**, and each airport remembers its own selection. Mackay's official board link is `https://flights.cairnsairport.com.au/#mky/both/MTB`. Set `"include_non_public": false` to hide records flagged `N`; this also hides some freight movements shown by the airport itself. These settings affect the built-in NQA source, not custom feeds or `adapter.py`.
 
 Settings → Feed and the board header show source timestamps, stale state and the URL. OpenFIDS keeps the last fetched flights if the upstream request fails, and retries automatically. Note that the airport feed may lag the actual movement time.
 

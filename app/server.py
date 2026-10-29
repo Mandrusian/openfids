@@ -243,9 +243,11 @@ def index():
 
 @app.get("/api/status")
 def status():
+    cfg = load_config()
     return {"app": "openfids", "data_dir": str(DATA_DIR),
-            "title": load_config().get("title", "Cairns Airport FIDS"),
-            "defaultAirport": load_config().get("airport", "CNS"), "feed": feed}
+            "title": cfg.get("title") or "Cairns Airport FIDS",
+            "customTitle": cfg.get("title") or "",
+            "defaultAirport": cfg.get("airport", "CNS"), "feed": feed}
 
 
 @app.get("/api/database")
@@ -286,7 +288,7 @@ def add_custom_flight(data: dict = Body(...)):
         "flightNumber": number,
         "portIATA": clean(data.get("portIATA"), "CNS", 4).upper(),
         "portName": clean(data.get("portName"), "Cairns Local Operational"),
-        "terminal": clean(data.get("terminal"), "T1", 8),
+        "terminal": clean(data.get("terminal"), "MTB" if airport == "MKY" else "T1", 8),
         "scheduled": scheduled,
         "statusMsgPublic": clean(data.get("status"), "Special Ops"),
         "gate": clean(data.get("gate"), "Bay 1", 12),

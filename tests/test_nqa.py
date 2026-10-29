@@ -92,6 +92,22 @@ class NQATests(unittest.TestCase):
         self.assertEqual(set(f["airport"] for f in flights), {"CNS", "MKY"})
         self.assertEqual(metadata["count"], 3)
 
+    def test_mackay_mtb_terminal_preserved(self):
+        flight = sample(airport="MKY")
+        flight["terminal"] = "MTB"
+        converted = convert_flight(flight)
+        self.assertEqual(converted["terminal"], "MTB")
+        self.assertEqual(converted["airport"], "MKY")
+
+    def test_custom_mackay_movement_uses_mtb(self):
+        with patch.object(server, "load_custom_flights", return_value=[]), \
+             patch.object(server, "save_custom_flights") as save:
+            result = server.add_custom_flight({"airport": "MKY", "airline": "VA",
+                                               "flightNumber": "123", "vector": "A"})
+        self.assertEqual(result["flights"][0]["terminal"], "MTB")
+        self.assertEqual(result["flights"][0]["airport"], "MKY")
+        save.assert_called_once()
+
     def test_explicit_opt_out_non_public(self):
         class Response:
             status_code = 200

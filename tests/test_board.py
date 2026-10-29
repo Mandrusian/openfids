@@ -36,6 +36,17 @@ class BoardTests(unittest.TestCase):
         self.assertIn("offBlock", text)
         self.assertIn("flightType", text)
         self.assertIn("airportScope()", text)
+        self.assertIn("MKY: ['MTB']", text)
+        self.assertIn("AIRPORT_TERMINALS[S.airport]", text)
+        self.assertIn("S.terminalSelections[S.airport]", text)
+        self.assertIn("terminalPick.dataset.airport !== S.airport", text)
+        self.assertIn("Mackay Airport FIDS", text)
+
+    def test_legacy_cairns_terminal_settings_migrate(self):
+        text = PAGE.read_text(encoding="utf-8")
+        self.assertIn("savedSelections.CNS ?? savedState.terminals", text)
+        self.assertIn("savedSelections.MKY", text)
+        self.assertIn("delete S.terminals", text)
 
 
 if __name__ == "__main__":
