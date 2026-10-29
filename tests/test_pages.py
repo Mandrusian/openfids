@@ -32,6 +32,14 @@ class PagesTests(unittest.TestCase):
         self.assertIn('id="flightTable"',demo)
         self.assertIn('id="airportPick"',demo)
         self.assertIn('id="timeFormat"',demo)
+    def test_root_pages_entry_points(self):
+        build()
+        landing=(ROOT/'index.html').read_text(encoding='utf-8')
+        demo=(ROOT/'demo/index.html').read_text(encoding='utf-8')
+        self.assertIn('<base href="./docs/">',landing)
+        self.assertIn('<base href="../docs/demo/">',demo)
+        self.assertIn('id="flightTable"',demo)
+
     def test_demo_uses_own_preferences(self):
         build()
         demo=(ROOT/'docs/demo/index.html').read_text(encoding='utf-8')

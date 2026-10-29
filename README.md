@@ -315,9 +315,9 @@ The embedded preview uses the **actual OpenFIDS interface** and the public `http
 
 The website demo is read-only; adding custom flights and stopping the local server are disabled. All desktop features remain in the installed app.
 
-`scripts/build_pages.py` rebuilds the static demo UI from `app/index.html` and exports aircraft/airline lookups from `app/database.py`. `.github/workflows/pages.yml` publishes on relevant pushes to `main`.
+`scripts/build_pages.py` rebuilds the static demo UI from `app/index.html` and exports aircraft/airline lookups from `app/database.py`. The build also generates root `index.html` and `demo/index.html` entry points that reuse the assets in `docs/`, so both supported Pages folders work. Commit these generated entry points after changing the website. `.github/workflows/pages.yml` validates the website and checks that generated output is current; GitHub’s built-in Pages workflow handles publishing.
 
-**To enable publishing for the first time:** GitHub repository Settings → Pages → Build and deployment → Source → **GitHub Actions**. The Pages deployment may fail until this is enabled.
+**Publishing setup:** GitHub repository Settings → Pages → Build and deployment → Source → **Deploy from a branch**, branch **main**, folder **/(root)** (or **/docs**). The project uses static branch publishing and does not need an additional Actions deployment or admin token.
 
 Example embed:
 

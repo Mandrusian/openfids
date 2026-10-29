@@ -1,29 +1,27 @@
-name: Deploy OpenFIDS website
+name: Validate OpenFIDS website
 on:
   push:
     branches: [main]
     paths:
       - "docs/**"
+      - "index.html"
+      - "demo/**"
       - "app/index.html"
       - "app/database.py"
       - "scripts/build_pages.py"
       - "tests/test_pages.py"
       - "tests/test_demo.js"
       - ".github/workflows/pages.yml"
+  pull_request:
   workflow_dispatch:
 permissions:
   contents: read
-  pages: write
-  id-token: write
 concurrency:
-  group: openfids-pages
+  group: openfids-website-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -39,25 +37,7 @@ jobs:
           node --check docs/site.js
           node --check docs/demo/shim.js
           node tests/test_demo.js
-      - name: Configure Pages publishing source
-        uses: actions/github-script@v7
-        with:
-          script: |
-            // Publish the generated docs artifact rather than the repository root.
-            const {owner, repo} = context.repo;
-            try {
-              const {data} = await github.request('GET /repos/{owner}/{repo}/pages', {owner, repo});
-              if (data.build_type !== 'workflow') {
-                await github.request('PUT /repos/{owner}/{repo}/pages', {owner, repo, build_type: 'workflow'});
-              }
-            } catch (error) {
-              if (error.status !== 404) throw error;
-              await github.request('POST /repos/{owner}/{repo}/pages', {owner, repo, build_type: 'workflow'});
-            }
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v4
-        with:
-          path: docs
-      - name: Publish Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Verify committed Pages output is current
+        run: git diff --exit-code -- docs/demo/index.html docs/demo/database.json index.html demo/index.html
+      # GitHub's built-in Pages workflow publishes main from /(root).
+      # Do not also deploy an Actions artifact: that conflicts with branch publishing.
