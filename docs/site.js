@@ -21,7 +21,7 @@ document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener
 
 
 document.documentElement.classList.add("js");
-const revealTargets = document.querySelectorAll(".hero, .features, .demo-band, .install, footer");
+const revealTargets = document.querySelectorAll(".hero-copy, .hero-art, .airports > *, .section-heading, .feature-grid article, .local-note, .demo-heading > *, .demo-shell, .disclaimer, .install > .kicker, .install > h2, .install > .section-copy, .installs article, .install-note, .footer > *");
 revealTargets.forEach((target) => target.classList.add("scroll-reveal"));
 if ("IntersectionObserver" in window) {
   const revealObserver = new IntersectionObserver((entries) => {
