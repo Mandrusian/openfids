@@ -73,6 +73,10 @@ class BoardTests(unittest.TestCase):
         self.assertIn("data-layout='detailed'", text.replace('"', "'"))
         self.assertNotIn("hm(iso).replace(':','')", text)
         self.assertNotIn('id="sH24"', text)
+        self.assertIn('<button type="button" class="feed" id="feed"', text)
+        self.assertIn('id="panel" role="dialog" aria-modal="true"', text)
+        self.assertIn("body.t-day .board-num.arr", text)
+        self.assertIn("f.vector === 'A' ? 'from' : 'to'", text)
 
 
 if __name__ == "__main__":

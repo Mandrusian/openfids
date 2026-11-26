@@ -244,10 +244,12 @@ def index():
 @app.get("/api/status")
 def status():
     cfg = load_config()
+    with _feed_lock:
+        feed_snapshot = dict(feed)
     return {"app": "openfids", "data_dir": str(DATA_DIR),
             "title": cfg.get("title") or "Cairns Airport FIDS",
             "customTitle": cfg.get("title") or "",
-            "defaultAirport": cfg.get("airport", "CNS"), "feed": feed}
+            "defaultAirport": cfg.get("airport", "CNS"), "feed": feed_snapshot}
 
 
 @app.get("/api/database")
@@ -259,7 +261,9 @@ def database():
 @app.get("/api/flights")
 def flights():
     live = fetch_live_flights()
-    return {"flights": load_custom_flights() + live, "feed": feed}
+    with _feed_lock:
+        feed_snapshot = dict(feed)
+    return {"flights": load_custom_flights() + live, "feed": feed_snapshot}
 
 
 @app.get("/api/custom-flights")
@@ -280,8 +284,16 @@ def add_custom_flight(data: dict = Body(...)):
     airport = clean(data.get("airport"), "CNS", 3).upper()
     if airport not in ("CNS", "MKY"):
         airport = "CNS"
+    flights_list = load_custom_flights()
+    existing_ids = {f.get("id") for f in flights_list}
+    base_id = f"CF-{int(time.time() * 1000)}"
+    flight_id = base_id
+    suffix = 1
+    while flight_id in existing_ids:
+        flight_id = f"{base_id}-{suffix}"
+        suffix += 1
     flight = {
-        "id": f"CF-{int(time.time() * 1000)}",
+        "id": flight_id,
         "airport": airport,
         "vector": vector,
         "airline": airline,
@@ -296,7 +308,6 @@ def add_custom_flight(data: dict = Body(...)):
         "acRego": clean(data.get("acRego"), "N1VIP", 12).upper(),
         "custom": True,
     }
-    flights_list = load_custom_flights()
     flights_list.append(flight)
     save_custom_flights(flights_list)
     return {"flights": flights_list}
