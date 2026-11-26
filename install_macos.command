@@ -7,7 +7,7 @@ echo " =============================="
 echo
 
 pick_python() {
-  for c in python3.13 python3.12 python3.11 python3.10 python3.9 python3; do
+  for c in python3.14 python3.13 python3.12 python3.11 python3.10 python3.9 python3; do
     if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys; sys.exit(0 if sys.version_info >= (3,9) else 1)' >/dev/null 2>&1; then
       echo "$c"; return 0
     fi
@@ -34,7 +34,10 @@ fi
 echo "Using $($PY --version) at $(command -v "$PY")"
 
 echo "[1/3] Creating private environment in .venv ..."
-[ -x .venv/bin/python ] || "$PY" -m venv .venv || { echo "Could not create the environment."; read -r -p "Press Enter..." _; exit 1; }
+if [ ! -x .venv/bin/python ]; then
+  rm -rf .venv
+  "$PY" -m venv .venv || { echo "Could not create the environment."; read -r -p "Press Enter..." _; exit 1; }
+fi
 
 echo "[2/3] Installing requirements ..."
 .venv/bin/python -m pip install --upgrade pip >/dev/null 2>&1

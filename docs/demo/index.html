@@ -217,6 +217,9 @@ body.t-airport{--bg:#0d1015;--panel:#15191f;--card:#1c222a;--accent:#ffd400;--on
 .board-num{font:700 13px var(--body);background:var(--accent);color:var(--on-accent);padding:3px 10px;border-radius:18px}
 .board-num.arr{background:color-mix(in srgb,#38aef0 22%,var(--panel));color:#67c8ff}
 .board-num.dep{background:color-mix(in srgb,#78d455 23%,var(--panel));color:#a4f190}
+body.t-day .board-num.arr,body.t-sky .board-num.arr{background:color-mix(in srgb,#0369a1 13%,var(--panel));color:#0369a1}
+body.t-day .board-num.dep,body.t-sky .board-num.dep{background:color-mix(in srgb,#15803d 13%,var(--panel));color:#15803d}
+.foot button.feed{border-radius:0;border-top:1px solid var(--line);margin-top:8px;padding:10px;font-size:12px}
 .board-wrap{position:relative}
 .board-wrap table{min-width:1390px}
 .board-wrap th{padding:10px 8px;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
@@ -390,20 +393,20 @@ body.glass.nomo::before{animation:none}
 <body>
 <div class="app" id="app">
 <aside>
-  <div class="brand"><span class="ic">✈</span><span class="lbl">Open<b>FIDS</b></span></div>
-  <nav class="nav" id="nav"><span class="nbub" id="nbub"></span>
-    <button aria-label="Flight board" title="Flight board" data-view="board" class="on"><span class="ic">▤</span><span class="lbl">Flight board</span></button>
-    <button aria-label="Watchlist" title="Watchlist" data-view="watch"><span class="ic">★</span><span class="lbl">Watchlist</span><span class="count lbl" id="wCount"></span></button>
-    <button aria-label="Statistics" title="Statistics" data-view="stats"><span class="ic">◔</span><span class="lbl">Statistics</span></button>
-    <button aria-label="Add a movement" title="Add a movement" data-panel="add"><span class="ic">＋</span><span class="lbl">Add a movement</span></button>
-    <button aria-label="Settings" title="Settings" data-panel="settings"><span class="ic">⚙</span><span class="lbl">Settings</span></button>
-    <button aria-label="Shortcuts" title="Shortcuts" data-panel="help"><span class="ic">?</span><span class="lbl">Shortcuts</span></button>
+  <div class="brand"><span class="ic" aria-hidden="true">✈</span><span class="lbl">Open<b>FIDS</b></span></div>
+  <nav class="nav" id="nav" aria-label="Primary"><span class="nbub" id="nbub"></span>
+    <button type="button" aria-label="Flight board" title="Flight board" data-view="board" class="on" aria-current="page"><span class="ic" aria-hidden="true">▤</span><span class="lbl">Flight board</span></button>
+    <button type="button" aria-label="Watchlist" title="Watchlist" data-view="watch"><span class="ic" aria-hidden="true">★</span><span class="lbl">Watchlist</span><span class="count lbl" id="wCount"></span></button>
+    <button type="button" aria-label="Statistics" title="Statistics" data-view="stats"><span class="ic" aria-hidden="true">◔</span><span class="lbl">Statistics</span></button>
+    <button type="button" aria-label="Add a movement" title="Add a movement" data-panel="add"><span class="ic" aria-hidden="true">＋</span><span class="lbl">Add a movement</span></button>
+    <button type="button" aria-label="Settings" title="Settings" data-panel="settings"><span class="ic" aria-hidden="true">⚙</span><span class="lbl">Settings</span></button>
+    <button type="button" aria-label="Shortcuts" title="Shortcuts" data-panel="help"><span class="ic" aria-hidden="true">?</span><span class="lbl">Shortcuts</span></button>
   </nav>
   <div class="gap"></div>
   <div class="foot">
-    <div class="feed" id="feed" title="Open feed settings"><span class="dot" id="dot"></span><span class="lbl" id="feedTxt">Connecting</span><svg class="ring" id="ring" viewBox="0 0 22 22" style="margin-left:auto"><circle cx="11" cy="11" r="9"/></svg></div>
-    <button id="collapse" aria-label="Collapse menu" title="Collapse menu" aria-expanded="true" aria-controls="nav"><span class="ic" id="colIc">«</span><span class="lbl">Collapse menu</span></button>
-    <button aria-label="Stop OpenFIDS" title="Stop OpenFIDS" id="quit"><span class="ic">⏻</span><span class="lbl">Stop OpenFIDS</span></button>
+    <button type="button" class="feed" id="feed" title="Open feed settings" aria-label="Feed status, open feed settings"><span class="dot" id="dot"></span><span class="lbl" id="feedTxt">Connecting</span><svg class="ring" id="ring" viewBox="0 0 22 22" style="margin-left:auto" aria-hidden="true"><circle cx="11" cy="11" r="9"/></svg></button>
+    <button type="button" id="collapse" aria-label="Collapse menu" title="Collapse menu" aria-expanded="true" aria-controls="nav"><span class="ic" id="colIc" aria-hidden="true">«</span><span class="lbl">Collapse menu</span></button>
+    <button type="button" aria-label="Stop OpenFIDS" title="Stop OpenFIDS" id="quit"><span class="ic" aria-hidden="true">⏻</span><span class="lbl">Stop OpenFIDS</span></button>
   </div>
 </aside>
 
@@ -430,18 +433,18 @@ body.glass.nomo::before{animation:none}
 
   <section id="v-board">
     <div class="bar">
-      <div class="search"><span>⌕</span><input id="q" placeholder="Search flight, airline, place or registration" autocomplete="off"><kbd>/</kbd></div>
-      <div class="chips" id="chips"><span class="bub" id="bub"></span>
-        <button class="chip on" data-f="all">Both</button><button class="chip" data-f="A">Arrivals</button><button class="chip" data-f="D">Departures</button><button class="chip" data-f="military">Military</button><button class="chip" data-f="rare">Rare</button>
+      <div class="search"><span aria-hidden="true">⌕</span><input id="q" aria-label="Search flights" placeholder="Search flight, airline, place or registration" autocomplete="off"><kbd aria-hidden="true">/</kbd></div>
+      <div class="chips" id="chips" role="group" aria-label="Movement filter"><span class="bub" id="bub"></span>
+        <button type="button" class="chip on" data-f="all" aria-pressed="true">Both</button><button type="button" class="chip" data-f="A" aria-pressed="false">Arrivals</button><button type="button" class="chip" data-f="D" aria-pressed="false">Departures</button><button type="button" class="chip" data-f="military" aria-pressed="false">Military</button><button type="button" class="chip" data-f="rare" aria-pressed="false">Rare</button>
       </div>
-      <button class="btn" id="mf">More filters <span class="count" id="mfN"></span></button><button class="btn" id="csv">Export CSV</button>
+      <button type="button" class="btn" id="mf" aria-expanded="false" aria-controls="adv">More filters <span class="count" id="mfN"></span></button><button type="button" class="btn" id="csv">Export CSV</button>
     </div>
     <div class="adv" id="adv"><div class="advin">
-      <select class="in" id="fxAl"><option value="">Any airline</option></select>
-      <select class="in" id="fxAc"><option value="">Any aircraft</option></select>
-      <select class="in" id="fxSt"><option value="">Any status</option><option value="ontime">On time</option><option value="delayed">Delayed</option><option value="cancelled">Cancelled</option><option value="landed">Landed</option><option value="departed">Departed</option><option value="other">Other</option></select>
-      <select class="in" id="fxWin"><option value="">Any time</option><option value="120">Next 2 hours</option><option value="360">Next 6 hours</option><option value="today">Today only</option></select>
-      <button class="btn" id="fxClear">Clear all filters</button>
+      <select class="in" id="fxAl" aria-label="Filter by airline"><option value="">Any airline</option></select>
+      <select class="in" id="fxAc" aria-label="Filter by aircraft"><option value="">Any aircraft</option></select>
+      <select class="in" id="fxSt" aria-label="Filter by status"><option value="">Any status</option><option value="ontime">On time</option><option value="delayed">Delayed</option><option value="cancelled">Cancelled</option><option value="landed">Landed</option><option value="departed">Departed</option><option value="other">Other</option></select>
+      <select class="in" id="fxWin" aria-label="Filter by time window"><option value="">Any time</option><option value="120">Next 2 hours</option><option value="360">Next 6 hours</option><option value="today">Today only</option></select>
+      <button type="button" class="btn" id="fxClear">Clear all filters</button>
     </div></div>
     <div class="board-summary" id="boardSummary">
       <strong id="boardCaption">Arrivals and departures</strong>
@@ -468,53 +471,53 @@ body.glass.nomo::before{animation:none}
 </div>
 
 <div id="veil"></div>
-<div id="panel" aria-live="polite">
+<div id="panel" role="dialog" aria-modal="true" aria-hidden="true" aria-label="OpenFIDS panel">
   <div data-p="add" hidden>
-    <div class="ph"><h2>Add a movement</h2><button class="x" data-x>✕</button></div>
+    <div class="ph"><h2>Add a movement</h2><button type="button" class="x" data-x aria-label="Close panel">✕</button></div>
     <p class="mut">Stored on this computer only. Shown at the top of the board.</p>
     <h4>Flight</h4>
-    <div class="f f2"><input class="in" id="cfAirline" placeholder="Airline (VIP)"><input class="in" id="cfNumber" placeholder="Flight number"><input class="in" id="cfAcType" placeholder="Aircraft type (GLF6)"><input class="in" id="cfRego" placeholder="Registration"></div>
+    <div class="f f2"><input class="in" id="cfAirline" aria-label="Airline code" placeholder="Airline (VIP)"><input class="in" id="cfNumber" aria-label="Flight number" placeholder="Flight number"><input class="in" id="cfAcType" aria-label="Aircraft type" placeholder="Aircraft type (GLF6)"><input class="in" id="cfRego" aria-label="Aircraft registration" placeholder="Registration"></div>
     <h4>Route and time</h4>
-    <div class="f f2"><select class="in" id="cfAirport"><option value="CNS">Cairns (CNS)</option><option value="MKY">Mackay (MKY)</option></select><input class="in" id="cfPort" placeholder="Place (Sydney)"><input class="in" id="cfIata" placeholder="Code (SYD)"><select class="in" id="cfVector"><option value="A">Arrival</option><option value="D">Departure</option></select><input class="in" id="cfWhen" type="datetime-local"></div>
-    <div class="f f2"><input class="in" id="cfGate" placeholder="Gate or bay"><input class="in" id="cfStatus" placeholder="Status (Landed)"></div>
-    <button class="btn pri" id="cfAdd">Add to board</button>
+    <div class="f f2"><select class="in" id="cfAirport" aria-label="Airport"><option value="CNS">Cairns (CNS)</option><option value="MKY">Mackay (MKY)</option></select><input class="in" id="cfPort" aria-label="Origin or destination city" placeholder="Place (Sydney)"><input class="in" id="cfIata" aria-label="Airport IATA code" placeholder="Code (SYD)"><select class="in" id="cfVector" aria-label="Direction"><option value="A">Arrival</option><option value="D">Departure</option></select><input class="in" id="cfWhen" aria-label="Scheduled date and time" type="datetime-local"></div>
+    <div class="f f2"><input class="in" id="cfGate" aria-label="Gate or bay" placeholder="Gate or bay"><input class="in" id="cfStatus" aria-label="Flight status" placeholder="Status (Landed)"></div>
+    <button type="button" class="btn pri" id="cfAdd">Add to board</button>
     <h4>Your movements</h4><div id="cfList"></div>
   </div>
 
   <div data-p="settings" hidden>
-    <div class="ph"><h2>Settings</h2><button class="x" data-x>✕</button></div>
-    <div class="tabs" id="tabs"><span class="bub" id="tbub"></span><button class="chip on" data-tab="look">Appearance</button><button class="chip" data-tab="how">Behaviour</button><button class="chip" data-tab="feed">Feed</button></div>
+    <div class="ph"><h2>Settings</h2><button type="button" class="x" data-x aria-label="Close panel">✕</button></div>
+    <div class="tabs" id="tabs"><span class="bub" id="tbub"></span><button type="button" class="chip on" data-tab="look">Appearance</button><button type="button" class="chip" data-tab="how">Behaviour</button><button type="button" class="chip" data-tab="feed">Feed</button></div>
 
     <div data-pane="look">
       <h4>Theme</h4>
-      <div class="themes" id="themes"><button data-t="airport" style="--sw:#ffd400">Airport board</button><button data-t="default" style="--sw:#ffb000">Amber</button><button data-t="runway" style="--sw:#5dff9a">Runway</button><button data-t="blue" style="--sw:#7cb4ff">Blue hour</button><button data-t="violet" style="--sw:#a78bfa">Violet</button><button data-t="sunset" style="--sw:#ff7a59">Sunset</button><button data-t="mint" style="--sw:#5eead4">Mint</button><button data-t="mono" style="--sw:#e5e5e5">Mono</button><button data-t="contrast" style="--sw:#ffff00">Contrast</button><button data-t="day" style="--sw:#b36b00">Daylight</button><button data-t="sky" style="--sw:#0b6bcb">Sky</button></div>
+      <div class="themes" id="themes"><button type="button" data-t="airport" style="--sw:#ffd400">Airport board</button><button type="button" data-t="default" style="--sw:#ffb000">Amber</button><button type="button" data-t="runway" style="--sw:#5dff9a">Runway</button><button type="button" data-t="blue" style="--sw:#7cb4ff">Blue hour</button><button type="button" data-t="violet" style="--sw:#a78bfa">Violet</button><button type="button" data-t="sunset" style="--sw:#ff7a59">Sunset</button><button type="button" data-t="mint" style="--sw:#5eead4">Mint</button><button type="button" data-t="mono" style="--sw:#e5e5e5">Mono</button><button type="button" data-t="contrast" style="--sw:#ffff00">Contrast</button><button type="button" data-t="day" style="--sw:#b36b00">Daylight</button><button type="button" data-t="sky" style="--sw:#0b6bcb">Sky</button></div>
       <p class="msg">Picking a theme resets any custom colours.</p>
-      <div class="cprow"><div>Accent colour<small>Highlights, buttons and the arrivals pattern</small></div><input type="color" id="cAccent"></div>
+      <div class="cprow"><div>Accent colour<small>Highlights, buttons and the arrivals pattern</small></div><input type="color" id="cAccent" aria-label="Accent colour"></div>
       <details class="mt"><summary>Customise every colour</summary><div id="cGrid"></div></details>
-      <button class="btn" id="cReset">Reset colours</button>
-      <div class="sw"><div>Liquid Glass<small>Layered frosted surfaces, soft highlights and a moving light reflection</small></div><input type="checkbox" id="sGlass"></div>
+      <button type="button" class="btn" id="cReset">Reset colours</button>
+      <div class="sw"><div>Liquid Glass<small>Layered frosted surfaces, soft highlights and a moving light reflection</small></div><input type="checkbox" id="sGlass" aria-label="Liquid Glass"></div>
       <div class="sw" id="glassDepthRow"><div>Glass depth<small>Adjust the blur, translucency and reflections</small></div>
         <select class="in compact-select" id="sGlassDepth" aria-label="Liquid Glass depth"><option value="soft">Subtle</option><option value="balanced">Balanced</option><option value="deep">Deep glass</option></select>
       </div>
-      <div class="sw"><div>Colour-code arrivals and departures<small>Arrow labels always show</small></div><input type="checkbox" id="sColor"></div>
-      <div class="sw"><div>Striped rows<small>Easier to follow across the board</small></div><input type="checkbox" id="sZebra"></div>
-      <h4>Text size</h4><select class="in" id="sSize"><option value="s">Small</option><option value="m">Normal</option><option value="l">Large</option></select>
+      <div class="sw"><div>Colour-code arrivals and departures<small>Arrow labels always show</small></div><input type="checkbox" id="sColor" aria-label="Colour-code arrivals and departures"></div>
+      <div class="sw"><div>Striped rows<small>Easier to follow across the board</small></div><input type="checkbox" id="sZebra" aria-label="Striped rows"></div>
+      <h4>Text size</h4><select class="in" id="sSize" aria-label="Text size"><option value="s">Small</option><option value="m">Normal</option><option value="l">Large</option></select>
     </div>
 
     <div data-pane="how" hidden>
-      <div class="sw"><div>Compact rows<small>Fit more flights on screen</small></div><input type="checkbox" id="sCompact"></div>
-      <div class="sw"><div>Motion<small>Split-flap flips and slides</small></div><input type="checkbox" id="sMotion"></div>
-      <div class="sw"><div>Smooth scrolling<small>Glide when changing views</small></div><input type="checkbox" id="sSmooth"></div>
-      <div class="sw"><div>Chime on watchlist changes<small>Plays when a starred flight updates</small></div><input type="checkbox" id="sAudio"></div>
+      <div class="sw"><div>Compact rows<small>Fit more flights on screen</small></div><input type="checkbox" id="sCompact" aria-label="Compact rows"></div>
+      <div class="sw"><div>Motion<small>Split-flap flips and slides</small></div><input type="checkbox" id="sMotion" aria-label="Motion"></div>
+      <div class="sw"><div>Smooth scrolling<small>Glide when changing views</small></div><input type="checkbox" id="sSmooth" aria-label="Smooth scrolling"></div>
+      <div class="sw"><div>Chime on watchlist changes<small>Plays when a starred flight updates</small></div><input type="checkbox" id="sAudio" aria-label="Chime on watchlist changes"></div>
       <div class="sw"><div>Time format<small>Flight times and the live clock; settings are saved automatically</small></div>
         <div id="timeFormat" class="time-format-switch" role="group" aria-label="Time format">
           <button type="button" data-time-format="12" aria-pressed="false">12H</button>
           <button type="button" data-time-format="24" aria-pressed="true">24H</button>
         </div>
       </div>
-      <div class="sw"><div>Remember my filters<small>Restore them next time you open OpenFIDS</small></div><input type="checkbox" id="sRemember"></div>
+      <div class="sw"><div>Remember my filters<small>Restore them next time you open OpenFIDS</small></div><input type="checkbox" id="sRemember" aria-label="Remember my filters"></div>
       <h4>Refresh every</h4>
-      <select class="in" id="sPoll"><option value="5000">5 seconds</option><option value="15000">15 seconds</option><option value="30000">30 seconds</option><option value="60000">60 seconds</option></select>
+      <select class="in" id="sPoll" aria-label="Refresh interval"><option value="5000">5 seconds</option><option value="15000">15 seconds</option><option value="30000">30 seconds</option><option value="60000">60 seconds</option></select>
     </div>
 
     <div data-pane="feed" hidden>
@@ -528,14 +531,14 @@ body.glass.nomo::before{animation:none}
   </div>
 
   <div data-p="help" hidden>
-    <div class="ph"><h2>Shortcuts</h2><button class="x" data-x>✕</button></div>
+    <div class="ph"><h2>Shortcuts</h2><button type="button" class="x" data-x aria-label="Close panel">✕</button></div>
     <div class="sw"><span>Search</span><kbd>/</kbd></div><div class="sw"><span>Flight board</span><kbd>b</kbd></div><div class="sw"><span>Watchlist</span><kbd>w</kbd></div><div class="sw"><span>Statistics</span><kbd>s</kbd></div>
     <div class="sw"><span>Add a movement</span><kbd>n</kbd></div><div class="sw"><span>Settings</span><kbd>,</kbd></div><div class="sw"><span>Collapse menu</span><kbd>[</kbd></div><div class="sw"><span>Close panel</span><kbd>Esc</kbd></div>
     <p class="msg">Star a flight to add it to your watchlist. You'll get a message when its status changes.</p>
   </div>
 </div>
 
-<div id="tip"></div><div id="toasts"></div>
+<div id="tip" role="tooltip"></div><div id="toasts" role="status" aria-live="polite"></div>
 <div id="bye"><div><h2>OpenFIDS has stopped</h2>You can close this tab. Open the OpenFIDS shortcut to start it again.</div></div>
 
 <script src="./shim.js"></script>
@@ -799,7 +802,7 @@ function track() {
     const k = key(f), st = JSON.stringify([f.statusMsgPublic,f.estimated,f.actual,f.onBlock,f.offBlock,f.gate,f.stand,f.carousel]);
     if (!first && last.has(k) && last.get(k) !== st) {
       changed.add(k);
-      if (S.watch.includes(code(f))) { toast(`${code(f)} to ${f.portName}: flight information updated`); chime(); }
+      if (S.watch.includes(code(f))) { toast(`${code(f)} ${f.vector === 'A' ? 'from' : 'to'} ${f.portName || f.portIATA || 'airport'}: flight information updated`); chime(); }
     }
     last.set(k, st);
   }); first = false;
@@ -840,15 +843,24 @@ function tick() {
 }
 
 /* ---------- navigation and panels ---------- */
+let lastFocus = null;
 function setView(v) {
   view = v; animNext = true; scrollTo({ top: 0, behavior: S.smooth ? 'smooth' : 'auto' }); $('v-board').hidden = v === 'stats'; $('v-stats').hidden = v !== 'stats';
-  document.querySelectorAll('#nav [data-view]').forEach((b) => b.classList.toggle('on', b.dataset.view === v));
+  document.querySelectorAll('#nav [data-view]').forEach((b) => {
+    const active = b.dataset.view === v;
+    b.classList.toggle('on', active);
+    if (active) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
   if (v === 'stats') stats(); else render(); moveBubs(); const vt = $(v === 'stats' ? 'v-stats' : 'v-board'); vt.classList.remove('vin'); void vt.offsetWidth; vt.classList.add('vin');
 }
 function panel(name) {
+  const wasOpen = $('panel').classList.contains('open');
+  if (name && !wasOpen) lastFocus = document.activeElement;
   document.querySelectorAll('#panel [data-p]').forEach((s) => s.hidden = s.dataset.p !== name);
-  $('panel').classList.toggle('open', !!name); $('veil').classList.toggle('on', !!name);
+  $('panel').classList.toggle('open', !!name); $('panel').setAttribute('aria-hidden', String(!name)); $('veil').classList.toggle('on', !!name);
   if (name === 'settings') { buildGrid(); placeTab(); } if (name === 'add') { $('cfAirport').value = S.airport; if (!$('cfWhen').value) { const d = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4); $('cfWhen').value = d.toISOString().slice(0, 16); } customList(); }
+  if (name) { const firstEl = document.querySelector('#panel [data-p="' + name + '"] [data-x]'); if (firstEl) firstEl.focus(); }
+  else if (wasOpen && lastFocus && typeof lastFocus.focus === 'function') { lastFocus.focus(); lastFocus = null; }
 }
 document.querySelectorAll('#nav [data-view]').forEach((b) => b.onclick = () => setView(b.dataset.view));
 document.querySelectorAll('#nav [data-panel]').forEach((b) => b.onclick = () => panel(b.dataset.panel));
@@ -877,17 +889,19 @@ $('refreshNow').onclick = async () => {
   try {await load();} finally {$('refreshNow').disabled=false;}
 };
 
-$('chips').onclick = (e) => { if (!e.target.dataset.f) return; filter = e.target.dataset.f; document.querySelectorAll('#chips .chip').forEach((c) => c.classList.toggle('on', c === e.target)); animNext = true; moveBubs(); keep(); render(); };
+$('chips').onclick = (e) => { const btn = e.target.closest('[data-f]'); if (!btn) return; filter = btn.dataset.f; document.querySelectorAll('#chips .chip').forEach((c) => { const on = c === btn; c.classList.toggle('on', on); c.setAttribute('aria-pressed', String(on)); }); animNext = true; moveBubs(); keep(); render(); };
 $('q').oninput = () => { animNext = false; render(); };
 $('rows').onclick = (e) => {
-  const c = e.target.dataset && e.target.dataset.star; if (!c) return;
+  const star = e.target.closest('[data-star]'); const c = star?.dataset.star; if (!c) return;
   S.watch = S.watch.includes(c) ? S.watch.filter((x) => x !== c) : [...S.watch, c]; save(); apply(); render();
 };
 $('csv').onclick = () => {
-  if (!flights.length) return toast('Nothing to export yet.');
+  const rows = visible();
+  if (!rows.length) return toast('Nothing to export yet.');
   const h = ['id','airport','vector','airline','flightNumber','portIATA','portName','terminal','scheduled','estimated','actual','onBlock','offBlock','statusMsgPublic','gate','stand','carousel','acType','acRego','codeShares','flightType'];
-  const csv = [h.join(',')].concat(visible().map((f) => h.map((k) => `"${String(Array.isArray(f[k]) ? f[k].join(" ") : (f[k] ?? '')).replace(/"/g, '""')}"`).join(','))).join('\r\n');
+  const csv = [h.join(',')].concat(rows.map((f) => h.map((k) => `"${String(Array.isArray(f[k]) ? f[k].join(" ") : (f[k] ?? '')).replace(/"/g, '""')}"`).join(','))).join('\r\n');
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = `openfids_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 };
 $('quit').onclick = async () => {
   if (!confirm('Stop OpenFIDS? You can start it again from your shortcut.')) return;
@@ -972,8 +986,10 @@ async function customList() {
 }
 $('cfAdd').onclick = async () => {
   const v = (id) => $(id).value.trim();
+  const when = v('cfWhen');
+  const scheduled = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(when) ? when + ':00' : when;
   try {
-    await api('/api/custom-flights', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ airport: v('cfAirport'), airline: v('cfAirline'), flightNumber: v('cfNumber'), acType: v('cfAcType'), acRego: v('cfRego'), portName: v('cfPort'), portIATA: v('cfIata'), vector: v('cfVector'), scheduled: v('cfWhen') + ':00', gate: v('cfGate'), status: v('cfStatus') }) });
+    await api('/api/custom-flights', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ airport: v('cfAirport'), airline: v('cfAirline'), flightNumber: v('cfNumber'), acType: v('cfAcType'), acRego: v('cfRego'), portName: v('cfPort'), portIATA: v('cfIata'), vector: v('cfVector'), scheduled, gate: v('cfGate'), status: v('cfStatus') }) });
     ['cfAirline','cfNumber','cfAcType','cfRego','cfPort','cfIata','cfGate','cfStatus'].forEach((i) => $(i).value = '');
     toast('Added to the board.'); customList(); load();
   } catch (e) { toast('Could not save that movement.'); }
@@ -992,7 +1008,7 @@ function fillFilters() {
   fill('fxAc', 'ac', uniq((f) => f.acType, (f, c) => (plane(f) || {}).name || c), 'Any aircraft');
   $('fxSt').value = fx.st; $('fxWin').value = fx.win; badge();
 }
-$('mf').onclick = () => $('adv').classList.toggle('open');
+$('mf').onclick = () => { const open = $('adv').classList.toggle('open'); $('mf').setAttribute('aria-expanded', String(open)); };
 [['fxAl', 'al'], ['fxAc', 'ac'], ['fxSt', 'st'], ['fxWin', 'win']].forEach(([id, k]) => $(id).onchange = (e) => { fx[k] = e.target.value; keep(); animNext = true; render(); badge(); });
 $('fxClear').onclick = () => { fx = { al: '', ac: '', st: '', win: '' }; $('q').value = ''; keep(); animNext = true; fillFilters(); render(); };
 [['sSmooth', 'smooth'], ['sColor', 'dircolor'], ['sZebra', 'zebra'], ['sRemember', 'remember']].forEach(([id, k]) => $(id).onchange = (e) => { S[k] = e.target.checked; save(); apply(); render(); tick(); });
@@ -1047,7 +1063,7 @@ $('tabs').onclick = (e) => {
 /* ---------- start ---------- */
 (async () => {
   if (innerWidth < 820) S.min = true;
-  if (S.remember) { filter = S.f || 'all'; fx = { ...fx, ...(S.fx || {}) }; document.querySelectorAll('#chips .chip').forEach((c) => c.classList.toggle('on', c.dataset.f === filter)); }
+  if (S.remember) { filter = S.f || 'all'; fx = { ...fx, ...(S.fx || {}) }; document.querySelectorAll('#chips .chip').forEach((c) => { const on = c.dataset.f === filter; c.classList.toggle('on', on); c.setAttribute('aria-pressed', String(on)); }); }
   if (document.fonts) document.fonts.ready.then(moveBubs); addEventListener('resize', moveBubs); $('app').addEventListener('transitionend', moveBubs);
   apply();
   try { const [db, st] = await Promise.all([api('/api/database'), api('/api/status')]);

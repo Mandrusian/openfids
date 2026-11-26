@@ -10,13 +10,14 @@ addEventListener('message',e=>{
   display.textContent=(live?'● NQA connected':e.data.count?'● Last received data':'● Feed unavailable')+count;
 });
 document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener('click',async()=>{
-  const original=button.textContent;
+  const original=button.dataset.label||(button.dataset.label=button.textContent);
   const el=document.getElementById(button.dataset.copy);
   if(!el)return;
+  clearTimeout(Number(button.dataset.timer));
   try{await navigator.clipboard.writeText(el.textContent.trim());button.textContent='Copied ✓';}
   catch(e){const sel=getSelection(),range=document.createRange();range.selectNodeContents(el);sel.removeAllRanges();sel.addRange(range);button.textContent='Selected';}
   button.setAttribute('aria-live','polite');
-  setTimeout(()=>button.textContent=original,2000);
+  button.dataset.timer=String(setTimeout(()=>{button.textContent=original;},2000));
 }));
 
 
@@ -28,7 +29,7 @@ if ("IntersectionObserver" in window) {
     entries.forEach((entry) => {
       entry.target.classList.toggle("is-visible", entry.isIntersecting);
     });
-  }, { threshold: 0.12 });
+  }, { threshold: 0.05 });
   revealTargets.forEach((target) => revealObserver.observe(target));
 } else {
   revealTargets.forEach((target) => target.classList.add("is-visible"));

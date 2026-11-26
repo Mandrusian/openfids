@@ -81,7 +81,7 @@ Nothing is installed system-wide, so that's everything. (Python, if the installe
 ## Using the board
 
 - **Flight board.** Select Cairns (T1/T2) or Mackay (MTB), then browse arrivals, departures, or both. See ARR/DEP totals, codeshares, freight/charter labels, aircraft type/registration, scheduled/estimated/actual/block times, bay, gate, baggage carousel and public status, grouped by date. Search flight, codeshare, airline, place, registration, or aircraft name. Several words work, for example `qantas 738`.
-  The chips switch between All, Arrivals, Departures, Military and Rare.
+  The chips switch between Both, Arrivals, Departures, Military and Rare.
 - **Board layout.** Comfortable is the default readable OpenFIDS layout, while Detailed reveals all 15 operational columns. Hover or keyboard-focus column headings for definitions. All flight times include the colon (e.g. `16:10` or `4:10 pm`).
 - **More filters.** Filter by airline, aircraft, status and time window. A badge shows how many are active.
 - **Early and delayed flights** get a coloured bubble on the right, such as "Delayed by 15 min".
